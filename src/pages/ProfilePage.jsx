@@ -58,16 +58,18 @@ function ProfilePage() {
     navigate('/tariff');
   };
 
+  const telegramUser = remoteUser || user;
+  const firstName = telegramUser?.firstName?.trim();
+  const lastName = telegramUser?.lastName?.trim();
+  const fullName =
+    [firstName, lastName].filter(Boolean).join(' ') ||
+    telegramUser?.username ||
+    'Пользователь';
+  const avatarSrc = telegramUser?.photoUrl || personImg;
+
   if (isLoading || isProfileLoading) {
     return <Spinner />;
   }
-
-  const displayName =
-    remoteUser?.firstName ||
-    user?.firstName ||
-    remoteUser?.username ||
-    user?.username ||
-    'Пользователь';
 
   return (
     <div className={`${styles.body} ${styles.profilePage}`}>
@@ -92,9 +94,23 @@ function ProfilePage() {
 
       <div className={`${styles.contentBlock} d-flex align-items-center`}>
         <div className={styles.avatarBlock}>
-          <img src={personImg} alt="Аватар профиля" width="30" height="30" />
+          <img
+            src={avatarSrc}
+            alt="Аватар профиля из Telegram"
+            width="30"
+            height="30"
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = personImg;
+            }}
+          />
         </div>
-        <div className={styles.infoBlock}>{displayName}</div>
+        <div className={styles.infoBlock}>
+          <div>{fullName}</div>
+          {telegramUser?.username && (
+            <div className={styles.username}>@{telegramUser.username}</div>
+          )}
+        </div>
       </div>
 
       <div className={styles.contentBlock}>

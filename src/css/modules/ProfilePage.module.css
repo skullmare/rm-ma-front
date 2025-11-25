@@ -121,6 +121,12 @@
     line-height: 1.25;
 }
 
+.profilePage .username {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6F6F6F;
+}
+
 .profilePage .addRole {
     border: 0.75px solid #4F4F4F;
     padding: 5px 15px;
