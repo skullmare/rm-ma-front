@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'https://rm-ma-back-ivanostapchuk.amvera.io',
+  baseURL: 'https://rm-ma-back-rocketmind.amvera.io',
 });
 
 export const setAuthHeader = (token) => {
