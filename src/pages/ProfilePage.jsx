@@ -131,12 +131,6 @@ function ProfilePage() {
 
       <div className={styles.contentBlock}>
         <div className="d-flex flex-column w-100 gap-2">
-          <div>
-            <span className={styles.sectionTitle}>Текущий тариф:</span>
-            <div className={styles.infoBlock}>
-              {profile?.tariff || 'Free'}
-            </div>
-          </div>
           <a className={styles.linkCorporatePage} href="#" onClick={handleTariffClick}>Выбрать тариф</a>
         </div>
       </div>
