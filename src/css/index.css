@@ -1,0 +1,356 @@
+/* === ОПТИМИЗАЦИЯ СТИЛЕЙ === */
+:root {
+    --color-bg: #121212;
+    --color-text: #E0E0E0;
+    --color-border: #3E3E3E;
+    --color-accent: #A172F8;
+    --color-button: #FFCC00;
+    --color-indicator: #fff;
+    --color-text-secondary: #C4C3C7;
+    --font-main: 'Roboto', sans-serif;
+    --font-heading: 'Roboto Condensed', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-main);
+    color: var(--color-text);
+}
+
+.homePage {
+    max-width: 500px;
+    height: 100vh;
+    margin: 0 auto;
+    overflow: hidden;
+    background: var(--color-bg);
+    position: relative;
+}
+
+.homePage h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    color: var(--color-text);
+}
+
+.homePage {
+    max-width: 500px;
+    height: 100vh;
+    margin: 0 auto;
+    overflow: hidden;
+    background: var(--color-bg);
+    position: relative;
+}
+
+/* === КАРУСЕЛЬ === */
+.homePage .carousel {
+    height: 100vh;
+    width: 100%;
+    touch-action: pan-y;
+}
+
+.homePage .carousel-inner,
+.homePage .carousel-item {
+    height: 100%;
+    width: 100%;
+    background-color: var(--color-bg);
+    position: relative;
+    transition: transform 0.3s ease-in-out !important;
+}
+
+.homePage .carousel-item::before,
+.homePage .carousel-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.75px;
+    background: var(--color-border);
+    z-index: 1000;
+}
+
+.homePage .carousel-item::before {
+    left: 12px;
+}
+
+.homePage .carousel-item::after {
+    right: 12px;
+}
+
+/* === НАВИГАЦИЯ === */
+.homePage .navbar {
+    width: 100%;
+    background: var(--color-bg);
+    z-index: 1000;
+    padding: 0;
+    border-bottom: 0.75px solid var(--color-border);
+    position: relative;
+}
+
+.homePage .navbar-brand {
+    padding: 0;
+}
+
+.homePage .navbar-brand img {
+    height: 45px;
+    display: block;
+}
+
+/* === СТРУКТУРА СЛАЙДА === */
+.homePage .slide-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.homePage .main-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(220 20% 25%) transparent;
+}
+
+/* === КОНТЕНТНЫЕ БЛОКИ === */
+.homePage .content-block {
+    width: 100%;
+    padding: 20px;
+    border-bottom: 0.75px solid var(--color-border);
+    position: relative;
+}
+
+.homePage .content-block-last {
+    border-bottom: none;
+}
+
+/* === КНОПКИ === */
+.homePage .button-block {
+    width: 100%;
+    padding: 20px 30px;
+    text-align: center;
+    border-top: 0.75px solid var(--color-border);
+    border-bottom: 0.75px solid var(--color-border);
+    z-index: 40;
+    background-color: var(--color-bg);
+    flex-shrink: 0;
+}
+
+.homePage .btn-primary {
+    background: var(--color-button);
+    color: #000;
+    border: none;
+    height: 44px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    transition: opacity 0.2s ease;
+}
+
+.homePage .btn-primary:hover {
+    opacity: 0.9;
+}
+
+/* === ИНДИКАТОРЫ === */
+.homePage .indicators-container {
+    width: 100%;
+    padding: 15px 30px;
+    text-align: center;
+    background-color: var(--color-bg);
+    z-index: 30;
+    flex-shrink: 0;
+}
+
+.homePage .carousel-indicators {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    z-index: 15;
+    height: 8px;
+}
+
+.homePage .carousel-indicators button {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50%;
+    background-color: var(--color-indicator);
+    opacity: 0.5;
+    margin: 0;
+    padding: 0;
+    border: none;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    text-indent: -9999px;
+    overflow: hidden;
+}
+
+.homePage .carousel-indicators .active {
+    opacity: 1;
+    width: 8px !important;
+    height: 8px !important;
+    background-color: var(--color-accent);
+}
+
+/* === ГРАФИЧЕСКИЕ ЭЛЕМЕНТЫ === */
+.homePage .glow {
+    position: absolute;
+    top: -70px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: #A172F880;
+    filter: blur(60px);
+    z-index: 1001;
+    pointer-events: none;
+}
+
+/* === ИЗОБРАЖЕНИЯ СЛАЙДА 1 === */
+.homePage .slide-1-img-boy {
+    position: relative;
+    top: 0;
+    left: -30px;
+    margin-top: -20px;
+    transform: rotate(11deg);
+    width: 95px;
+    z-index: 1002;
+}
+
+.homePage .slide-1-img-map-board {
+    position: relative;
+    margin-top: -110px;
+    top: 0;
+    margin-left: -5%;
+    width: 110%;
+    z-index: 1001;
+}
+
+.homePage .slide-1-img-girl {
+    position: relative;
+    left: 75%;
+    margin-top: -170px;
+    transform: rotate(11deg);
+    width: 126px;
+    z-index: 1001;
+}
+
+/* === ИЗОБРАЖЕНИЕ СЛАЙДА 2 === */
+.homePage .slide-2-img {
+    position: relative;
+    left: 65%;
+    top: -60px;
+    transform: rotate(15deg);
+    width: 176px;
+    z-index: 1001;
+}
+
+/* === ТИПОГРАФИЯ И КОМПОНЕНТЫ === */
+.homePage .text-lead {
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 130%;
+    color: var(--color-text-secondary);
+    margin: 12px 0 12px 10px;
+}
+
+.homePage .feature-item {
+    display: flex;
+    align-items: flex-start;
+    margin: 12px 0 12px 10px;
+    gap: 10px;
+}
+
+.homePage .feature-icon {
+    width: 20px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.homePage .feature-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.homePage .feature-text span {
+    font-size: 18px;
+}
+
+.homePage .agent-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 24px;
+}
+
+.homePage .agent-image {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.homePage .agent-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.homePage .agent-name {
+    color: var(--color-accent);
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.homePage .agent-role {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: var(--color-text);
+    line-height: 1.2;
+    margin: 2px 0 0 0;
+}
+
+.homePage .agent-description {
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 130%;
+    color: #A9A9A9;
+    margin: 3px 0 0 0;
+}
+
+.homePage .section-title {
+    margin: 15px 0 15px 10px;
+    font-size: 24px;
+}
+
+
+

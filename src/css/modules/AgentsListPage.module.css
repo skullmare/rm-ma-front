@@ -1,0 +1,129 @@
+/* AgentsListPage Styles */
+.body {
+    
+}
+
+.agentsListPage {
+    /* Все стили вложены в этот класс для изоляции */
+    padding: 0;
+    overflow-x: hidden;
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+    background: #121212;
+    height: 100vh;
+}
+
+/* === ТИПОГРАФИЯ === */
+.agentsListPage .headingSection {
+    margin: 15px 0 15px 10px;
+    font-size: 24px;
+}
+
+.agentsListPage .agentName {
+    color: #A172F8;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.agentsListPage .agentRole {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 500;
+    font-size: 17px;
+    text-transform: uppercase;
+    color: #E0E0E0;
+    line-height: 1.2;
+    margin: 2px 0 0 0;
+}
+
+/* === КОМПОНЕНТЫ === */
+.agentsListPage .navbar {
+    width: 100%;
+    background: #121212;
+    z-index: 1000;
+    padding: 0;
+    border-bottom: 0.75px solid #3E3E3E;
+    position: relative;
+}
+
+.agentsListPage .navbarBrand {
+    padding: 0;
+}
+
+.agentsListPage .navbarBrand img {
+    height: 45px;
+}
+
+.agentsListPage .glow {
+    position: absolute;
+    top: -70px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: #A172F880;
+    filter: blur(60px);
+    z-index: 1001;
+    pointer-events: none;
+}
+
+.agentsListPage .navbarAccount {
+    width: 45px;
+    height: 45px;
+    border-left: 0.75px solid #3E3E3E;
+    color: #E0E0E0;
+    text-decoration: none;
+}
+
+.agentsListPage .accountIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border: 0.75px solid #3E3E3E;
+    border-radius: 50%;
+}
+
+.agentsListPage .contentBlock {
+    width: 100%;
+    padding: 20px;
+    border-bottom: 0.75px solid #3E3E3E;
+}
+
+.agentsListPage .agentLink {
+    color: #E0E0E0;
+    width: 100%;
+    text-decoration: none;
+}
+
+.agentsListPage .agentLink:hover {
+    text-decoration: none;
+}
+
+.agentsListPage .agentAvatar {
+    position: relative;
+    width: 90px;
+    flex-shrink: 0;
+}
+
+.agentsListPage .agentInfoIcon {
+    position: absolute;
+    z-index: 2;
+}
+
+.agentsListPage .agentImage {
+    width: 90px;
+    flex-shrink: 0;
+}
+
+.agentsListPage .agentContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.agentsListPage .agentArrow {
+    flex-shrink: 0;
+}

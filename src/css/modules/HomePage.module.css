@@ -1,0 +1,245 @@
+/* HomePage Styles */
+.homePage {
+    max-width: 500px;
+    height: 100vh;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #121212;
+    position: relative;
+}
+
+/* Стили карусели вынесены в carousel.css для работы с глобальными классами Bootstrap */
+
+/* === НАВИГАЦИЯ === */
+.homePage .navbar {
+    width: 100%;
+    background: #121212;
+    z-index: 1000;
+    padding: 0;
+    border-bottom: 0.75px solid #3E3E3E;
+    position: relative;
+}
+
+.homePage .navbarBrand {
+    padding: 0;
+}
+
+.homePage .navbarBrand img {
+    height: 45px;
+    display: block;
+}
+
+/* === СТРУКТУРА СЛАЙДА === */
+.homePage .slideContent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.homePage .mainContent {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(220 20% 25%) transparent;
+}
+
+/* === КОНТЕНТНЫЕ БЛОКИ === */
+.homePage .contentBlock {
+    width: 100%;
+    padding: 20px;
+    border-bottom: 0.75px solid #3E3E3E;
+    position: relative;
+}
+
+.homePage .contentBlockLast {
+    border-bottom: none;
+}
+
+/* === КНОПКИ === */
+.homePage .buttonBlock {
+    width: 100%;
+    padding: 20px 30px;
+    text-align: center;
+    border-top: 0.75px solid #3E3E3E;
+    border-bottom: 0.75px solid #3E3E3E;
+    z-index: 40;
+    background-color: #121212;
+    flex-shrink: 0;
+}
+
+.homePage .btnPrimary {
+    background: #FFCC00;
+    color: #000;
+    border: none;
+    height: 44px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-transform: uppercase;
+    transition: opacity 0.2s ease;
+}
+
+.homePage .btnPrimary:hover {
+    opacity: 0.9;
+}
+
+/* === ИНДИКАТОРЫ === */
+.homePage .indicatorsContainer {
+    width: 100%;
+    padding: 15px 30px;
+    text-align: center;
+    background-color: #121212;
+    z-index: 30;
+    flex-shrink: 0;
+}
+
+/* Стили индикаторов вынесены в carousel.css */
+
+/* === ГРАФИЧЕСКИЕ ЭЛЕМЕНТЫ === */
+.homePage .glow {
+    position: absolute;
+    top: -70px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: #A172F880;
+    filter: blur(60px);
+    z-index: 1001;
+    pointer-events: none;
+}
+
+/* === ИЗОБРАЖЕНИЯ СЛАЙДА 1 === */
+.homePage .slide1ImgBoy {
+    position: relative;
+    top: 0;
+    left: -30px;
+    margin-top: -20px;
+    transform: rotate(11deg);
+    width: 95px;
+    z-index: 1002;
+}
+
+.homePage .slide1ImgMapBoard {
+    position: relative;
+    margin-top: -110px;
+    top: 0;
+    margin-left: -5%;
+    width: 110%;
+    z-index: 1001;
+}
+
+.homePage .slide1ImgGirl {
+    position: relative;
+    left: 75%;
+    margin-top: -170px;
+    transform: rotate(11deg);
+    width: 126px;
+    z-index: 1001;
+}
+
+/* === ИЗОБРАЖЕНИЕ СЛАЙДА 2 === */
+.homePage .slide2Img {
+    position: relative;
+    left: 65%;
+    top: -60px;
+    transform: rotate(15deg);
+    width: 176px;
+    z-index: 1001;
+}
+
+/* === ТИПОГРАФИЯ И КОМПОНЕНТЫ === */
+.homePage .textLead {
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 130%;
+    color: #C4C3C7;
+    margin: 12px 0 12px 10px;
+}
+
+.homePage .featureItem {
+    display: flex;
+    align-items: flex-start;
+    margin: 12px 0 12px 10px;
+    gap: 10px;
+}
+
+.homePage .featureIcon {
+    width: 20px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.homePage .featureText {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.homePage .featureText span {
+    font-size: 18px;
+}
+
+.homePage .agentCard {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 24px;
+}
+
+.homePage .agentImage {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.homePage .agentInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.homePage .agentName {
+    color: #A172F8;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.homePage .agentRole {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: #E0E0E0;
+    line-height: 1.2;
+    margin: 2px 0 0 0;
+}
+
+.homePage .agentDescription {
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 130%;
+    color: #A9A9A9;
+    margin: 3px 0 0 0;
+}
+
+.homePage .sectionTitle {
+    margin: 15px 0 15px 10px;
+    font-size: 24px;
+}

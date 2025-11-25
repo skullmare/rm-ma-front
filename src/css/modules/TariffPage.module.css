@@ -1,0 +1,177 @@
+/* TariffPage Styles */
+.body {
+    
+}
+
+.tariffPage {
+    /* Все стили вложены в этот класс для изоляции */
+    padding: 0;
+    overflow-x: hidden;
+    background: #121212;
+    height: 100vh;
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Navbar */
+.tariffPage .navbar {
+    background: #121212;
+    z-index: 1000;
+    padding: 0;
+    border-bottom: 0.75px solid #3E3E3E;
+    position: relative;
+}
+
+.tariffPage .navbarBrand {
+    padding: 0;
+}
+
+.tariffPage .navbarBrand img {
+    height: 45px;
+}
+
+.tariffPage .glow {
+    position: absolute;
+    top: -70px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: rgba(161, 114, 248, 0.5);
+    filter: blur(60px);
+    z-index: 1001;
+    pointer-events: none;
+}
+
+.tariffPage .navbarAccount {
+    width: 45px;
+    height: 45px;
+    border-left: 0.75px solid #3E3E3E;
+    color: #E0E0E0;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tariffPage .accountIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border: 0.75px solid #3E3E3E;
+    border-radius: 50%;
+}
+
+.tariffPage .accountIcon img {
+    width: 25px;
+    height: 25px;
+}
+
+.tariffPage .contentBlock {
+    width: 100%;
+    padding: 20px 15px;
+    border-bottom: 0.75px solid #3E3E3E;
+}
+
+.tariffPage .contentBlockLast {
+    border-bottom: none;
+}
+
+.tariffPage .prev {
+    display: flex;
+    align-items: center;
+}
+
+.tariffPage .prev img {
+    margin-left: 15px;
+    height: 24px;
+}
+
+.tariffPage .infoBlock {
+    margin-left: 15px;
+    font-size: 14px;
+    font-weight: 300;
+    color: #A9A9A9;
+    line-height: 1.25;
+}
+
+.tariffPage .elementList {
+    font-size: 14px;
+    font-weight: 300;
+    color: #A9A9A9;
+    line-height: 1.6;
+}
+
+/* Button block */
+.tariffPage .buttonBlock {
+    width: 100%;
+    text-align: center;
+}
+
+.tariffPage .buttonSubscribe,
+.tariffPage .buttonActive {
+    border: none;
+    height: 44px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1;
+    text-transform: uppercase;
+    transition: opacity 0.2s ease;
+}
+
+.tariffPage .buttonSubscribe {
+    background: #FFCC00;
+    color: #000000;
+}
+
+.tariffPage .buttonActive {
+    background: #372558;
+    color: #A9A9A9;
+}
+
+.tariffPage .buttonSubscribe:hover,
+.tariffPage .buttonActive:hover {
+    opacity: 0.9;
+}
+
+/* Специфические стили для контента */
+.tariffPage .tariffTitle {
+    margin: 10px 0;
+    font-size: 24px;
+}
+
+.tariffPage .tariffSubtitle {
+    color: #A9A9A9;
+    font-weight: 300;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.tariffPage .tariffType {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0%;
+}
+
+.tariffPage .tariffTypeFree {
+    color: #A9A9A9;
+}
+
+.tariffPage .tariffTypePremium {
+    color: #A172F8;
+}
+
+.tariffPage .featuresList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}

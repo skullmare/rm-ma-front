@@ -1,0 +1,178 @@
+/* ProfilePage Styles */
+.body {
+    
+}
+
+.profilePage {
+    padding: 0;
+    overflow-x: hidden;
+    background: #121212;
+    height: 100vh;
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Navbar */
+.profilePage .navbar {
+    width: 100%;
+    background: #121212;
+    z-index: 1000;
+    padding: 0;
+    border-bottom: 0.75px solid #3E3E3E;
+    position: relative;
+}
+
+.profilePage .navbarBrand {
+    padding: 0;
+}
+
+.profilePage .navbarBrand img {
+    height: 45px;
+    display: block;
+}
+
+.profilePage .glow {
+    position: absolute;
+    top: -70px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: #A172F880;
+    filter: blur(60px);
+    z-index: 1001;
+    pointer-events: none;
+}
+
+.profilePage .navbarAccount {
+    width: 45px;
+    height: 45px;
+    border-left: 0.75px solid #3E3E3E;
+    color: #E0E0E0;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profilePage .accountIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border: 0.75px solid #3E3E3E;
+    border-radius: 50%;
+}
+
+.profilePage .accountIcon img {
+    width: 25px;
+    height: 25px;
+}
+
+.profilePage .contentBlock {
+    width: 100%;
+    padding: 20px 15px;
+    border-bottom: 0.75px solid #3E3E3E;
+}
+
+.profilePage .contentBlock:last-of-type {
+    border-bottom: none;
+}
+
+.profilePage .aWrapper {
+    color: #E0E0E0;
+    width: 100%;
+    text-decoration: none;
+}
+
+.profilePage .avatarBlock {
+    width: 48px;
+    height: 48px;
+    border: 0.75px solid #3E3E3E;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.profilePage .avatarBlock img {
+    width: 30px;
+    height: 30px;
+}
+
+.profilePage .prev {
+    display: flex;
+    align-items: center;
+}
+
+.profilePage .prev img {
+    margin-left: 15px;
+    height: 24px;
+    display: block;
+}
+
+.profilePage .infoBlock {
+    margin-left: 15px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #A9A9A9;
+    line-height: 1.25;
+}
+
+.profilePage .addRole {
+    border: 0.75px solid #4F4F4F;
+    padding: 5px 15px;
+    border-radius: 4px;
+    color: #A9A9A9;
+    margin-right: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.profilePage .personActivity {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 400;
+    color: #A9A9A9;
+    line-height: 1.25;
+    padding: 0;
+}
+
+.profilePage .personActivity::placeholder {
+    color: #A9A9A9;
+    opacity: 0.8;
+}
+
+.profilePage .linkCorporatePage {
+    font-size: 14px;
+    font-weight: 400;
+    color: #A9A9A9;
+    line-height: 1.25;
+    text-decoration: none;
+    display: block;
+}
+
+.profilePage .linkCorporatePage:hover {
+    color: #E0E0E0;
+}
+
+.profilePage .sectionTitle {
+    font-weight: 700;
+    font-size: 14px;
+    color: #A9A9A9;
+    letter-spacing: 0;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.profilePage .profileTitle {
+    margin: 10px 0;
+    font-size: 24px;
+}
