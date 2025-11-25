@@ -97,8 +97,8 @@ function ProfilePage() {
           <img
             src={avatarSrc}
             alt="Аватар профиля из Telegram"
-            width="30"
-            height="30"
+            width={error ? '30px' : '100%'}
+            height={error ? '30px' : '100%'}
             onError={(event) => {
               event.currentTarget.onerror = null;
               event.currentTarget.src = personImg;
