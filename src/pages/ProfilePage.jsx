@@ -6,148 +6,90 @@ import { usePageLoader } from '../hooks/usePageLoader';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const backArrowImg = '/img/Rectangle 42215.svg';
-const settingIconImg = '/img/setting_icon.svg';
-const personImg = '/img/person.svg';
+const BACK_ARROW = '/img/Rectangle 42215.svg';
+const SETTINGS_ICON = '/img/setting_icon.svg';
+const DEFAULT_AVATAR = '/img/person.svg';
 
 function ProfilePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isLoading = usePageLoader(500);
+  const isPageLoading = usePageLoader(500);
 
   const [profile, setProfile] = useState(null);
-  const [error, setError] = useState(null);
-  const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
+    let isMounted = true;
 
-    const loadProfile = async () => {
-      setIsProfileLoading(true);
+    const fetchProfile = async () => {
       try {
         const { data } = await apiClient.get('/api/profile');
-
-        if (!mounted) return;
-
-        console.log('Ответ от сервера:', data);
-
-        if (data?.profile) {
+        if (isMounted && data?.profile) {
           setProfile(data.profile);
-          setError(null);
-        } else {
-          setError('Данные профиля не найдены в ответе сервера');
         }
       } catch (err) {
-        if (!mounted) return;
-        console.error('Ошибка загрузки профиля:', err);
-        setError(
-          err?.response?.data?.message ||
-            'Не удалось загрузить профиль. Попробуйте позже.'
-        );
+        if (isMounted) {
+          setError(err?.response?.data?.message || 'Не удалось загрузить профиль');
+        }
       } finally {
-        if (mounted) setIsProfileLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
-    loadProfile();
-
-    return () => {
-      mounted = false;
-    };
+    fetchProfile();
+    return () => { isMounted = false; };
   }, []);
 
-  // === ОТЛАДКА (можно удалить в продакшене) ===
-  useEffect(() => {
-    console.log('profile state:', profile);
-    console.log('user из AuthContext:', user);
-  }, [profile, user]);
+  // Приоритет: профиль из бэкенда → AuthContext → дефолты
+  const firstName = profile?.first_name?.trim() || user?.firstName?.trim() || '';
+  const lastName = profile?.last_name?.trim() || user?.lastName?.trim() || '';
+  const usernameRaw = profile?.username || user?.username || '';
+  const username = usernameRaw.startsWith('@') ? usernameRaw.slice(1) : usernameRaw;
 
-  const handleBackClick = (e) => {
-    e.preventDefault();
-    navigate('/agents_list');
-  };
+  const photoUrl = profile?.photo_url || user?.photoUrl || DEFAULT_AVATAR;
+  const profession = profile?.profession || '';
+  const roles = Array.isArray(profile?.roles) ? profile.roles : [];
 
-  const handleTariffClick = (e) => {
-    e.preventDefault();
-    navigate('/tariff');
-  };
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || 
+                   (username ? `@${username}` : 'Пользователь');
 
-  // === ГЛАВНОЕ: ДАННЫЕ ИЗ n8n ПРОФИЛЯ ИМЕЮТ МАКСИМАЛЬНЫЙ ПРИОРИТЕТ ===
-  const displayData = {
-    firstName: (profile?.first_name || user?.firstName || '').trim(),
-    lastName: (profile?.last_name || user?.lastName || '').trim(),
-    usernameRaw: profile?.username || user?.username || '',
-    photoUrl: profile?.photo_url || user?.photoUrl || personImg,
-    profession: profile?.profession || '',
-    roles: Array.isArray(profile?.roles) ? profile.roles : [],
-    tariff: profile?.tariff || 'free',
-  };
+  const goBack = () => navigate('/agents_list');
+  const goToTariff = () => navigate('/tariff');
 
-  const username = displayData.usernameRaw.startsWith('@')
-    ? displayData.usernameRaw.slice(1)
-    : displayData.usernameRaw;
-
-  const fullName =
-    [displayData.firstName, displayData.lastName].filter(Boolean).join(' ') ||
-    (username ? `@${username}` : 'Пользователь');
-
-  if (isLoading || isProfileLoading) {
-    return <Spinner />;
-  }
+  if (isPageLoading || isLoading) return <Spinner />;
 
   return (
     <div className={`${styles.body} ${styles.profilePage}`}>
+      {/* Навбар */}
       <nav className={styles.navbar}>
         <div className="container-fluid d-flex justify-content-between px-0">
-          <a
-            className={styles.prev}
-            href="#"
-            onClick={handleBackClick}
-            aria-label="Назад"
-          >
-            <img src={backArrowImg} alt="Назад" />
+          <a href="#" onClick={goBack} className={styles.prev} aria-label="Назад">
+            <img src={BACK_ARROW} alt="" />
           </a>
-          <a className={styles.navbarAccount} href="#" aria-label="Настройки">
+
+          <a href="#" className={styles.navbarAccount} aria-label="Настройки">
             <div className={styles.accountIcon}>
-              <img src={settingIconImg} alt="Настройки" />
+              <img src={SETTINGS_ICON} alt="" />
             </div>
           </a>
         </div>
       </nav>
 
-      <div className={styles.glow} aria-hidden="true"></div>
+      <div className={styles.glow} aria-hidden="true" />
 
       <div className={styles.contentBlock}>
         <h2 className={styles.profileTitle}>ПРОФИЛЬ</h2>
-
-        {/* Отладка - удали, когда всё заработает */}
-        {process.env.NODE_ENV === 'development' && (
-          <div
-            style={{
-              fontSize: '11px',
-              color: '#666',
-              background: '#f0f0f0',
-              padding: '8px',
-              borderRadius: '6px',
-              marginTop: '10px',
-            }}
-          >
-            <strong>Debug:</strong> {fullName} | @{username || '—'} | 
-            Роль: {displayData.roles.join(', ') || '—'} | 
-            Профессия: "{displayData.profession || 'не указана'}"
-          </div>
-        )}
       </div>
 
-      {/* АВАТАР + ИМЯ */}
+      {/* Аватар + имя */}
       <div className={`${styles.contentBlock} d-flex align-items-center`}>
         <div className={styles.avatarBlock}>
           <img
-            src={displayData.photoUrl}
-            alt="Аватар профиля"
+            src={photoUrl}
+            alt="Аватар"
             onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = personImg;
+              e.currentTarget.src = DEFAULT_AVATAR;
             }}
           />
         </div>
@@ -157,15 +99,13 @@ function ProfilePage() {
         </div>
       </div>
 
-      {/* РОЛИ */}
+      {/* Роли */}
       <div className={styles.contentBlock}>
         <span className={styles.sectionTitle}>ВАША РОЛЬ:</span>
-        <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
-          {displayData.roles.length > 0 ? (
-            displayData.roles.map((role, i) => (
-              <div key={i} className={styles.addRole}>
-                {role}
-              </div>
+        <div className="d-flex flex-wrap gap-2 mt-2">
+          {roles.length > 0 ? (
+            roles.map((role, i) => (
+              <div key={i} className={styles.addRole}>{role}</div>
             ))
           ) : (
             <>
@@ -176,34 +116,28 @@ function ProfilePage() {
         </div>
       </div>
 
-      {/* СФЕРА ДЕЯТЕЛЬНОСТИ */}
+      {/* Сфера деятельности */}
       <div className={styles.contentBlock}>
         <span className={styles.sectionTitle}>СФЕРА ДЕЯТЕЛЬНОСТИ:</span>
-        <div className="input-block mt-2">
+        <div className="mt-2">
           <input
             className={styles.personActivity}
             type="text"
             placeholder="Укажите вашу сферу деятельности.."
-            value={displayData.profession}
+            value={profession}
             readOnly
           />
         </div>
       </div>
 
-      {/* ТАРИФ */}
+      {/* Тариф */}
       <div className={styles.contentBlock}>
-        <div className="d-flex flex-column w-100 gap-2">
-          <a
-            className={styles.linkCorporatePage}
-            href="#"
-            onClick={handleTariffClick}
-          >
-            Выбрать тариф
-          </a>
-        </div>
+        <a href="#" onClick={goToTariff} className={styles.linkCorporatePage}>
+          Выбрать тариф
+        </a>
       </div>
 
-      {/* ОШИБКА */}
+      {/* Ошибка */}
       {error && (
         <div className={styles.contentBlock}>
           <div className={styles.infoBlock} style={{ color: '#F87171' }}>
@@ -212,17 +146,11 @@ function ProfilePage() {
         </div>
       )}
 
-      {/* НИЖНИЕ ССЫЛКИ */}
+      {/* Нижние ссылки */}
       <div className={`${styles.contentBlock} d-flex flex-column gap-3`}>
-        <a className={styles.linkCorporatePage} href="#">
-          Политика конфиденциальности
-        </a>
-        <a className={styles.linkCorporatePage} href="#">
-          Условия использования
-        </a>
-        <a className={styles.linkCorporatePage} href="#">
-          О сервисе
-        </a>
+        <a href="#" className={styles.linkCorporatePage}>Политика конфиденциальности</a>
+        <a href="#" className={styles.linkCorporatePage}>Условия использования</a>
+        <a href="#" className={styles.linkCorporatePage}>О сервисе</a>
       </div>
     </div>
   );
