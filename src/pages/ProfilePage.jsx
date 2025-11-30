@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../css/modules/ProfilePage.module.css';
 import Spinner from '../components/Spinner';
@@ -18,6 +18,9 @@ function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [profession, setProfession] = useState('');
+  const [isUpdatingProfession, setIsUpdatingProfession] = useState(false);
+  const professionDebounceRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -27,6 +30,7 @@ function ProfilePage() {
         const { data } = await apiClient.get('/api/profile');
         if (isMounted && data?.profile) {
           setProfile(data.profile);
+          setProfession(data.profile.profession || '');
         }
       } catch (err) {
         if (isMounted) {
@@ -48,8 +52,53 @@ function ProfilePage() {
   const username = usernameRaw.startsWith('@') ? usernameRaw.slice(1) : usernameRaw;
 
   const photoUrl = profile?.photo_url || user?.photoUrl || DEFAULT_AVATAR;
-  const profession = profile?.profession || '';
   const roles = Array.isArray(profile?.roles) ? profile.roles : [];
+
+  // Получаем chat_id из профиля или пользователя
+  const chatId = profile?.chat_id || user?.telegramId || user?.id;
+
+  // Обработчик изменения профессии с debounce
+  const handleProfessionChange = (e) => {
+    const newProfession = e.target.value;
+    setProfession(newProfession);
+
+    // Очищаем предыдущий таймер
+    if (professionDebounceRef.current) {
+      clearTimeout(professionDebounceRef.current);
+    }
+
+    // Устанавливаем новый таймер на 1 секунду
+    professionDebounceRef.current = setTimeout(async () => {
+      if (!chatId) {
+        console.error('chat_id not found, cannot update profession');
+        return;
+      }
+
+      setIsUpdatingProfession(true);
+      try {
+        await apiClient.put('/api/profile/profession', {
+          chat_id: String(chatId),
+          profession: newProfession,
+        });
+        // Обновляем профиль локально
+        setProfile(prev => ({ ...prev, profession: newProfession }));
+      } catch (err) {
+        console.error('Failed to update profession:', err);
+        setError(err?.response?.data?.message || 'Не удалось обновить сферу деятельности');
+      } finally {
+        setIsUpdatingProfession(false);
+      }
+    }, 1000);
+  };
+
+  // Очистка таймера при размонтировании
+  useEffect(() => {
+    return () => {
+      if (professionDebounceRef.current) {
+        clearTimeout(professionDebounceRef.current);
+      }
+    };
+  }, []);
 
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || 
                    (username ? `@${username}` : 'Пользователь');
@@ -125,7 +174,14 @@ function ProfilePage() {
             type="text"
             placeholder="Укажите вашу сферу деятельности.."
             value={profession}
+            onChange={handleProfessionChange}
+            disabled={isUpdatingProfession}
           />
+          {isUpdatingProfession && (
+            <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+              Сохранение...
+            </div>
+          )}
         </div>
       </div>
 
