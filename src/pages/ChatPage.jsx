@@ -17,7 +17,8 @@ function ChatPage() {
   const chatContainerRef = useRef(null);
   const isScrolledToBottom = useRef(true);
   const shouldScrollToBottom = useRef(true);
-  const isInitialLoad = useRef(true); // Новый флаг для блокировки дублирующих запросов
+  const isInitialLoad = useRef(true); // Флаг для блокировки дублирующих запросов
+  const hasScrolledToBottom = useRef(false); // Новый флаг для отслеживания первоначальной прокрутки
 
   const agentInfo = location.state || { agent: 'sergey', agentName: 'СЕРГЕЙ' };
   const { agent, agentName } = agentInfo;
@@ -64,6 +65,8 @@ function ChatPage() {
   const scrollToBottom = useCallback((behavior = 'auto') => {
     if (!chatContainerRef.current) return;
     chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    isScrolledToBottom.current = true;
+    hasScrolledToBottom.current = true;
   }, []);
 
   // === Загрузка истории ===
@@ -134,6 +137,9 @@ function ChatPage() {
     // Обновляем флаг: был ли пользователь внизу
     const atBottom = scrollHeight - scrollTop - clientHeight < 100;
     isScrolledToBottom.current = atBottom;
+    if (atBottom) {
+      hasScrolledToBottom.current = true;
+    }
   }, [messages, isLoadingMore, hasMoreMessages, loadHistory]);
 
   useEffect(() => {
@@ -148,7 +154,8 @@ function ChatPage() {
     if (isHistoryLoading) return;
 
     requestAnimationFrame(() => {
-      if (shouldScrollToBottom.current || isScrolledToBottom.current || isLoading) {
+      // При первой загрузке всегда скроллим вниз
+      if (!hasScrolledToBottom.current || shouldScrollToBottom.current || isScrolledToBottom.current || isLoading) {
         scrollToBottom('smooth');
         shouldScrollToBottom.current = false;
       }
