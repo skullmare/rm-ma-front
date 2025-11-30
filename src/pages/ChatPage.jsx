@@ -191,15 +191,35 @@ function ChatPage() {
     };
   }, []);
 
+  // Автопрокрутка вниз после первой загрузки истории
+  useEffect(() => {
+    if (!isHistoryLoading && messages.length > 0 && chatRef.current) {
+      // Прокручиваем вниз после загрузки истории
+      const scrollToBottom = () => {
+        if (chatRef.current) {
+          chatRef.current.scrollTop = chatRef.current.scrollHeight;
+        }
+      };
+      
+      // Используем небольшую задержку для гарантии, что DOM обновился
+      setTimeout(scrollToBottom, 50);
+    }
+  }, [isHistoryLoading, messages.length]);
+
   // Автопрокрутка вниз при добавлении новых сообщений (только если уже были внизу)
   useEffect(() => {
-    if (chatRef.current && messages.length > 0) {
-      const chat = chatRef.current;
-      const isScrolledToBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 50;
-      
-      if (isScrolledToBottom || isHistoryLoading) {
-        chat.scrollTop = chat.scrollHeight;
-      }
+    if (!chatRef.current || messages.length === 0 || isHistoryLoading) return;
+    
+    const chat = chatRef.current;
+    const isScrolledToBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 50;
+    
+    // Прокручиваем вниз при отправке сообщений или если уже были внизу
+    if (isScrolledToBottom || isLoading) {
+      requestAnimationFrame(() => {
+        if (chatRef.current) {
+          chatRef.current.scrollTop = chatRef.current.scrollHeight;
+        }
+      });
     }
   }, [messages, isLoading, isHistoryLoading]);
 
