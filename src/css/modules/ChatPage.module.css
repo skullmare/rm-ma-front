@@ -262,10 +262,3 @@
     font-size: 14px;
     align-self: center;
 }
-
-.chatContainer {
-    display: flex;
-    flex-direction: column-reverse;
-    overflow-y: auto;
-    /* другие стили */
-  }

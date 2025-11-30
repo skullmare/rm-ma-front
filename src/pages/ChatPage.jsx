@@ -15,7 +15,8 @@ function ChatPage() {
   const location = useLocation();
   const textareaRef = useRef(null);
   const chatContainerRef = useRef(null);
-  const prevScrollHeightRef = useRef(0); // Для сохранения позиции при загрузке старых
+  const isScrolledToBottom = useRef(true); // Отслеживаем, был ли пользователь внизу
+  const shouldScrollToBottom = useRef(true); // Принудительно скроллим вниз при первой загрузке
 
   const agentInfo = location.state || { agent: 'sergey', agentName: 'СЕРГЕЙ' };
   const { agent, agentName } = agentInfo;
@@ -58,6 +59,12 @@ function ChatPage() {
     };
   }, [formatTime]);
 
+  // === Прокрутка вниз (плавная и только при необходимости) ===
+  const scrollToBottom = useCallback((behavior = 'auto') => {
+    if (!chatContainerRef.current) return;
+    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+  }, []);
+
   // === Загрузка истории ===
   const loadHistory = useCallback(async (timestamp = null) => {
     if (!chatId) {
@@ -74,17 +81,15 @@ function ChatPage() {
         transformed.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
         if (timestamp) {
-          // Добавляем старые сообщения в НАЧАЛО массива (поскольку reverse)
           setMessages(prev => {
             const combined = [...transformed, ...prev];
             const unique = Array.from(new Map(combined.map(m => [m.id, m])).values());
             return unique.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
           });
-          setHasMoreMessages(data.hasMore === true);
         } else {
           setMessages(transformed);
-          setHasMoreMessages(data.hasMore === true);
         }
+        setHasMoreMessages(data.hasMore === true);
       }
     } catch (error) {
       console.error('Ошибка загрузки истории:', error);
@@ -102,25 +107,29 @@ function ChatPage() {
     }
 
     setIsHistoryLoading(true);
+    shouldScrollToBottom.current = true;
+    isScrolledToBottom.current = true;
     loadHistory();
   }, [chatId, agent, loadHistory]);
 
-  // === Обработка скролла для загрузки старых ===
+  // === Загрузка старых сообщений при скролле вверх ===
   const handleScroll = useCallback(() => {
     if (!chatContainerRef.current || isLoadingMore || !hasMoreMessages) return;
 
     const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
 
-    // В column-reverse: когда scrollTop близко к 0 — "внизу" (новые сообщения)
-    // Когда scrollTop большой — просмотр старых (верх чата)
-    if (scrollTop < 150) { // Близко к "верху" визуально (старым сообщениям)
+    // Проверяем, близко ли к верху
+    if (scrollTop < 150) {
       const oldest = messages[0];
       if (oldest?.timestamp) {
-        prevScrollHeightRef.current = scrollHeight; // Сохраняем высоту перед добавлением
         setIsLoadingMore(true);
         loadHistory(oldest.timestamp);
       }
     }
+
+    // Обновляем флаг: был ли пользователь внизу
+    const atBottom = scrollHeight - scrollTop - clientHeight < 100;
+    isScrolledToBottom.current = atBottom;
   }, [messages, isLoadingMore, hasMoreMessages, loadHistory]);
 
   useEffect(() => {
@@ -130,20 +139,17 @@ function ChatPage() {
     return () => chat.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // === Корректировка скролла после добавления старых сообщений ===
+  // === Автопрокрутка при новых сообщениях ===
   useEffect(() => {
-    if (isLoadingMore || !chatContainerRef.current) return;
+    if (isHistoryLoading) return;
 
-    const chat = chatContainerRef.current;
-    const prevScrollHeight = prevScrollHeightRef.current;
-
-    if (prevScrollHeight > 0) {
-      // Корректируем позицию скролла, чтобы не дёргалось
-      const newScrollHeight = chat.scrollHeight;
-      chat.scrollTop = newScrollHeight - prevScrollHeight;
-      prevScrollHeightRef.current = 0;
-    }
-  }, [messages, isLoadingMore]);
+    requestAnimationFrame(() => {
+      if (shouldScrollToBottom.current || isScrolledToBottom.current || isLoading) {
+        scrollToBottom('smooth');
+        shouldScrollToBottom.current = false; // Больше не принудительно
+      }
+    });
+  }, [messages, isLoading, isHistoryLoading, scrollToBottom]);
 
   // === Авторесайз textarea ===
   useEffect(() => {
@@ -153,7 +159,7 @@ function ChatPage() {
     const adjustHeight = () => {
       textarea.style.height = 'auto';
       const newHeight = Math.min(textarea.scrollHeight, 140);
-      textarea.style.height = `${newHeight}px`;
+      textarea.style.height = newHeight + 'px';
       textarea.style.overflowY = newHeight >= 140 ? 'auto' : 'hidden';
     };
 
@@ -178,12 +184,9 @@ function ChatPage() {
       autor: 'human',
     };
 
-    // Добавляем в конец (новое сообщение)
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
-
-    // Поскольку column-reverse, новое появляется внизу автоматически, без скролла
 
     setIsLoading(true);
 
@@ -199,7 +202,7 @@ function ChatPage() {
         if (data?.message && data?.autor === 'ai_agent') {
           const aiMsg = transformMessage(data);
           if (!updated.some(m => m.id === aiMsg.id)) {
-            updated = [...updated, aiMsg]; // Добавляем в конец
+            updated.push(aiMsg);
           }
         }
 
@@ -243,14 +246,14 @@ function ChatPage() {
       <div className={styles.glow}></div>
 
       <main id="chat" ref={chatContainerRef} className={styles.chatContainer}>
-        {isLoading && (
+        {isLoadingMore && (
+          <div className={styles.loadingMore}>Загрузка предыдущих сообщений...</div>
+        )}
+
+        {messages.length === 0 && !isHistoryLoading && (
           <div className={`${styles.message} ${styles.incoming}`}>
-            <div className={styles.typingIndicator}>
-              <span className={styles.dots}>
-                <span></span><span></span><span></span>
-              </span>
-              печатает
-            </div>
+            Добрый день! Готов помочь вам. С чем хотите поработать сегодня?
+            <div className={styles.messageTime}>{formatTime(new Date())}</div>
           </div>
         )}
 
@@ -264,15 +267,15 @@ function ChatPage() {
           </div>
         ))}
 
-        {messages.length === 0 && !isHistoryLoading && (
+        {isLoading && (
           <div className={`${styles.message} ${styles.incoming}`}>
-            Добрый день! Готов помочь вам. С чем хотите поработать сегодня? 😊
-            <div className={styles.messageTime}>{formatTime(new Date())}</div>
+            <div className={styles.typingIndicator}>
+              <span className={styles.dots}>
+                <span></span><span></span><span></span>
+              </span>
+              печатает
+            </div>
           </div>
-        )}
-
-        {isLoadingMore && (
-          <div className={styles.loadingMore}>Загрузка предыдущих сообщений...</div>
         )}
       </main>
 
