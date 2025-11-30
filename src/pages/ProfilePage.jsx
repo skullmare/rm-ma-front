@@ -66,6 +66,9 @@ function ProfilePage() {
     username ||
     'Пользователь';
   const avatarSrc = profile?.photo_url || user?.photoUrl || personImg;
+  const roles = profile?.roles || [];
+  const profession = profile?.profession || '';
+  const tariff = profile?.tariff || 'free';
 
   if (isLoading || isProfileLoading) {
     return <Spinner />;
@@ -116,16 +119,30 @@ function ProfilePage() {
       <div className={styles.contentBlock}>
         <span className={styles.sectionTitle}>ВАША РОЛЬ:</span>
         <div className="d-flex align-items-center">
-          <div className={styles.addRole}>Добавить роль +</div>
-          <div className={styles.addRole}>Добавить роль +</div>
+          {roles.length > 0 ? (
+            roles.map((role, index) => (
+              <div key={index} className={styles.addRole}>{role}</div>
+            ))
+          ) : (
+            <>
+              <div className={styles.addRole}>Добавить роль +</div>
+              <div className={styles.addRole}>Добавить роль +</div>
+            </>
+          )}
         </div>
       </div>
 
       <div className={styles.contentBlock}>
         <span className={styles.sectionTitle}>СФЕРА ДЕЯТЕЛЬНОСТИ:</span>
         <div className="input-block">
-          <input className={styles.personActivity} type="text" placeholder="Укажите вашу сферу деятельности.."
-            aria-label="Сфера деятельности" />
+          <input 
+            className={styles.personActivity} 
+            type="text" 
+            placeholder="Укажите вашу сферу деятельности.."
+            aria-label="Сфера деятельности"
+            value={profession}
+            readOnly
+          />
         </div>
       </div>
 
