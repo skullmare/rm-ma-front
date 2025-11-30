@@ -16,7 +16,7 @@ function ChatPage() {
   const textareaRef = useRef(null);
   const chatContainerRef = useRef(null);
   const isScrolledToBottom = useRef(true);
-  const isFirstRenderComplete = useRef(false); // Главный флаг — можно ли подгружать старые сообщения
+  const isFirstRenderComplete = useRef(false); // Разблокировка подгрузки после первой прокрутки
 
   const agentInfo = location.state || { agent: 'sergey', agentName: 'СЕРГЕЙ' };
   const { agent, agentName } = agentInfo;
@@ -70,12 +70,16 @@ function ChatPage() {
     isScrolledToBottom.current = true;
   }, []);
 
-  // === Загрузка истории ===
+  // === Загрузка истории (ГЛАВНЫЙ ФИКС: сохранение позиции скролла) ===
   const loadHistory = useCallback(async (timestamp = null) => {
     if (!chatId) {
       setIsHistoryLoading(false);
       return;
     }
+
+    const chatEl = chatContainerRef.current;
+    const prevScrollHeight = chatEl?.scrollHeight || 0;
+    const prevScrollTop = chatEl?.scrollTop || 0;
 
     try {
       const params = {
@@ -110,6 +114,15 @@ function ChatPage() {
     } finally {
       setIsHistoryLoading(false);
       setIsLoadingMore(false);
+
+      // Восстанавливаем позицию скролла только при подгрузке старых сообщений
+      if (timestamp && chatEl) {
+        requestAnimationFrame(() => {
+          const newScrollHeight = chatEl.scrollHeight;
+          const heightDiff = newScrollHeight - prevScrollHeight;
+          chatEl.scrollTop = prevScrollTop + heightDiff;
+        });
+      }
     }
   }, [chatId, transformMessage]);
 
@@ -121,19 +134,19 @@ function ChatPage() {
     }
 
     setIsHistoryLoading(true);
-    isFirstRenderComplete.current = false; // Сбрасываем флаг при входе
+    isFirstRenderComplete.current = false;
     isScrolledToBottom.current = true;
 
-    loadHistory(); // Без timestamp — только последние 10
+    loadHistory();
   }, [chatId, agent, loadHistory]);
 
-  // === Автопрокрутка + разблокировка подгрузки старых сообщений ===
+  // === Первая прокрутка вниз + разблокировка подгрузки старых сообщений ===
   useEffect(() => {
     if (isHistoryLoading) return;
 
     const timer = setTimeout(() => {
       scrollToBottom('auto');
-      isFirstRenderComplete.current = true; // Разрешаем подгрузку старых сообщений
+      isFirstRenderComplete.current = true; // Теперь можно подгружать старые
     }, 100);
 
     return () => clearTimeout(timer);
@@ -142,13 +155,11 @@ function ChatPage() {
   // === Обработка скролла ===
   const handleScroll = useCallback(() => {
     if (!chatContainerRef.current || isLoadingMore || !hasMoreMessages) return;
-
-    // Запрещаем подгрузку до завершения первой прокрутки вниз
     if (!isFirstRenderComplete.current) return;
 
     const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
 
-    // Подгрузка старых сообщений при скролле вверх
+    // Подгрузка старых сообщений
     if (scrollTop < 150 && messages.length > 0) {
       const oldest = messages[0];
       if (oldest?.timestamp) {
@@ -157,7 +168,7 @@ function ChatPage() {
       }
     }
 
-    // Обновляем флаг "внизу ли пользователь"
+    // Обновляем флаг "внизу"
     isScrolledToBottom.current = scrollHeight - scrollTop - clientHeight < 100;
   }, [messages, isLoadingMore, hasMoreMessages, loadHistory]);
 
@@ -168,14 +179,14 @@ function ChatPage() {
     return () => chat.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // === Автопрокрутка при новых сообщениях (после загрузки истории) ===
+  // === Автопрокрутка при новых сообщениях (НЕ при подгрузке старых!) ===
   useEffect(() => {
-    if (isHistoryLoading || !isFirstRenderComplete.current) return;
+    if (isHistoryLoading || !isFirstRenderComplete.current || isLoadingMore) return;
 
     if (isScrolledToBottom.current || isLoading) {
       scrollToBottom('smooth');
     }
-  }, [messages, isLoading, isHistoryLoading, scrollToBottom]);
+  }, [messages, isLoading, isHistoryLoading, isLoadingMore, scrollToBottom]);
 
   // === Авторесайз textarea ===
   useEffect(() => {
