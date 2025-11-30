@@ -26,10 +26,18 @@ function ProfilePage() {
         const { data } = await apiClient.get('/api/profile');
         if (!mounted) return;
         // Данные профиля теперь приходят из n8n
-        setProfile(data.profile);
-        setError(null);
+        console.log('Profile data received:', data);
+        console.log('Profile object:', data.profile);
+        if (data && data.profile) {
+          setProfile(data.profile);
+          setError(null);
+        } else {
+          console.warn('Profile data is missing or invalid:', data);
+          setError('Данные профиля не получены');
+        }
       } catch (profileError) {
         if (!mounted) return;
+        console.error('Profile loading error:', profileError);
         setError(
           profileError?.response?.data?.message ||
             'Не удалось получить данные профиля'
@@ -47,6 +55,21 @@ function ProfilePage() {
     };
   }, []);
 
+  // Отслеживаем изменения profile для отладки
+  useEffect(() => {
+    if (profile) {
+      console.log('Profile state updated:', profile);
+      console.log('Profile fields:', {
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        username: profile.username,
+        photo_url: profile.photo_url,
+        roles: profile.roles,
+        profession: profile.profession,
+      });
+    }
+  }, [profile]);
+
   const handleBackClick = (e) => {
     e.preventDefault();
     navigate('/agents_list');
@@ -58,15 +81,15 @@ function ProfilePage() {
   };
 
   // Используем данные из профиля n8n, если они есть, иначе из контекста авторизации
-  const firstName = profile?.first_name?.trim() || user?.firstName?.trim();
-  const lastName = profile?.last_name?.trim() || user?.lastName?.trim();
-  const username = profile?.username || user?.username;
-  const fullName =
-    [firstName, lastName].filter(Boolean).join(' ') ||
-    username ||
-    'Пользователь';
+  const firstName = profile?.first_name?.trim() || user?.firstName?.trim() || '';
+  const lastName = profile?.last_name?.trim() || user?.lastName?.trim() || '';
+  const usernameRaw = profile?.username || user?.username || '';
+  // Убираем @ из username если он есть, чтобы не дублировать
+  const username = usernameRaw.startsWith('@') ? usernameRaw.substring(1) : usernameRaw;
+  
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || username || 'Пользователь';
   const avatarSrc = profile?.photo_url || user?.photoUrl || personImg;
-  const roles = profile?.roles || [];
+  const roles = Array.isArray(profile?.roles) ? profile.roles : [];
   const profession = profile?.profession || '';
   const tariff = profile?.tariff || 'free';
 
@@ -93,6 +116,17 @@ function ProfilePage() {
 
       <div className={styles.contentBlock}>
         <h2 className={styles.profileTitle}>ПРОФИЛЬ</h2>
+        {/* Временная отладка - удалить после проверки */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{ fontSize: '10px', color: '#999', marginTop: '10px' }}>
+            Debug: profile={profile ? 'loaded' : 'null'}, 
+            firstName={firstName || 'empty'}, 
+            lastName={lastName || 'empty'}, 
+            username={username || 'empty'},
+            roles={roles.length}, 
+            profession={profession || 'empty'}
+          </div>
+        )}
       </div>
 
       <div className={`${styles.contentBlock} d-flex align-items-center`}>
@@ -109,9 +143,9 @@ function ProfilePage() {
           />
         </div>
         <div className={styles.infoBlock}>
-          <div>{fullName}</div>
+          <div>{fullName || 'Пользователь'}</div>
           {username && (
-            <div className={styles.username}>{username.startsWith('@') ? username : `@${username}`}</div>
+            <div className={styles.username}>@{username}</div>
           )}
         </div>
       </div>
