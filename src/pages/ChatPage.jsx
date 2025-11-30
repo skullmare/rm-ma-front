@@ -16,7 +16,7 @@ function ChatPage() {
   const textareaRef = useRef(null);
   const chatContainerRef = useRef(null);
   const isScrolledToBottom = useRef(true);
-  const isFirstRenderComplete = useRef(false); // Разблокировка подгрузки после первой прокрутки
+  const initialScrollDone = useRef(false);
 
   const agentInfo = location.state || { agent: 'sergey', agentName: 'СЕРГЕЙ' };
   const { agent, agentName } = agentInfo;
@@ -31,6 +31,7 @@ function ChatPage() {
 
   const isPageLoading = usePageLoader(500);
   const chatId = user?.telegramId || user?.id;
+  const canLoadMore = useRef(false);
 
   // === Форматирование времени ===
   const formatTime = useCallback((timestampOrDate) => {
@@ -54,7 +55,7 @@ function ChatPage() {
       text: msg.message || '',
       type: msg.autor === 'human' ? 'outgoing' : 'incoming',
       time: formatTime(msg.create_at || msg.timestamp),
-      timestamp: msg.timestamp ? Number(msg.timestamp) : new Date(msg.create_at || Date.now()).getTime(),
+      timestamp: msg.timestamp ? Number(msg.timestamp) : new Date(msg.create_at).getTime(),
       autor: msg.autor,
     };
   }, [formatTime]);
@@ -62,29 +63,28 @@ function ChatPage() {
   // === Прокрутка вниз ===
   const scrollToBottom = useCallback((behavior = 'smooth') => {
     if (!chatContainerRef.current) return;
-    const { scrollHeight, clientHeight } = chatContainerRef.current;
+    
+    const scrollHeight = chatContainerRef.current.scrollHeight;
+    const clientHeight = chatContainerRef.current.clientHeight;
+    
     chatContainerRef.current.scrollTo({
       top: scrollHeight - clientHeight,
-      behavior,
+      behavior: behavior
     });
+    
     isScrolledToBottom.current = true;
   }, []);
 
-  // === Загрузка истории (ГЛАВНЫЙ ФИКС: сохранение позиции скролла) ===
+  // === Загрузка истории ===
   const loadHistory = useCallback(async (timestamp = null) => {
     if (!chatId) {
       setIsHistoryLoading(false);
       return;
     }
 
-    const chatEl = chatContainerRef.current;
-    const prevScrollHeight = chatEl?.scrollHeight || 0;
-    const prevScrollTop = chatEl?.scrollTop || 0;
-
     try {
       const params = {
-        id: chatId,
-        limit: 10,
+        chat_id: chatId,
       };
       if (timestamp) {
         params.timestamp = String(timestamp);
@@ -97,14 +97,12 @@ function ChatPage() {
         transformed.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
         if (timestamp) {
-          // Подгрузка старых сообщений
           setMessages(prev => {
             const combined = [...transformed, ...prev];
             const unique = Array.from(new Map(combined.map(m => [m.id, m])).values());
             return unique.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
           });
         } else {
-          // Первая загрузка
           setMessages(transformed);
         }
         setHasMoreMessages(data.hasMore === true);
@@ -114,14 +112,10 @@ function ChatPage() {
     } finally {
       setIsHistoryLoading(false);
       setIsLoadingMore(false);
-
-      // Восстанавливаем позицию скролла только при подгрузке старых сообщений
-      if (timestamp && chatEl) {
-        requestAnimationFrame(() => {
-          const newScrollHeight = chatEl.scrollHeight;
-          const heightDiff = newScrollHeight - prevScrollHeight;
-          chatEl.scrollTop = prevScrollTop + heightDiff;
-        });
+      if (!timestamp) {
+        setTimeout(() => {
+          canLoadMore.current = true;
+        }, 2000);
       }
     }
   }, [chatId, transformMessage]);
@@ -134,33 +128,23 @@ function ChatPage() {
     }
 
     setIsHistoryLoading(true);
-    isFirstRenderComplete.current = false;
     isScrolledToBottom.current = true;
-
+    initialScrollDone.current = false;
+    canLoadMore.current = false;
+    
     loadHistory();
   }, [chatId, agent, loadHistory]);
 
-  // === Первая прокрутка вниз + разблокировка подгрузки старых сообщений ===
-  useEffect(() => {
-    if (isHistoryLoading) return;
-
-    const timer = setTimeout(() => {
-      scrollToBottom('auto');
-      isFirstRenderComplete.current = true; // Теперь можно подгружать старые
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [isHistoryLoading, messages.length, scrollToBottom]);
-
-  // === Обработка скролла ===
+  // === Загрузка старых сообщений при скролле вверх ===
   const handleScroll = useCallback(() => {
-    if (!chatContainerRef.current || isLoadingMore || !hasMoreMessages) return;
-    if (!isFirstRenderComplete.current) return;
+    if (!chatContainerRef.current || isLoadingMore || !hasMoreMessages || !canLoadMore.current) {
+      return;
+    }
 
     const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
 
-    // Подгрузка старых сообщений
-    if (scrollTop < 150 && messages.length > 0) {
+    // Проверяем, близко ли к верху
+    if (scrollTop < 150) {
       const oldest = messages[0];
       if (oldest?.timestamp) {
         setIsLoadingMore(true);
@@ -168,8 +152,9 @@ function ChatPage() {
       }
     }
 
-    // Обновляем флаг "внизу"
-    isScrolledToBottom.current = scrollHeight - scrollTop - clientHeight < 100;
+    // Обновляем флаг: был ли пользователь внизу
+    const atBottom = scrollHeight - scrollTop - clientHeight < 100;
+    isScrolledToBottom.current = atBottom;
   }, [messages, isLoadingMore, hasMoreMessages, loadHistory]);
 
   useEffect(() => {
@@ -179,14 +164,35 @@ function ChatPage() {
     return () => chat.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // === Автопрокрутка при новых сообщениях (НЕ при подгрузке старых!) ===
+  // === Автопрокрутка при новых сообщениях ===
   useEffect(() => {
-    if (isHistoryLoading || !isFirstRenderComplete.current || isLoadingMore) return;
+    if (isHistoryLoading) return;
 
-    if (isScrolledToBottom.current || isLoading) {
-      scrollToBottom('smooth');
+    const timer = setTimeout(() => {
+      if (!initialScrollDone.current) {
+        // Первоначальная прокрутка при загрузке истории
+        scrollToBottom('auto');
+        initialScrollDone.current = true;
+      } else if (isScrolledToBottom.current || isLoading) {
+        // Последующие прокрутки при новых сообщениях
+        scrollToBottom('smooth');
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [messages, isLoading, isHistoryLoading, scrollToBottom]);
+
+  // === Принудительная прокрутка после загрузки истории ===
+  useEffect(() => {
+    if (!isHistoryLoading && messages.length > 0 && !initialScrollDone.current) {
+      const timer = setTimeout(() => {
+        scrollToBottom('auto');
+        initialScrollDone.current = true;
+      }, 200);
+      
+      return () => clearTimeout(timer);
     }
-  }, [messages, isLoading, isHistoryLoading, isLoadingMore, scrollToBottom]);
+  }, [isHistoryLoading, messages.length, scrollToBottom]);
 
   // === Авторесайз textarea ===
   useEffect(() => {
@@ -234,9 +240,7 @@ function ChatPage() {
       });
 
       setMessages(prev => {
-        let updated = prev.map(m =>
-          m.id === tempId && data?.userMessageId ? { ...m, id: data.userMessageId } : m
-        );
+        let updated = prev.map(m => m.id === tempId && data?.userMessageId ? { ...m, id: data.userMessageId } : m);
 
         if (data?.message && data?.autor === 'ai_agent') {
           const aiMsg = transformMessage(data);
