@@ -125,7 +125,6 @@ function ProfilePage() {
             type="text"
             placeholder="Укажите вашу сферу деятельности.."
             value={profession}
-            readOnly
           />
         </div>
       </div>

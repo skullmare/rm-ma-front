@@ -47,6 +47,8 @@ const clearSessionStorage = () => {
 export function AuthProvider({ children }) {
     const [state, setState] = useState(initialState);
     const isMounted = useRef(true);
+    const initDataRef = useRef(null); // Храним initData в ref, чтобы избежать пересоздания функций
+    const hasAuthorizedRef = useRef(false); // Отслеживаем, был ли уже вызван authorize
 
     useEffect(() => {
         return () => {
@@ -57,17 +59,23 @@ export function AuthProvider({ children }) {
     const applySession = useCallback((session, initData = null) => {
         if (!isMounted.current) return;
 
+        // Сохраняем initData в ref
+        if (initData) {
+            initDataRef.current = initData;
+        }
+
         setAuthHeader(session.token);
         saveSessionToStorage(session.token, session.user);
 
-        setState({
+        // Используем функциональное обновление, чтобы не зависеть от state.initData
+        setState(prev => ({
             status: 'authenticated',
             token: session.token,
             user: session.user,
             error: null,
-            initData: initData || state.initData,
-        });
-    }, [state.initData]);
+            initData: initData || initDataRef.current || prev.initData,
+        }));
+    }, []); // Убираем зависимость от state.initData
 
     const handleError = useCallback((message) => {
         if (!isMounted.current) return;
@@ -129,6 +137,8 @@ export function AuthProvider({ children }) {
                     user: saved.user,
                 }));
                 // Можно дополнительно проверить токен через /me, если нужно
+                hasAuthorizedRef.current = true; // Помечаем, что авторизация уже была
+                return; // Если есть сохраненная сессия, не вызываем authorize
             }
 
             // 2. Telegram WebApp
@@ -153,12 +163,17 @@ export function AuthProvider({ children }) {
                 return;
             }
 
+            // Проверяем, не вызывали ли мы уже authorize
+            if (hasAuthorizedRef.current) return;
+            hasAuthorizedRef.current = true;
+
             try {
                 if (!cancelled) {
                     await authorize(currentInitData);
                 }
             } catch (error) {
                 if (!cancelled) {
+                    hasAuthorizedRef.current = false; // Сбрасываем флаг при ошибке
                     handleError(
                         error?.response?.data?.message ||
                         error?.message ||
@@ -173,12 +188,13 @@ export function AuthProvider({ children }) {
         return () => {
             cancelled = true;
         };
-    }, [authorize, handleError]);
+    }, [authorize, handleError]); // Зависимости теперь стабильны благодаря исправлению applySession
 
     // === Выход ===
     const logout = useCallback(() => {
         setAuthHeader(null);
         clearSessionStorage();
+        hasAuthorizedRef.current = false; // Сбрасываем флаг при выходе
         setState({
             status: 'unauthorized',
             token: null,
@@ -190,7 +206,8 @@ export function AuthProvider({ children }) {
 
     // === Повторная авторизация (например, после истечения токена) ===
     const reload = useCallback(async () => {
-        const initData = state.initData ||
+        const initData = initDataRef.current || // Используем ref в первую очередь
+            state.initData ||
             window.Telegram?.WebApp?.initData ||
             new URLSearchParams(window.location.search).get('mockInitData');
 
