@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState, useLayoutEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../css/modules/ChatPage.module.css';
 import Spinner from '../components/Spinner';
@@ -14,12 +14,13 @@ function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const textareaRef = useRef(null);
-  const chatRef = useRef(null);
-  
-  // Получаем информацию об агенте из location state или используем значения по умолчанию
+  const chatContainerRef = useRef(null);
+  const isScrolledToBottom = useRef(true); // Отслеживаем, был ли пользователь внизу
+  const shouldScrollToBottom = useRef(true); // Принудительно скроллим вниз при первой загрузке
+
   const agentInfo = location.state || { agent: 'sergey', agentName: 'СЕРГЕЙ' };
   const { agent, agentName } = agentInfo;
-  
+
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,13 +28,11 @@ function ChatPage() {
   const [inputValue, setInputValue] = useState('');
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const hasScrolledToBottomRef = useRef(false); // Флаг для отслеживания первой прокрутки
-  const isPageLoading = usePageLoader(500);
 
-  // Получаем chat_id из пользователя
+  const isPageLoading = usePageLoader(500);
   const chatId = user?.telegramId || user?.id;
 
-  // Форматирование времени из timestamp или create_at
+  // === Форматирование времени ===
   const formatTime = useCallback((timestampOrDate) => {
     let date;
     if (typeof timestampOrDate === 'string') {
@@ -43,13 +42,12 @@ function ChatPage() {
     } else {
       date = new Date();
     }
-    
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   }, []);
 
-  // Преобразование сообщения из формата API в формат для отображения
+  // === Преобразование сообщения ===
   const transformMessage = useCallback((msg) => {
     return {
       id: msg._id || msg.id || Date.now(),
@@ -61,7 +59,13 @@ function ChatPage() {
     };
   }, [formatTime]);
 
-  // Загрузка истории сообщений
+  // === Прокрутка вниз (плавная и только при необходимости) ===
+  const scrollToBottom = useCallback((behavior = 'auto') => {
+    if (!chatContainerRef.current) return;
+    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+  }, []);
+
+  // === Загрузка истории ===
   const loadHistory = useCallback(async (timestamp = null) => {
     if (!chatId) {
       setIsHistoryLoading(false);
@@ -71,258 +75,145 @@ function ChatPage() {
     try {
       const params = timestamp ? { timestamp: String(timestamp) } : {};
       const { data } = await apiClient.get('/api/chats/history', { params });
-      
+
       if (data?.messages && Array.isArray(data.messages)) {
-        const transformedMessages = data.messages.map(transformMessage);
-        
-        // Сортируем по timestamp (от старых к новым)
-        transformedMessages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-        
+        const transformed = data.messages.map(transformMessage);
+        transformed.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
         if (timestamp) {
-          // Добавляем к существующим сообщениям в начало
           setMessages(prev => {
-            // Объединяем и удаляем дубликаты
-            const combined = [...transformedMessages, ...prev];
-            const unique = combined.reduce((acc, msg) => {
-              if (!acc.find(m => m.id === msg.id)) {
-                acc.push(msg);
-              }
-              return acc;
-            }, []);
-            // Сортируем по timestamp
+            const combined = [...transformed, ...prev];
+            const unique = Array.from(new Map(combined.map(m => [m.id, m])).values());
             return unique.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
           });
         } else {
-          // Первая загрузка - заменяем все сообщения
-          setMessages(transformedMessages);
+          setMessages(transformed);
         }
-        
-        // Проверяем, есть ли еще сообщения
         setHasMoreMessages(data.hasMore === true);
       }
     } catch (error) {
-      console.error('Не удалось загрузить историю чата', error);
+      console.error('Ошибка загрузки истории:', error);
     } finally {
       setIsHistoryLoading(false);
       setIsLoadingMore(false);
     }
   }, [chatId, transformMessage]);
 
-  // Первичная загрузка истории при открытии чата
+  // === Первая загрузка ===
   useEffect(() => {
     if (!chatId) {
       setIsHistoryLoading(false);
       return;
     }
-    
-    // Сбрасываем флаг прокрутки при смене агента или чата
-    hasScrolledToBottomRef.current = false;
+
     setIsHistoryLoading(true);
+    shouldScrollToBottom.current = true;
+    isScrolledToBottom.current = true;
     loadHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatId, agent]); // Перезагружаем при смене агента
+  }, [chatId, agent, loadHistory]);
 
-  // Обработка скролла для загрузки старых сообщений
+  // === Загрузка старых сообщений при скролле вверх ===
   const handleScroll = useCallback(() => {
-    if (!chatRef.current || isLoadingMore || !hasMoreMessages) return;
+    if (!chatContainerRef.current || isLoadingMore || !hasMoreMessages) return;
 
-    const { scrollTop } = chatRef.current;
-    
-    // Если прокрутили вверх достаточно (например, на 100px от верха)
-    if (scrollTop < 100) {
-      const oldestMessage = messages[0];
-      if (oldestMessage?.timestamp) {
+    const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+
+    // Проверяем, близко ли к верху
+    if (scrollTop < 150) {
+      const oldest = messages[0];
+      if (oldest?.timestamp) {
         setIsLoadingMore(true);
-        loadHistory(oldestMessage.timestamp);
+        loadHistory(oldest.timestamp);
       }
     }
+
+    // Обновляем флаг: был ли пользователь внизу
+    const atBottom = scrollHeight - scrollTop - clientHeight < 100;
+    isScrolledToBottom.current = atBottom;
   }, [messages, isLoadingMore, hasMoreMessages, loadHistory]);
 
-  // Добавляем обработчик скролла
   useEffect(() => {
-    const chat = chatRef.current;
+    const chat = chatContainerRef.current;
     if (!chat) return;
-
     chat.addEventListener('scroll', handleScroll);
-    return () => {
-      chat.removeEventListener('scroll', handleScroll);
-    };
+    return () => chat.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // Настройка textarea и автопрокрутки
+  // === Автопрокрутка при новых сообщениях ===
+  useEffect(() => {
+    if (isHistoryLoading) return;
+
+    requestAnimationFrame(() => {
+      if (shouldScrollToBottom.current || isScrolledToBottom.current || isLoading) {
+        scrollToBottom('smooth');
+        shouldScrollToBottom.current = false; // Больше не принудительно
+      }
+    });
+  }, [messages, isLoading, isHistoryLoading, scrollToBottom]);
+
+  // === Авторесайз textarea ===
   useEffect(() => {
     const textarea = textareaRef.current;
-    const chat = chatRef.current;
-
-    if (!textarea || !chat) return;
-
-    const scrollToBottom = () => {
-      chat.scrollTop = chat.scrollHeight;
-    };
+    if (!textarea) return;
 
     const adjustHeight = () => {
       textarea.style.height = 'auto';
-      const newHeight = textarea.scrollHeight;
-
-      if (newHeight > 140) {
-        textarea.style.overflowY = 'auto';
-        textarea.style.height = '140px';
-      } else {
-        textarea.style.overflowY = 'hidden';
-        textarea.style.height = newHeight + 'px';
-      }
+      const newHeight = Math.min(textarea.scrollHeight, 140);
+      textarea.style.height = newHeight + 'px';
+      textarea.style.overflowY = newHeight >= 140 ? 'auto' : 'hidden';
     };
 
-    window.addEventListener('load', scrollToBottom);
     textarea.addEventListener('input', adjustHeight);
-    textarea.addEventListener('focus', scrollToBottom);
-
-    const observer = new MutationObserver(scrollToBottom);
-    observer.observe(chat, {
-      childList: true,
-      subtree: true
-    });
-
     adjustHeight();
-    scrollToBottom();
 
-    return () => {
-      window.removeEventListener('load', scrollToBottom);
-      textarea.removeEventListener('input', adjustHeight);
-      textarea.removeEventListener('focus', scrollToBottom);
-      observer.disconnect();
-    };
+    return () => textarea.removeEventListener('input', adjustHeight);
   }, []);
 
-  // Синхронная прокрутка вниз при первой загрузке истории (до отрисовки браузером)
-  useLayoutEffect(() => {
-    if (!isHistoryLoading && messages.length > 0 && chatRef.current && !hasScrolledToBottomRef.current) {
-      const chat = chatRef.current;
-      // Прокручиваем синхронно до того, как браузер отрисует содержимое
-      chat.scrollTop = chat.scrollHeight;
-      hasScrolledToBottomRef.current = true;
-    }
-  }, [isHistoryLoading, messages.length]);
-
-  // Автопрокрутка вниз при добавлении новых сообщений (только если уже были внизу)
-  useEffect(() => {
-    if (!chatRef.current || messages.length === 0 || isHistoryLoading) return;
-    
-    const chat = chatRef.current;
-    const isScrolledToBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 50;
-    
-    // Прокручиваем вниз при отправке сообщений или если уже были внизу
-    if (isScrolledToBottom || isLoading) {
-      requestAnimationFrame(() => {
-        if (chatRef.current) {
-          chatRef.current.scrollTop = chatRef.current.scrollHeight;
-        }
-      });
-    }
-  }, [messages, isLoading, isHistoryLoading]);
-
-  const handleBackClick = (e) => {
-    e.preventDefault();
-    navigate('/agents_list');
-  };
-
-  const handleProfileClick = (e) => {
-    e.preventDefault();
-    navigate('/profile');
-  };
-
+  // === Отправка сообщения ===
   const sendMessage = async () => {
-    const messageText = inputValue.trim();
-    if (!messageText || isLoading || !chatId) return;
+    const text = inputValue.trim();
+    if (!text || isLoading || !chatId) return;
 
+    const tempId = `temp-${Date.now()}`;
     const userMessage = {
-      id: `temp-${Date.now()}`,
-      text: messageText,
+      id: tempId,
+      text,
       type: 'outgoing',
       time: formatTime(new Date()),
       timestamp: Date.now(),
       autor: 'human',
     };
 
-    // Добавляем сообщение пользователя сразу (оптимистичное обновление)
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
-    
-    // Очищаем textarea
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
-    // Показываем индикатор загрузки
     setIsLoading(true);
 
     try {
       const { data } = await apiClient.post('/api/chats/send', {
-        message: messageText,
+        message: text,
         agent,
       });
 
-      // Если получили ответ от агента, добавляем его
-      if (data?.message && data?.autor === 'ai_agent') {
-        const aiResponse = transformMessage(data);
-        
-        // Обновляем временное сообщение пользователя (оставляем его) и добавляем ответ агента
-        setMessages(prev => {
-          // Обновляем ID временного сообщения пользователя, если есть ID от сервера
-          const updatedMessages = prev.map(msg => 
-            msg.id === userMessage.id && data?.userMessageId 
-              ? { ...msg, id: data.userMessageId }
-              : msg
-          );
-          
-          // Проверяем, нет ли уже такого ответа агента
-          const exists = updatedMessages.some(msg => 
-            msg.id === aiResponse.id || 
-            (msg.autor === 'ai_agent' && msg.text === aiResponse.text && Math.abs(msg.timestamp - aiResponse.timestamp) < 5000)
-          );
-          
-          if (!exists) {
-            return [...updatedMessages, aiResponse];
-          }
-          return updatedMessages;
-        });
-      } else if (data?.message || data?.reply || data?.output) {
-        // Если формат ответа другой, но есть сообщение
-        const aiResponse = {
-          id: data?._id || data?.id || `ai-${Date.now()}`,
-          text: data?.message || data?.reply || data?.output || 'Извините, не удалось получить ответ',
-          type: 'incoming',
-          time: formatTime(data?.create_at || data?.timestamp || new Date()),
-          timestamp: data?.timestamp ? Number(data.timestamp) : Date.now(),
-          autor: 'ai_agent',
-        };
-        
-        setMessages(prev => [...prev, aiResponse]);
-      }
-    } catch (error) {
-      console.error('Ошибка при отправке сообщения:', error);
-      
-      // Удаляем временное сообщение и показываем ошибку
       setMessages(prev => {
-        const withoutTemp = prev.filter(msg => msg.id !== userMessage.id);
-        const errorMessage = {
-          id: `error-${Date.now()}`,
-          text: 'Извините, произошла ошибка при отправке сообщения. Попробуйте еще раз.',
-          type: 'incoming',
-          time: formatTime(new Date()),
-          timestamp: Date.now(),
-          autor: 'ai_agent',
-        };
-        return [...withoutTemp, userMessage, errorMessage];
+        let updated = prev.map(m => m.id === tempId && data?.userMessageId ? { ...m, id: data.userMessageId } : m);
+
+        if (data?.message && data?.autor === 'ai_agent') {
+          const aiMsg = transformMessage(data);
+          if (!updated.some(m => m.id === aiMsg.id)) {
+            updated.push(aiMsg);
+          }
+        }
+
+        return updated;
       });
+    } catch (error) {
+      console.error('Ошибка отправки:', error);
+      setMessages(prev => prev.filter(m => m.id !== tempId));
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSendClick = (e) => {
-    e.preventDefault();
-    sendMessage();
   };
 
   const handleKeyPress = (e) => {
@@ -330,10 +221,6 @@ function ChatPage() {
       e.preventDefault();
       sendMessage();
     }
-  };
-
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
   };
 
   if (isPageLoading || (isHistoryLoading && messages.length === 0)) {
@@ -344,11 +231,11 @@ function ChatPage() {
     <div className={`${styles.body} ${styles.chatPage}`}>
       <nav className={styles.navbar}>
         <div className="container-fluid d-flex justify-content-between px-0 align-items-center">
-          <a className={styles.prev} href="#" onClick={handleBackClick}>
+          <a className={styles.prev} href="#" onClick={(e) => { e.preventDefault(); navigate('/agents_list'); }}>
             <img src={backArrowImg} alt="назад" />
           </a>
           <div style={{ fontWeight: 500, color: '#BEBEBE', fontSize: '16px' }}>{agentName}</div>
-          <a className={styles.navbarAccount} href="#" onClick={handleProfileClick}>
+          <a className={styles.navbarAccount} href="#" onClick={(e) => { e.preventDefault(); navigate('/profile'); }}>
             <div className={styles.accountIcon}>
               <img src={settingIconImg} alt="настройки" />
             </div>
@@ -358,22 +245,23 @@ function ChatPage() {
 
       <div className={styles.glow}></div>
 
-      <main id="chat" ref={chatRef}>
+      <main id="chat" ref={chatContainerRef} className={styles.chatContainer}>
         {isLoadingMore && (
-          <div className={styles.loadingMore}>
-            Загрузка предыдущих сообщений...
-          </div>
+          <div className={styles.loadingMore}>Загрузка предыдущих сообщений...</div>
         )}
 
         {messages.length === 0 && !isHistoryLoading && (
           <div className={`${styles.message} ${styles.incoming}`}>
-            Добрый день! Готов помочь вам. С чем хотите поработать сегодня? 😊
+            Добрый день! Готов помочь вам. С чем хотите поработать сегодня?
             <div className={styles.messageTime}>{formatTime(new Date())}</div>
           </div>
         )}
-        
+
         {messages.map((message) => (
-          <div key={message.id} className={`${styles.message} ${message.type === 'incoming' ? styles.incoming : styles.outgoing}`}>
+          <div
+            key={message.id}
+            className={`${styles.message} ${message.type === 'incoming' ? styles.incoming : styles.outgoing}`}
+          >
             {message.text}
             <div className={styles.messageTime}>{message.time}</div>
           </div>
@@ -395,18 +283,18 @@ function ChatPage() {
 
       <div className={styles.formBlock}>
         <div className={styles.blockQuestionField}>
-          <textarea 
-            className={styles.questionField} 
-            placeholder="Задайте свой вопрос..." 
-            rows="1" 
+          <textarea
+            className={styles.questionField}
+            placeholder="Задайте свой вопрос..."
+            rows="1"
             ref={textareaRef}
             value={inputValue}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyPress}
             disabled={isLoading}
-          ></textarea>
+          />
         </div>
-        <div className={styles.blockButtonSend} onClick={handleSendClick}>
+        <div className={styles.blockButtonSend} onClick={sendMessage}>
           <img src={sendButtonImg} alt="Отправить" />
         </div>
       </div>
