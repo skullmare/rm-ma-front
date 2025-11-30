@@ -254,3 +254,11 @@
         transform: translateY(0px);
     }
 }
+
+.chatPage .loadingMore {
+    text-align: center;
+    padding: 10px;
+    color: #888;
+    font-size: 14px;
+    align-self: center;
+}
