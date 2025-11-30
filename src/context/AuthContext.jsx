@@ -126,22 +126,7 @@ export function AuthProvider({ children }) {
         const boot = async () => {
             const tg = window.Telegram?.WebApp;
 
-            // 1. Попробуем восстановить сессию из localStorage (если токен валиден)
-            const saved = loadSessionFromStorage();
-            if (saved && saved.token && saved.user) {
-                setAuthHeader(saved.token);
-                setState(prev => ({
-                    ...prev,
-                    status: 'authenticated',
-                    token: saved.token,
-                    user: saved.user,
-                }));
-                // Можно дополнительно проверить токен через /me, если нужно
-                hasAuthorizedRef.current = true; // Помечаем, что авторизация уже была
-                return; // Если есть сохраненная сессия, не вызываем authorize
-            }
-
-            // 2. Telegram WebApp
+            // Telegram WebApp
             if (tg) {
                 tg.ready?.();
                 tg.expand?.();
@@ -150,16 +135,14 @@ export function AuthProvider({ children }) {
             const currentInitData = tg?.initData || new URLSearchParams(window.location.search).get('mockInitData');
 
             if (!currentInitData) {
-                if (!saved) {
-                    // Нет ни сохранённой сессии, ни initData → просим открыть в Telegram
-                    setState({
-                        status: 'unauthorized',
-                        token: null,
-                        user: null,
-                        error: 'Откройте мини-апп внутри Telegram',
-                        initData: null,
-                    });
-                }
+                // Нет initData → просим открыть в Telegram
+                setState({
+                    status: 'unauthorized',
+                    token: null,
+                    user: null,
+                    error: 'Откройте мини-апп внутри Telegram',
+                    initData: null,
+                });
                 return;
             }
 
