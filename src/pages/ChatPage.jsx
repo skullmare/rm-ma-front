@@ -84,8 +84,7 @@ function ChatPage() {
 
     try {
       const params = {
-        id: chatId,
-        limit: 10,
+        chat_id: chatId,
       };
       if (timestamp) {
         params.timestamp = String(timestamp);
