@@ -268,7 +268,7 @@
     flex-direction: column-reverse; /* ключевой приём: делает так, чтобы верхний scrollTop=0 показывал визуально нижние элементы */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    height: calc(100vh - /* высота navbar + formBlock + и пр. */ 140px); /* установи корректную высоту */
+    height: calc(100vh - 140px); /* установи корректную высоту */
     padding: 16px;
   }
   
