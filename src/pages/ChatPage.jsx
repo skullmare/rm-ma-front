@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../css/modules/ChatPage.module.css';
 import Spinner from '../components/Spinner';
@@ -27,6 +27,7 @@ function ChatPage() {
   const [inputValue, setInputValue] = useState('');
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const hasScrolledToBottomRef = useRef(false); // Флаг для отслеживания первой прокрутки
   const isPageLoading = usePageLoader(500);
 
   // Получаем chat_id из пользователя
@@ -114,6 +115,8 @@ function ChatPage() {
       return;
     }
     
+    // Сбрасываем флаг прокрутки при смене агента или чата
+    hasScrolledToBottomRef.current = false;
     setIsHistoryLoading(true);
     loadHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -191,18 +194,13 @@ function ChatPage() {
     };
   }, []);
 
-  // Автопрокрутка вниз после первой загрузки истории
-  useEffect(() => {
-    if (!isHistoryLoading && messages.length > 0 && chatRef.current) {
-      // Прокручиваем вниз после загрузки истории
-      const scrollToBottom = () => {
-        if (chatRef.current) {
-          chatRef.current.scrollTop = chatRef.current.scrollHeight;
-        }
-      };
-      
-      // Используем небольшую задержку для гарантии, что DOM обновился
-      setTimeout(scrollToBottom, 50);
+  // Синхронная прокрутка вниз при первой загрузке истории (до отрисовки браузером)
+  useLayoutEffect(() => {
+    if (!isHistoryLoading && messages.length > 0 && chatRef.current && !hasScrolledToBottomRef.current) {
+      const chat = chatRef.current;
+      // Прокручиваем синхронно до того, как браузер отрисует содержимое
+      chat.scrollTop = chat.scrollHeight;
+      hasScrolledToBottomRef.current = true;
     }
   }, [isHistoryLoading, messages.length]);
 
