@@ -265,7 +265,7 @@
 /* Пример, адаптируй под существующие селекторы */
 .chatContainer {
     display: flex;
-    flex-direction: column-reverse; /* ключевой приём: делает так, чтобы верхний scrollTop=0 показывал визуально нижние элементы */
+    flex-direction: column; /* ключевой приём: делает так, чтобы верхний scrollTop=0 показывал визуально нижние элементы */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     height: calc(100vh - 140px); /* установи корректную высоту */
