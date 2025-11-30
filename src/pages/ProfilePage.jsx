@@ -21,6 +21,7 @@ function ProfilePage() {
   const [profession, setProfession] = useState('');
   const [isUpdatingProfession, setIsUpdatingProfession] = useState(false);
   const professionDebounceRef = useRef(null);
+  const professionInputRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -74,6 +75,10 @@ function ProfilePage() {
         return;
       }
 
+      // Сохраняем фокус перед обновлением состояния
+      const inputElement = professionInputRef.current;
+      const hadFocus = document.activeElement === inputElement;
+
       setIsUpdatingProfession(true);
       try {
         await apiClient.put('/api/profile/profession', {
@@ -81,12 +86,20 @@ function ProfilePage() {
           profession: newProfession,
         });
         // Обновляем профиль локально
-        // setProfile(prev => ({ ...prev, profession: newProfession }));
+        setProfile(prev => ({ ...prev, profession: newProfession }));
       } catch (err) {
         console.error('Failed to update profession:', err);
         setError(err?.response?.data?.message || 'Не удалось обновить сферу деятельности');
       } finally {
         setIsUpdatingProfession(false);
+        
+        // Восстанавливаем фокус после обновления состояния
+        if (hadFocus && inputElement) {
+          // Используем setTimeout, чтобы дождаться завершения рендера
+          setTimeout(() => {
+            inputElement.focus();
+          }, 0);
+        }
       }
     }, 1000);
   };
@@ -170,6 +183,7 @@ function ProfilePage() {
         <span className={styles.sectionTitle}>СФЕРА ДЕЯТЕЛЬНОСТИ:</span>
         <div className="mt-2">
           <input
+            ref={professionInputRef}
             className={styles.personActivity}
             type="text"
             placeholder="Укажите вашу сферу деятельности.."
