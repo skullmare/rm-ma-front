@@ -14,7 +14,6 @@ function ProfilePage() {
   const { user } = useAuth();
   const isLoading = usePageLoader(500);
   const [profile, setProfile] = useState(null);
-  const [remoteUser, setRemoteUser] = useState(null);
   const [error, setError] = useState(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
 
@@ -26,8 +25,8 @@ function ProfilePage() {
       try {
         const { data } = await apiClient.get('/api/profile');
         if (!mounted) return;
+        // Данные профиля теперь приходят из n8n
         setProfile(data.profile);
-        setRemoteUser(data.user);
         setError(null);
       } catch (profileError) {
         if (!mounted) return;
@@ -58,14 +57,15 @@ function ProfilePage() {
     navigate('/tariff');
   };
 
-  const telegramUser = remoteUser || user;
-  const firstName = telegramUser?.firstName?.trim();
-  const lastName = telegramUser?.lastName?.trim();
+  // Используем данные из профиля n8n, если они есть, иначе из контекста авторизации
+  const firstName = profile?.first_name?.trim() || user?.firstName?.trim();
+  const lastName = profile?.last_name?.trim() || user?.lastName?.trim();
+  const username = profile?.username || user?.username;
   const fullName =
     [firstName, lastName].filter(Boolean).join(' ') ||
-    telegramUser?.username ||
+    username ||
     'Пользователь';
-  const avatarSrc = telegramUser?.photoUrl || personImg;
+  const avatarSrc = profile?.photo_url || user?.photoUrl || personImg;
 
   if (isLoading || isProfileLoading) {
     return <Spinner />;
@@ -107,8 +107,8 @@ function ProfilePage() {
         </div>
         <div className={styles.infoBlock}>
           <div>{fullName}</div>
-          {telegramUser?.username && (
-            <div className={styles.username}>@{telegramUser.username}</div>
+          {username && (
+            <div className={styles.username}>{username.startsWith('@') ? username : `@${username}`}</div>
           )}
         </div>
       </div>
