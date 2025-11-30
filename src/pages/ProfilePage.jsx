@@ -5,6 +5,7 @@ import Spinner from '../components/Spinner';
 import { usePageLoader } from '../hooks/usePageLoader';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../context/AuthContext.jsx';
+
 const backArrowImg = '/img/Rectangle 42215.svg';
 const settingIconImg = '/img/setting_icon.svg';
 const personImg = '/img/person.svg';
@@ -13,6 +14,7 @@ function ProfilePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isLoading = usePageLoader(500);
+
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
@@ -24,51 +26,41 @@ function ProfilePage() {
       setIsProfileLoading(true);
       try {
         const { data } = await apiClient.get('/api/profile');
+
         if (!mounted) return;
-        // Данные профиля теперь приходят из n8n
-        console.log('Profile data received:', data);
-        console.log('Profile object:', data.profile);
-        if (data && data.profile) {
+
+        console.log('Ответ от сервера:', data);
+
+        if (data?.profile) {
           setProfile(data.profile);
           setError(null);
         } else {
-          console.warn('Profile data is missing or invalid:', data);
-          setError('Данные профиля не получены');
+          setError('Данные профиля не найдены в ответе сервера');
         }
-      } catch (profileError) {
+      } catch (err) {
         if (!mounted) return;
-        console.error('Profile loading error:', profileError);
+        console.error('Ошибка загрузки профиля:', err);
         setError(
-          profileError?.response?.data?.message ||
-            'Не удалось получить данные профиля'
+          err?.response?.data?.message ||
+            'Не удалось загрузить профиль. Попробуйте позже.'
         );
       } finally {
-        if (mounted) {
-          setIsProfileLoading(false);
-        }
+        if (mounted) setIsProfileLoading(false);
       }
     };
 
     loadProfile();
+
     return () => {
       mounted = false;
     };
   }, []);
 
-  // Отслеживаем изменения profile для отладки
+  // === ОТЛАДКА (можно удалить в продакшене) ===
   useEffect(() => {
-    if (profile) {
-      console.log('Profile state updated:', profile);
-      console.log('Profile fields:', {
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        username: profile.username,
-        photo_url: profile.photo_url,
-        roles: profile.roles,
-        profession: profile.profession,
-      });
-    }
-  }, [profile]);
+    console.log('profile state:', profile);
+    console.log('user из AuthContext:', user);
+  }, [profile, user]);
 
   const handleBackClick = (e) => {
     e.preventDefault();
@@ -80,18 +72,24 @@ function ProfilePage() {
     navigate('/tariff');
   };
 
-  // Используем данные из профиля n8n, если они есть, иначе из контекста авторизации
-  const firstName = profile?.first_name?.trim() || user?.firstName?.trim() || '';
-  const lastName = profile?.last_name?.trim() || user?.lastName?.trim() || '';
-  const usernameRaw = profile?.username || user?.username || '';
-  // Убираем @ из username если он есть, чтобы не дублировать
-  const username = usernameRaw.startsWith('@') ? usernameRaw.substring(1) : usernameRaw;
-  
-  const fullName = [firstName, lastName].filter(Boolean).join(' ') || username || 'Пользователь';
-  const avatarSrc = profile?.photo_url || user?.photoUrl || personImg;
-  const roles = Array.isArray(profile?.roles) ? profile.roles : [];
-  const profession = profile?.profession || '';
-  const tariff = profile?.tariff || 'free';
+  // === ГЛАВНОЕ: ДАННЫЕ ИЗ n8n ПРОФИЛЯ ИМЕЮТ МАКСИМАЛЬНЫЙ ПРИОРИТЕТ ===
+  const displayData = {
+    firstName: (profile?.first_name || user?.firstName || '').trim(),
+    lastName: (profile?.last_name || user?.lastName || '').trim(),
+    usernameRaw: profile?.username || user?.username || '',
+    photoUrl: profile?.photo_url || user?.photoUrl || personImg,
+    profession: profile?.profession || '',
+    roles: Array.isArray(profile?.roles) ? profile.roles : [],
+    tariff: profile?.tariff || 'free',
+  };
+
+  const username = displayData.usernameRaw.startsWith('@')
+    ? displayData.usernameRaw.slice(1)
+    : displayData.usernameRaw;
+
+  const fullName =
+    [displayData.firstName, displayData.lastName].filter(Boolean).join(' ') ||
+    (username ? `@${username}` : 'Пользователь');
 
   if (isLoading || isProfileLoading) {
     return <Spinner />;
@@ -101,7 +99,12 @@ function ProfilePage() {
     <div className={`${styles.body} ${styles.profilePage}`}>
       <nav className={styles.navbar}>
         <div className="container-fluid d-flex justify-content-between px-0">
-          <a className={styles.prev} href="#" onClick={handleBackClick} aria-label="Назад">
+          <a
+            className={styles.prev}
+            href="#"
+            onClick={handleBackClick}
+            aria-label="Назад"
+          >
             <img src={backArrowImg} alt="Назад" />
           </a>
           <a className={styles.navbarAccount} href="#" aria-label="Настройки">
@@ -116,46 +119,53 @@ function ProfilePage() {
 
       <div className={styles.contentBlock}>
         <h2 className={styles.profileTitle}>ПРОФИЛЬ</h2>
-        {/* Временная отладка - удалить после проверки */}
+
+        {/* Отладка - удали, когда всё заработает */}
         {process.env.NODE_ENV === 'development' && (
-          <div style={{ fontSize: '10px', color: '#999', marginTop: '10px' }}>
-            Debug: profile={profile ? 'loaded' : 'null'}, 
-            firstName={firstName || 'empty'}, 
-            lastName={lastName || 'empty'}, 
-            username={username || 'empty'},
-            roles={roles.length}, 
-            profession={profession || 'empty'}
+          <div
+            style={{
+              fontSize: '11px',
+              color: '#666',
+              background: '#f0f0f0',
+              padding: '8px',
+              borderRadius: '6px',
+              marginTop: '10px',
+            }}
+          >
+            <strong>Debug:</strong> {fullName} | @{username || '—'} | 
+            Роль: {displayData.roles.join(', ') || '—'} | 
+            Профессия: "{displayData.profession || 'не указана'}"
           </div>
         )}
       </div>
 
+      {/* АВАТАР + ИМЯ */}
       <div className={`${styles.contentBlock} d-flex align-items-center`}>
         <div className={styles.avatarBlock}>
           <img
-            src={avatarSrc}
-            alt="Аватар профиля из Telegram"
-            onError={(event) => {
-              event.currentTarget.onerror = null;
-              event.currentTarget.src = personImg;
-              event.currentTarget.style.width = '30px';
-              event.currentTarget.style.height = '30px';
+            src={displayData.photoUrl}
+            alt="Аватар профиля"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = personImg;
             }}
           />
         </div>
         <div className={styles.infoBlock}>
-          <div>{fullName || 'Пользователь'}</div>
-          {username && (
-            <div className={styles.username}>@{username}</div>
-          )}
+          <div>{fullName}</div>
+          {username && <div className={styles.username}>@{username}</div>}
         </div>
       </div>
 
+      {/* РОЛИ */}
       <div className={styles.contentBlock}>
         <span className={styles.sectionTitle}>ВАША РОЛЬ:</span>
-        <div className="d-flex align-items-center">
-          {roles.length > 0 ? (
-            roles.map((role, index) => (
-              <div key={index} className={styles.addRole}>{role}</div>
+        <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
+          {displayData.roles.length > 0 ? (
+            displayData.roles.map((role, i) => (
+              <div key={i} className={styles.addRole}>
+                {role}
+              </div>
             ))
           ) : (
             <>
@@ -166,26 +176,34 @@ function ProfilePage() {
         </div>
       </div>
 
+      {/* СФЕРА ДЕЯТЕЛЬНОСТИ */}
       <div className={styles.contentBlock}>
         <span className={styles.sectionTitle}>СФЕРА ДЕЯТЕЛЬНОСТИ:</span>
-        <div className="input-block">
-          <input 
-            className={styles.personActivity} 
-            type="text" 
+        <div className="input-block mt-2">
+          <input
+            className={styles.personActivity}
+            type="text"
             placeholder="Укажите вашу сферу деятельности.."
-            aria-label="Сфера деятельности"
-            value={profession}
+            value={displayData.profession}
             readOnly
           />
         </div>
       </div>
 
+      {/* ТАРИФ */}
       <div className={styles.contentBlock}>
         <div className="d-flex flex-column w-100 gap-2">
-          <a className={styles.linkCorporatePage} href="#" onClick={handleTariffClick}>Выбрать тариф</a>
+          <a
+            className={styles.linkCorporatePage}
+            href="#"
+            onClick={handleTariffClick}
+          >
+            Выбрать тариф
+          </a>
         </div>
       </div>
 
+      {/* ОШИБКА */}
       {error && (
         <div className={styles.contentBlock}>
           <div className={styles.infoBlock} style={{ color: '#F87171' }}>
@@ -194,15 +212,20 @@ function ProfilePage() {
         </div>
       )}
 
+      {/* НИЖНИЕ ССЫЛКИ */}
       <div className={`${styles.contentBlock} d-flex flex-column gap-3`}>
-        <a className={styles.linkCorporatePage} href="">Политика конфиденциальности</a>
-        <a className={styles.linkCorporatePage} href="">Условия использования</a>
-        <a className={styles.linkCorporatePage} href="">О сервисе</a>
+        <a className={styles.linkCorporatePage} href="#">
+          Политика конфиденциальности
+        </a>
+        <a className={styles.linkCorporatePage} href="#">
+          Условия использования
+        </a>
+        <a className={styles.linkCorporatePage} href="#">
+          О сервисе
+        </a>
       </div>
-
     </div>
   );
 }
 
 export default ProfilePage;
-
