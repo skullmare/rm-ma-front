@@ -17,8 +17,8 @@ function ChatPage() {
   const chatContainerRef = useRef(null);
   const isScrolledToBottom = useRef(true);
   const shouldScrollToBottom = useRef(true);
-  const isInitialLoad = useRef(true); // Флаг для блокировки дублирующих запросов
-  const hasScrolledToBottom = useRef(false); // Новый флаг для отслеживания первоначальной прокрутки
+  const isInitialLoad = useRef(true);
+  const initialScrollDone = useRef(false); // Новый флаг для отслеживания первоначальной прокрутки
 
   const agentInfo = location.state || { agent: 'sergey', agentName: 'СЕРГЕЙ' };
   const { agent, agentName } = agentInfo;
@@ -62,11 +62,19 @@ function ChatPage() {
   }, [formatTime]);
 
   // === Прокрутка вниз ===
-  const scrollToBottom = useCallback((behavior = 'auto') => {
+  const scrollToBottom = useCallback((behavior = 'smooth') => {
     if (!chatContainerRef.current) return;
-    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    
+    const scrollHeight = chatContainerRef.current.scrollHeight;
+    const clientHeight = chatContainerRef.current.clientHeight;
+    
+    // Прокручиваем до самого низа
+    chatContainerRef.current.scrollTo({
+      top: scrollHeight - clientHeight,
+      behavior: behavior
+    });
+    
     isScrolledToBottom.current = true;
-    hasScrolledToBottom.current = true;
   }, []);
 
   // === Загрузка истории ===
@@ -114,9 +122,8 @@ function ChatPage() {
     setIsHistoryLoading(true);
     shouldScrollToBottom.current = true;
     isScrolledToBottom.current = true;
-    loadHistory().finally(() => {
-      isInitialLoad.current = false; // Сбрасываем флаг после завершения загрузки
-    });
+    initialScrollDone.current = false; // Сбрасываем флаг прокрутки
+    loadHistory();
   }, [chatId, agent, loadHistory]);
 
   // === Загрузка старых сообщений при скролле вверх ===
@@ -137,9 +144,6 @@ function ChatPage() {
     // Обновляем флаг: был ли пользователь внизу
     const atBottom = scrollHeight - scrollTop - clientHeight < 100;
     isScrolledToBottom.current = atBottom;
-    if (atBottom) {
-      hasScrolledToBottom.current = true;
-    }
   }, [messages, isLoadingMore, hasMoreMessages, loadHistory]);
 
   useEffect(() => {
@@ -153,14 +157,34 @@ function ChatPage() {
   useEffect(() => {
     if (isHistoryLoading) return;
 
-    requestAnimationFrame(() => {
-      // При первой загрузке всегда скроллим вниз
-      if (!hasScrolledToBottom.current || shouldScrollToBottom.current || isScrolledToBottom.current || isLoading) {
+    // Используем setTimeout чтобы дать время на рендер сообщений
+    const timer = setTimeout(() => {
+      if (!initialScrollDone.current) {
+        // Первоначальная прокрутка при загрузке истории
+        scrollToBottom('auto');
+        initialScrollDone.current = true;
+        isInitialLoad.current = false;
+      } else if (isScrolledToBottom.current || isLoading) {
+        // Последующие прокрутки при новых сообщениях
         scrollToBottom('smooth');
-        shouldScrollToBottom.current = false;
       }
-    });
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [messages, isLoading, isHistoryLoading, scrollToBottom]);
+
+  // === Принудительная прокрутка после загрузки истории ===
+  useEffect(() => {
+    if (!isHistoryLoading && messages.length > 0 && !initialScrollDone.current) {
+      const timer = setTimeout(() => {
+        scrollToBottom('auto');
+        initialScrollDone.current = true;
+        isInitialLoad.current = false;
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isHistoryLoading, messages.length, scrollToBottom]);
 
   // === Авторесайз textarea ===
   useEffect(() => {
