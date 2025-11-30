@@ -15,8 +15,9 @@ function ChatPage() {
   const location = useLocation();
   const textareaRef = useRef(null);
   const chatContainerRef = useRef(null);
-  const isScrolledToBottom = useRef(true); // Отслеживаем, был ли пользователь внизу
-  const shouldScrollToBottom = useRef(true); // Принудительно скроллим вниз при первой загрузке
+  const isScrolledToBottom = useRef(true);
+  const shouldScrollToBottom = useRef(true);
+  const isInitialLoad = useRef(true); // Новый флаг для блокировки дублирующих запросов
 
   const agentInfo = location.state || { agent: 'sergey', agentName: 'СЕРГЕЙ' };
   const { agent, agentName } = agentInfo;
@@ -59,7 +60,7 @@ function ChatPage() {
     };
   }, [formatTime]);
 
-  // === Прокрутка вниз (плавная и только при необходимости) ===
+  // === Прокрутка вниз ===
   const scrollToBottom = useCallback((behavior = 'auto') => {
     if (!chatContainerRef.current) return;
     chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -103,18 +104,21 @@ function ChatPage() {
   useEffect(() => {
     if (!chatId) {
       setIsHistoryLoading(false);
+      isInitialLoad.current = false;
       return;
     }
 
     setIsHistoryLoading(true);
     shouldScrollToBottom.current = true;
     isScrolledToBottom.current = true;
-    loadHistory();
+    loadHistory().finally(() => {
+      isInitialLoad.current = false; // Сбрасываем флаг после завершения загрузки
+    });
   }, [chatId, agent, loadHistory]);
 
   // === Загрузка старых сообщений при скролле вверх ===
   const handleScroll = useCallback(() => {
-    if (!chatContainerRef.current || isLoadingMore || !hasMoreMessages) return;
+    if (!chatContainerRef.current || isLoadingMore || !hasMoreMessages || isInitialLoad.current) return;
 
     const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
 
@@ -146,7 +150,7 @@ function ChatPage() {
     requestAnimationFrame(() => {
       if (shouldScrollToBottom.current || isScrolledToBottom.current || isLoading) {
         scrollToBottom('smooth');
-        shouldScrollToBottom.current = false; // Больше не принудительно
+        shouldScrollToBottom.current = false;
       }
     });
   }, [messages, isLoading, isHistoryLoading, scrollToBottom]);
