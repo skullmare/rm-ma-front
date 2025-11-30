@@ -16,8 +16,6 @@ function ChatPage() {
   const textareaRef = useRef(null);
   const chatContainerRef = useRef(null);
   const isScrolledToBottom = useRef(true);
-  const shouldScrollToBottom = useRef(true);
-  const isInitialLoad = useRef(true);
   const initialScrollDone = useRef(false);
 
   const agentInfo = location.state || { agent: 'sergey', agentName: 'СЕРГЕЙ' };
@@ -33,6 +31,7 @@ function ChatPage() {
 
   const isPageLoading = usePageLoader(500);
   const chatId = user?.telegramId || user?.id;
+  const canLoadMore = useRef(false);
 
   // === Форматирование времени ===
   const formatTime = useCallback((timestampOrDate) => {
@@ -83,14 +82,15 @@ function ChatPage() {
       return;
     }
 
-    // Блокируем загрузку старых сообщений во время первоначальной загрузки
-    if (timestamp && isInitialLoad.current) {
-      console.log('Блокируем загрузку старых сообщений во время первоначальной загрузки');
-      return;
-    }
-
     try {
-      const params = timestamp ? { timestamp: String(timestamp) } : {};
+      const params = {
+        id: chatId,
+        limit: 10,
+      };
+      if (timestamp) {
+        params.timestamp = String(timestamp);
+      }
+
       const { data } = await apiClient.get('/api/chats/history', { params });
 
       if (data?.messages && Array.isArray(data.messages)) {
@@ -105,8 +105,6 @@ function ChatPage() {
           });
         } else {
           setMessages(transformed);
-          // Сбрасываем флаг первоначальной загрузки после получения основной истории
-          isInitialLoad.current = false;
         }
         setHasMoreMessages(data.hasMore === true);
       }
@@ -115,6 +113,11 @@ function ChatPage() {
     } finally {
       setIsHistoryLoading(false);
       setIsLoadingMore(false);
+      if (!timestamp) {
+        setTimeout(() => {
+          canLoadMore.current = true;
+        }, 5000);
+      }
     }
   }, [chatId, transformMessage]);
 
@@ -122,23 +125,20 @@ function ChatPage() {
   useEffect(() => {
     if (!chatId) {
       setIsHistoryLoading(false);
-      isInitialLoad.current = false;
       return;
     }
 
     setIsHistoryLoading(true);
-    shouldScrollToBottom.current = true;
     isScrolledToBottom.current = true;
     initialScrollDone.current = false;
+    canLoadMore.current = false;
     
-    // Устанавливаем флаг перед началом загрузки
-    isInitialLoad.current = true;
     loadHistory();
   }, [chatId, agent, loadHistory]);
 
   // === Загрузка старых сообщений при скролле вверх ===
   const handleScroll = useCallback(() => {
-    if (!chatContainerRef.current || isLoadingMore || !hasMoreMessages || isInitialLoad.current) {
+    if (!chatContainerRef.current || isLoadingMore || !hasMoreMessages || !canLoadMore.current) {
       return;
     }
 
