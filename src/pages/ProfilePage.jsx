@@ -81,7 +81,7 @@ function ProfilePage() {
           profession: newProfession,
         });
         // Обновляем профиль локально
-        setProfile(prev => ({ ...prev, profession: newProfession }));
+        // setProfile(prev => ({ ...prev, profession: newProfession }));
       } catch (err) {
         console.error('Failed to update profession:', err);
         setError(err?.response?.data?.message || 'Не удалось обновить сферу деятельности');
