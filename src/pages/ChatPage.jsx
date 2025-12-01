@@ -36,6 +36,7 @@ function ChatPage() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [textareaHeight, setTextareaHeight] = useState(44); // Начальная высота textarea
 
   const formatTime = (input) => {
     const date = new Date(
@@ -131,11 +132,14 @@ function ChatPage() {
       
       // Включаем прокрутку только если достигнут максимум
       ta.style.overflowY = newHeight >= 140 ? 'auto' : 'hidden';
+      
+      // Сохраняем текущую высоту для расчета положения кнопки
+      setTextareaHeight(newHeight);
     };
 
     // Вызываем при каждом изменении значения
     resize();
-  }, [inputValue]); // Запускать при изменении inputValue
+  }, [inputValue]);
 
   const sendMessage = async () => {
     const text = inputValue.trim();
@@ -185,6 +189,16 @@ function ChatPage() {
     }
   };
 
+  // Динамически рассчитываем bottom отступ для кнопки прокрутки
+  const calculateButtonBottom = () => {
+    const minTextareaHeight = 44; // Минимальная высота textarea
+    const baseBottom = 80; // Базовый отступ при минимальной высоте
+    const heightDifference = Math.max(0, textareaHeight - minTextareaHeight);
+    
+    // Увеличиваем отступ пропорционально увеличению высоты textarea
+    return baseBottom + heightDifference;
+  };
+
   if (isPageLoading || (isHistoryLoading && messages.length === 0)) {
     return <Spinner />;
   }
@@ -206,7 +220,6 @@ function ChatPage() {
       </nav>
 
       <div className={styles.glow} />
-
 
       <main ref={chatContainerRef} className={styles.chatContainer}>
         {hasMore && !isHistoryLoading && (
@@ -244,6 +257,39 @@ function ChatPage() {
 
       <div className={styles.glowBottom} />
 
+      {/* Кнопка прокрутки с динамическим положением */}
+      <div
+        onClick={scrollToBottom}
+        style={{
+          position: 'fixed', // Используем fixed для независимого позиционирования
+          bottom: `${calculateButtonBottom()}px`,
+          right: '20px',
+          transform: 'rotate(-90deg)',
+          transformOrigin: 'center center',
+          cursor: 'pointer',
+          borderRadius: '50%',
+          backgroundColor: '#2d2d2d',
+          zIndex: 10000, // Увеличиваем z-index
+          width: '40px',
+          height: '40px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          transition: 'bottom 0.2s ease', // Плавная анимация изменения положения
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)' // Тень для лучшей видимости
+        }}
+      >
+        <img 
+          style={{ 
+            width: '20px', 
+            height: '20px',
+            filter: 'brightness(0.9)'
+          }} 
+          src={IMAGES.back} 
+          alt="Прокрутить вниз" 
+        />
+      </div>
+
       <div className={styles.formBlock}>
         <div className={styles.blockQuestionField}>
           <textarea
@@ -264,27 +310,6 @@ function ChatPage() {
         >
           <img src={IMAGES.send} alt="Отправить" />
         </div>
-      </div>
-      <div
-        onClick={scrollToBottom}
-        style={{
-          position: 'absolute',
-          bottom: '80px',
-          right: '20px',
-          transform: 'rotate(-90deg)',
-          transformOrigin: 'center center',
-          cursor: 'pointer',
-          borderRadius: '50%',
-          backgroundColor: '#2d2d2d',
-          zIndex: 9999,
-          width: '40px',
-          height: '40px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}
-      >
-        <img style={{ width: '20px', height: '20px' }} src={IMAGES.back} alt="Вниз" />
       </div>
     </div>
   );
