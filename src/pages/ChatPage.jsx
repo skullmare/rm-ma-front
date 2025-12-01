@@ -90,6 +90,8 @@ function ChatPage() {
         setHasMore(!!data.hasMore);
         if (isLoadMore) {
           setTimeout(restoreScrollPosition, 0);
+        } else {
+          setTimeout(scrollToBottom, 0);
         }
       } else {
         setHasMore(false);
