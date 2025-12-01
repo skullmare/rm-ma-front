@@ -116,19 +116,26 @@ function ChatPage() {
     loadHistory();
   }, [chatId, agent, loadHistory]);
 
+  // Исправленный useEffect для адаптации высоты textarea
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
 
     const resize = () => {
+      // Сбрасываем высоту для корректного расчета
       ta.style.height = 'auto';
-      ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+      
+      // Рассчитываем новую высоту (ограничение 140px)
+      const newHeight = Math.min(ta.scrollHeight, 140);
+      ta.style.height = newHeight + 'px';
+      
+      // Включаем прокрутку только если достигнут максимум
+      ta.style.overflowY = newHeight >= 140 ? 'auto' : 'hidden';
     };
 
-    ta.addEventListener('input', resize);
+    // Вызываем при каждом изменении значения
     resize();
-    return () => ta.removeEventListener('input', resize);
-  }, []);
+  }, [inputValue]); // Запускать при изменении inputValue
 
   const sendMessage = async () => {
     const text = inputValue.trim();
@@ -144,8 +151,7 @@ function ChatPage() {
     };
 
     setMessages(prev => [...prev, newMsg]);
-    setInputValue('');
-    textareaRef.current && (textareaRef.current.style.height = 'auto');
+    setInputValue(''); // Значение очистится, useEffect сам обработает сброс высоты
     setIsLoading(true);
 
     try {

@@ -171,7 +171,27 @@
     font-size: 16px;
     line-height: 1.45;
     color: #E0E0E0;
-    overflow-y: hidden;
+    /* Изменено: разрешена прокрутка */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #555 transparent;
+}
+
+.chatPage .questionField::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chatPage .questionField::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chatPage .questionField::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 2px;
+}
+
+.chatPage .questionField::-webkit-scrollbar-thumb:hover {
+    background: #777;
 }
 
 .chatPage .questionField::placeholder {
