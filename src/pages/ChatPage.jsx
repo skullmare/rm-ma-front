@@ -12,9 +12,9 @@ import apiClient from '../lib/apiClient';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const IMAGES = {
-  backArrow: '/img/Rectangle 42215.svg',
-  settingIcon: '/img/setting_icon.svg',
-  sendButton: '/img/send-button.png',
+  back: '/img/Rectangle 42215.svg',
+  settings: '/img/setting_icon.svg',
+  send: '/img/send-button.png',
 };
 
 const TYPING_INDICATOR = (
@@ -44,14 +44,18 @@ function ChatPage() {
 
   const agentInfo = location.state || { agent: 'sergey', agentName: 'СЕРГЕЙ' };
   const { agent, agentName } = agentInfo;
+
   const chatId = user?.telegramId || user?.id;
   const isPageLoading = usePageLoader(500);
 
+  // Рефы
   const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
-  const isAtBottom = useRef(true);              // пользователь внизу?
-  const previousHeight = useRef(0);              // высота до подгрузки старых сообщений
+  const isAtBottom = useRef(true);
+  const previousScrollHeightMinusTop = useRef(0); // для сохранения позиции при подгрузке
+  const shouldRestoreScroll = useRef(false);     // флаг подгрузки старых сообщений
 
+  // Состояния
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -59,32 +63,52 @@ function ChatPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const formatTime = useCallback((dateInput) => {
-    const date = new Date(dateInput || Date.now());
+  // Форматирование времени
+  const formatTime = useCallback((input) => {
+    const date = typeof input === 'string' || typeof input === 'number'
+      ? new Date(input)
+      : input || new Date();
+
+    if (isNaN(date)) return new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
     return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   }, []);
 
+  // Преобразование сообщения с сервера
   const transformMessage = useCallback((msg) => ({
-    id: msg._id || msg.id || `msg-${Date.now()}`,
+    id: msg._id || msg.id || `temp-${Date.now()}-${Math.random()}`,
     text: msg.message || '',
     type: msg.autor === 'human' ? 'outgoing' : 'incoming',
     time: formatTime(msg.create_at || msg.timestamp),
-    timestamp: msg.timestamp ? Number(msg.timestamp) : new Date(msg.create_at || Date.now()).getTime(),
+    timestamp: msg.timestamp
+      ? Number(msg.timestamp)
+      : new Date(msg.create_at || Date.now()).getTime(),
   }), [formatTime]);
 
+  // Точная прокрутка в самый низ
   const scrollToBottom = useCallback((behavior = 'smooth') => {
     const container = chatContainerRef.current;
-    if (!container) return;
-    container.scrollTo({
-      top: container.scrollHeight - container.clientHeight,
-      behavior,
-    });
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight - container.clientHeight,
+        behavior,
+      });
+    }
   }, []);
 
+  // Загрузка истории (с/без пагинации)
   const loadHistory = useCallback(async (beforeTimestamp = null) => {
     if (!chatId) {
       setIsHistoryLoading(false);
       return;
+    }
+
+    const container = chatContainerRef.current;
+
+    // Если подгружаем старые — запоминаем позицию
+    if (beforeTimestamp && container) {
+      shouldRestoreScroll.current = true;
+      previousScrollHeightMinusTop.current = container.scrollHeight - container.scrollTop;
     }
 
     try {
@@ -94,12 +118,13 @@ function ChatPage() {
       const { data } = await apiClient.get('/api/chats/history', { params });
 
       if (Array.isArray(data?.messages)) {
-        const newMessages = data.messages.map(transformMessage);
+        const newMsgs = data.messages.map(transformMessage);
 
         setMessages(prev => {
-          const combined = beforeTimestamp ? [...newMessages, ...prev] : newMessages;
-          const unique = Array.from(new Map(combined.map(m => [m.id, m])).values());
-          return unique.sort((a, b) => a.timestamp - b.timestamp);
+          const combined = beforeTimestamp ? [...newMsgs, ...prev] : newMsgs;
+          const map = new Map();
+          combined.forEach(m => map.set(m.id, m));
+          return Array.from(map.values()).sort((a, b) => a.timestamp - b.timestamp);
         });
 
         setHasMore(!!data.hasMore);
@@ -112,7 +137,7 @@ function ChatPage() {
     }
   }, [chatId, transformMessage]);
 
-  // Первичная загрузка
+  // Первая загрузка
   useEffect(() => {
     if (!chatId) {
       setIsHistoryLoading(false);
@@ -124,39 +149,41 @@ function ChatPage() {
     loadHistory();
   }, [chatId, agent, loadHistory]);
 
-  // Автопрокрутка только когда нужно
+  // Главная логика скролла и автопрокрутки
   useEffect(() => {
-    if (isHistoryLoading) return;
-
     const container = chatContainerRef.current;
-    if (!container) return;
+    if (!container || isHistoryLoading) return;
 
-    // Если пользователь был внизу или только что отправил сообщение — прокручиваем вниз
+    // Восстановление позиции после подгрузки старых сообщений
+    if (shouldRestoreScroll.current) {
+      container.scrollTop = container.scrollHeight - previousScrollHeightMinusTop.current;
+      shouldRestoreScroll.current = false;
+      return;
+    }
+
+    // Прокрутка вниз, если пользователь был внизу или только что отправил сообщение
     if (isAtBottom.current || isLoading) {
       scrollToBottom(isLoading ? 'smooth' : 'auto');
     }
-    // Если подгрузили старые сообщения — сохраняем позицию (это ключевой фикс!)
-    else if (isLoadingMore) {
-      container.scrollTop = container.scrollHeight - previousHeight.current;
-    }
-  }, [messages, isLoading, isHistoryLoading, isLoadingMore, scrollToBottom]);
+  }, [messages, isLoading, isHistoryLoading, scrollToBottom]);
 
-  // Обработка скролла
+  // Обработка скролла — подгрузка + отслеживание "внизу ли"
   const handleScroll = useCallback(() => {
     const container = chatContainerRef.current;
-    if (!container || isLoadingMore || !hasMore || messages.length === 0) return;
+    if (!container) return;
 
     const { scrollTop, scrollHeight, clientHeight } = container;
+    const atBottom = scrollHeight - scrollTop - clientHeight < 150;
 
-    // Проверяем, внизу ли пользователь
-    isAtBottom.current = scrollHeight - scrollTop - clientHeight < 100;
+    isAtBottom.current = atBottom;
 
-    // Если близко к верху — подгружаем старые
-    if (scrollTop < 200) {
-      previousHeight.current = scrollHeight;  // запоминаем текущую высоту
-      setIsLoadingMore(true);
-      const oldestTimestamp = messages[0].timestamp;
-      loadHistory(oldestTimestamp);
+    // Подгрузка старых при достижении верха
+    if (scrollTop < 300 && !isLoadingMore && hasMore && messages.length > 0) {
+      const oldestTimestamp = messages[0]?.timestamp;
+      if (oldestTimestamp) {
+        setIsLoadingMore(true);
+        loadHistory(oldestTimestamp);
+      }
     }
   }, [messages, isLoadingMore, hasMore, loadHistory]);
 
@@ -192,7 +219,7 @@ function ChatPage() {
     if (!text || isLoading || !chatId) return;
 
     const tempId = `temp-${Date.now()}`;
-    const optimisticMessage = {
+    const optimisticMsg = {
       id: tempId,
       text,
       type: 'outgoing',
@@ -200,10 +227,9 @@ function ChatPage() {
       timestamp: Date.now(),
     };
 
-    setMessages(prev => [...prev, optimisticMessage]);
+    setMessages(prev => [...prev, optimisticMsg]);
     setInputValue('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
-
+    textareaRef.current && (textareaRef.current.style.height = 'auto');
     setIsLoading(true);
     isAtBottom.current = true;
 
@@ -224,6 +250,7 @@ function ChatPage() {
             updated = [...updated, aiMsg];
           }
         }
+
         return updated;
       });
     } catch (err) {
@@ -241,21 +268,23 @@ function ChatPage() {
     }
   };
 
+  // Рендер
   if (isPageLoading || (isHistoryLoading && messages.length === 0)) {
     return <Spinner />;
   }
 
   return (
     <div className={`${styles.body} ${styles.chatPage}`}>
+      {/* Навбар */}
       <nav className={styles.navbar}>
-        <div className="container-fluid d-flex justify-content-between px-0 align-items-center">
-          <a className={styles.prev} href="#" onClick={(e) => { e.preventDefault(); navigate('/agents_list'); }}>
-            <img src={IMAGES.backArrow} alt="назад" />
+        <div className="container-fluid d-flex justify-content-between align-items-center px-0">
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/agents_list'); }} className={styles.prev}>
+            <img src={IMAGES.back} alt="назад" />
           </a>
           <div style={{ fontWeight: 500, color: '#BEBEBE', fontSize: '16px' }}>{agentName}</div>
-          <a className={styles.navbarAccount} href="#" onClick={(e) => { e.preventDefault(); navigate('/profile'); }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/profile'); }} className={styles.navbarAccount}>
             <div className={styles.accountIcon}>
-              <img src={IMAGES.settingIcon} alt="настройки" />
+              <img src={IMAGES.settings} alt="настройки" />
             </div>
           </a>
         </div>
@@ -263,7 +292,7 @@ function ChatPage() {
 
       <div className={styles.glow} />
 
-      <main ref={chatContainerRef} id="chat" className={styles.chatContainer}>
+      <main ref={chatContainerRef} className={styles.chatContainer}>
         {isLoadingMore && (
           <div className={styles.loadingMore}>Загрузка предыдущих сообщений...</div>
         )}
@@ -291,11 +320,11 @@ function ChatPage() {
             ref={textareaRef}
             className={styles.questionField}
             placeholder="Задайте свой вопрос..."
-            rows={1}
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isLoading}
+            rows={1}
           />
         </div>
         <div
@@ -303,7 +332,7 @@ function ChatPage() {
           onClick={sendMessage}
           style={{ opacity: isLoading ? 0.5 : 1, cursor: isLoading ? 'not-allowed' : 'pointer' }}
         >
-          <img src={IMAGES.sendButton} alt="Отправить" />
+          <img src={IMAGES.send} alt="Отправить" />
         </div>
       </div>
     </div>
