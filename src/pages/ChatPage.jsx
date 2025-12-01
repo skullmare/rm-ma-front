@@ -1,4 +1,4 @@
-import React, {
+import React, { 
   useCallback,
   useEffect,
   useRef,
@@ -39,14 +39,10 @@ function ChatPage() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingTimestamp, setLoadingTimestamp] = useState(null);
 
-  // Флаг: нужно ли принудительно прокрутить вниз
   const shouldScrollToBottom = useRef(false);
-  // Сохраняем предыдущую высоту скролла для плавной подгрузки
   const previousScrollHeight = useRef(0);
-  // Отслеживаем, было ли отправлено новое сообщение
   const lastMessageCount = useRef(0);
 
-  // Форматирование времени
   const formatTime = (input) => {
     const date = new Date(
       typeof input === 'number' ? input : input || Date.now()
@@ -62,15 +58,14 @@ function ChatPage() {
     timestamp: msg.timestamp ? Number(msg.timestamp) : new Date(msg.create_at || Date.now()).getTime(),
   }), []);
 
-  // Прокрутка вниз (моментальная, без анимации)
+  // МГНОВЕННЫЙ скролл вниз
   const scrollToBottom = useCallback(() => {
     const container = chatContainerRef.current;
     if (container) {
-      container.scrollTop = container.scrollHeight;
+      container.scrollTop = container.scrollHeight - container.clientHeight;
     }
   }, []);
 
-  // Сохраняем позицию скролла перед обновлением сообщений
   const saveScrollPosition = () => {
     const container = chatContainerRef.current;
     if (container) {
@@ -78,7 +73,6 @@ function ChatPage() {
     }
   };
 
-  // Восстанавливаем позицию скролла после загрузки старых сообщений
   const restoreScrollPosition = () => {
     const container = chatContainerRef.current;
     if (container && previousScrollHeight.current > 0) {
@@ -88,12 +82,10 @@ function ChatPage() {
     }
   };
 
-  // === Загрузка истории ===
   const loadHistory = useCallback(async (beforeTimestamp = null, isLoadMore = false) => {
     if (!chatId) return;
 
     try {
-      // Сохраняем позицию скролла перед загрузкой новых сообщений
       if (isLoadMore) {
         saveScrollPosition();
         setIsLoadingMore(true);
@@ -117,14 +109,12 @@ function ChatPage() {
         });
 
         setHasMore(!!data.hasMore);
-        
-        // Восстанавливаем позицию скролла после обновления DOM
+
         if (isLoadMore) {
           setTimeout(restoreScrollPosition, 0);
         } else {
-          // При первой загрузке скроллим вниз
           setTimeout(() => {
-            scrollToBottom();
+            scrollToBottom(); // МГНОВЕННЫЙ скролл
           }, 100);
         }
       } else {
@@ -143,7 +133,6 @@ function ChatPage() {
     }
   }, [chatId, transformMessage, scrollToBottom]);
 
-  // Первичная загрузка
   useEffect(() => {
     if (!chatId) {
       setIsHistoryLoading(false);
@@ -155,18 +144,15 @@ function ChatPage() {
     setHasMore(true);
     loadHistory();
 
-    // При первом рендере — всегда в низ
     shouldScrollToBottom.current = true;
   }, [chatId, agent, loadHistory]);
 
-  // Улучшенный автоскролл
   useEffect(() => {
     if (isHistoryLoading) return;
 
     const container = chatContainerRef.current;
     if (!container) return;
 
-    // 1. При первом открытии чата
     if (shouldScrollToBottom.current) {
       scrollToBottom();
       shouldScrollToBottom.current = false;
@@ -174,38 +160,34 @@ function ChatPage() {
       return;
     }
 
-    // 2. Если добавилось новое сообщение (от пользователя или бота)
     if (messages.length > lastMessageCount.current) {
       const newMessageCount = messages.length - lastMessageCount.current;
       const newMessages = messages.slice(-newMessageCount);
-      
-      // Проверяем, есть ли среди новых сообщений наши исходящие или входящие от бота
-      const shouldScroll = newMessages.some(msg => 
+
+      const shouldScroll = newMessages.some(msg =>
         msg.type === 'outgoing' || msg.type === 'incoming'
       );
-      
+
       if (shouldScroll) {
-        // Моментальный скролл без анимации
         setTimeout(() => {
-          scrollToBottom();
+          scrollToBottom(); // БЫСТРЫЙ скролл
         }, 50);
       }
-      
+
       lastMessageCount.current = messages.length;
     }
   }, [messages, isHistoryLoading, scrollToBottom]);
 
-  // Подгрузка старых сообщений
   const handleScroll = useCallback(() => {
     const container = chatContainerRef.current;
     if (!container || isLoadingMore || !hasMore || messages.length === 0) return;
 
     const scrollThreshold = 100;
     const nearTop = container.scrollTop <= scrollThreshold;
-    
+
     if (nearTop) {
       const oldest = messages[0]?.timestamp;
-      
+
       if (oldest && oldest !== loadingTimestamp) {
         setLoadingTimestamp(oldest);
         loadHistory(oldest, true);
@@ -213,7 +195,6 @@ function ChatPage() {
     }
   }, [messages, isLoadingMore, hasMore, loadHistory, loadingTimestamp]);
 
-  // Debounce для обработки скролла
   useEffect(() => {
     const container = chatContainerRef.current;
     if (!container) return;
@@ -233,7 +214,6 @@ function ChatPage() {
     };
   }, [handleScroll]);
 
-  // Авторесайз textarea
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -248,7 +228,6 @@ function ChatPage() {
     return () => ta.removeEventListener('input', resize);
   }, []);
 
-  // Отправка сообщения
   const sendMessage = async () => {
     const text = inputValue.trim();
     if (!text || isLoading || !chatId) return;
@@ -262,15 +241,13 @@ function ChatPage() {
       timestamp: Date.now(),
     };
 
-    // Сразу скроллим вниз при отправке пользователем
     setMessages(prev => [...prev, newMsg]);
     setInputValue('');
     textareaRef.current && (textareaRef.current.style.height = 'auto');
     setIsLoading(true);
 
-    // Моментальный скролл вниз сразу после добавления временного сообщения
     setTimeout(() => {
-      scrollToBottom();
+      scrollToBottom(); // моментальный скролл
     }, 0);
 
     try {
@@ -291,9 +268,8 @@ function ChatPage() {
         return list;
       });
 
-      // Моментальный скролл вниз после получения ответа от бота
       setTimeout(() => {
-        scrollToBottom();
+        scrollToBottom(); // тоже моментально
       }, 100);
 
     } catch (err) {
