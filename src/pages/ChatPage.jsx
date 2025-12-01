@@ -76,7 +76,7 @@ function ChatPage() {
     if (container) {
       container.scrollTo({
         top: container.scrollHeight,
-        behavior: 'auto',
+        behavior: 'smooth'
       });
     }
   }, []);
