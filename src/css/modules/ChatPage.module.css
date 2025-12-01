@@ -1,3 +1,6 @@
+*{
+    scroll-behavior: auto;
+}
 /* ChatPage Styles */
 .body {
     
