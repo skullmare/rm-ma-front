@@ -38,10 +38,11 @@ function ChatPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  // Флаг: нужно ли принудительно прокрутить вниз при следующем обновлении messages
   const shouldScrollToBottom = useRef(false);
 
-  // Форматирование времени
+  // NEW — сохраняем предыдущую высоту scrollHeight
+  const prevScrollHeightRef = useRef(0);
+
   const formatTime = (input) => {
     const date = new Date(
       typeof input === 'number' ? input : input || Date.now()
@@ -54,10 +55,10 @@ function ChatPage() {
     text: msg.message || '',
     type: msg.autor === 'human' ? 'outgoing' : 'incoming',
     time: formatTime(msg.create_at || msg.timestamp),
-    timestamp: msg.timestamp ? Number(msg.timestamp) : new Date(msg.create_at || Date.now()).getTime(),
+    timestamp: msg.timestamp ? Number(msg.timestamp) :
+      new Date(msg.create_at || Date.now()).getTime(),
   }), []);
 
-  // Прокрутка вниз — только когда явно нужно
   const scrollToBottom = () => {
     const container = chatContainerRef.current;
     if (container) {
@@ -80,8 +81,12 @@ function ChatPage() {
 
         setMessages(prev => {
           const combined = beforeTimestamp ? [...newMsgs, ...prev] : newMsgs;
-          const unique = Array.from(new Map(combined.map(m => [m.id, m])).values())
+
+          const unique = Array.from(new Map(
+            combined.map(m => [m.id, m])
+          ).values())
             .sort((a, b) => a.timestamp - b.timestamp);
+
           return unique;
         });
 
@@ -95,7 +100,7 @@ function ChatPage() {
     }
   }, [chatId, transformMessage]);
 
-  // Первичная загрузка — прокручиваем вниз один раз
+  // Первичная загрузка
   useEffect(() => {
     if (!chatId) {
       setIsHistoryLoading(false);
@@ -106,25 +111,22 @@ function ChatPage() {
     setMessages([]);
     loadHistory();
 
-    // При первом рендере — всегда в низ
     shouldScrollToBottom.current = true;
   }, [chatId, agent]);
 
-  // Автоскролл ТОЛЬКО в двух случаях
+  // Автоскролл
   useEffect(() => {
     if (isHistoryLoading) return;
 
     const container = chatContainerRef.current;
     if (!container) return;
 
-    // 1. При первом открытии чата
     if (shouldScrollToBottom.current) {
       scrollToBottom();
-      shouldScrollToBottom.current = false; // больше не трогаем
+      shouldScrollToBottom.current = false;
       return;
     }
 
-    // 2. При отправке своего сообщения (isLoading = true → false)
     if (isLoading === false && messages.length > 0) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg.type === 'outgoing') {
@@ -133,27 +135,43 @@ function ChatPage() {
     }
   }, [messages, isLoading, isHistoryLoading]);
 
-  // Подгрузка старых сообщений — без автоскролла
+  // === Исправленный SCROLL LOADER ===
   const handleScroll = useCallback(() => {
     const container = chatContainerRef.current;
     if (!container || isLoadingMore || !hasMore || messages.length === 0) return;
 
-    if (container.scrollTop < 300) {
-      const oldest = messages[0].timestamp;
+    // Подгружаем не только < 300, а когда прям достигнут потолок
+    if (container.scrollTop <= 50) {
+      prevScrollHeightRef.current = container.scrollHeight;
+
       setIsLoadingMore(true);
+
+      const oldest = messages[0].timestamp;
       loadHistory(oldest);
     }
   }, [messages, isLoadingMore, hasMore, loadHistory]);
 
   useEffect(() => {
     const container = chatContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll, { passive: true });
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
+    if (!container) return;
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // Авторесайз textarea
+  // === Восстановление позиции скролла после загрузки вверх ===
+  useEffect(() => {
+    if (!isLoadingMore) return;
+
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    const diff = container.scrollHeight - prevScrollHeightRef.current;
+
+    container.scrollTop = diff;
+  }, [messages, isLoadingMore]);
+
+  // Авто-ресайз textarea
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -168,7 +186,6 @@ function ChatPage() {
     return () => ta.removeEventListener('input', resize);
   }, []);
 
-  // Отправка сообщения
   const sendMessage = async () => {
     const text = inputValue.trim();
     if (!text || isLoading || !chatId) return;
@@ -241,7 +258,9 @@ function ChatPage() {
       <div className={styles.glow} />
 
       <main ref={chatContainerRef} className={styles.chatContainer}>
-        {isLoadingMore && <div className={styles.loadingMore}>Загрузка...</div>}
+        {isLoadingMore && (
+          <div className={styles.loadingMore}>Загрузка...</div>
+        )}
 
         {messages.length === 0 && !isHistoryLoading && (
           <div className={`${styles.message} ${styles.incoming}`}>
