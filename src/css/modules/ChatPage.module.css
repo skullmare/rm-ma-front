@@ -1,8 +1,3 @@
-/* ChatPage Styles */
-.body {
-    
-}
-
 .chatPage {
     /* Все стили вложены в этот класс для изоляции */
     height: 100vh;
@@ -28,7 +23,6 @@
     scrollbar-width: thin;
     scrollbar-color: #555 transparent;
     z-index: 1002;
-    justify-content: flex-end;
 }
 
 /* WebKit scrollbar */
