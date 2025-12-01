@@ -23,6 +23,7 @@
     scrollbar-width: thin;
     scrollbar-color: #555 transparent;
     z-index: 1002;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* WebKit scrollbar */
