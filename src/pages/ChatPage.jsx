@@ -207,7 +207,7 @@ function ChatPage() {
 
   const scrollToTop = () => {
     chatContainerRef.current?.scrollTo({
-      top: 0,
+      bottom: 0,
       behavior: 'smooth'
     });
   };
