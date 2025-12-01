@@ -205,9 +205,9 @@ function ChatPage() {
     }
   };
 
-  const scrollToTop = () => {
+  const scrollToBottom = () => {
     chatContainerRef.current?.scrollTo({
-      bottom: 0,
+      top: chatContainerRef.current.scrollHeight,
       behavior: 'smooth'
     });
   };
@@ -292,17 +292,20 @@ function ChatPage() {
         </div>
       </div>
       <div
-        onClick={scrollToTop}
+        onClick={scrollToBottom}
         style={{
           position: 'absolute',
           bottom: '80px',
           right: '10px',
-          transform: 'rotate(90deg)',
+          transform: 'rotate(-90deg)',
           transformOrigin: 'center',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          borderRadius: '50%',
+          backgroundColor: '#FFFFFF',
+          padding: '8px'
         }}
       >
-        <img src={IMAGES.back} alt="Наверх" />
+        <img style={{width: '20px', height: '20px'}} src={IMAGES.back} alt="Наверх" />
       </div>
     </div>
   );
