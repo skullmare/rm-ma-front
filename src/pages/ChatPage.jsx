@@ -197,19 +197,19 @@ function ChatPage() {
 
       <div className={styles.glow} />
 
-      {hasMore && !isHistoryLoading && (
-        <button
-          onClick={() => {
-            const oldest = messages[0]?.timestamp;
-            if (oldest) loadHistory(oldest);
-          }}
-          className={styles.loadMoreButton}
-        >
-          {isLoadingMore ? 'Загрузка...' : 'Загрузить предыдущие сообщения'}
-        </button>
-      )}
 
       <main ref={chatContainerRef} className={styles.chatContainer}>
+        {hasMore && !isHistoryLoading && (
+          <button
+            onClick={() => {
+              const oldest = messages[0]?.timestamp;
+              if (oldest) loadHistory(oldest);
+            }}
+            className={styles.loadMoreButton}
+          >
+            {isLoadingMore ? 'Загрузка...' : 'Загрузить предыдущие сообщения'}
+          </button>
+        )}
         {messages.map(msg => (
           <div
             key={msg.id}
