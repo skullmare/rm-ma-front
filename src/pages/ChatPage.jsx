@@ -34,9 +34,7 @@ function ChatPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [loadingTimestamp, setLoadingTimestamp] = useState(null);
-  const shouldScrollToBottom = useRef(false);
   const previousScrollHeight = useRef(0);
-  const lastMessageCount = useRef(0);
 
   const formatTime = (input) => {
     const date = new Date(
@@ -52,23 +50,6 @@ function ChatPage() {
     time: formatTime(msg.create_at || msg.timestamp),
     timestamp: msg.timestamp ? Number(msg.timestamp) : new Date(msg.create_at || Date.now()).getTime(),
   }), []);
-
-  const scrollToBottom = useCallback(() => {
-    const container = chatContainerRef.current;
-    if (container) {
-      container.scrollTop = container.scrollHeight - container.clientHeight;
-    }
-  }, []);
-
-  const smoothScrollToBottom = useCallback(() => {
-    const container = chatContainerRef.current;
-    if (container) {
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  }, []);
 
   const saveScrollPosition = () => {
     const container = chatContainerRef.current;
@@ -109,10 +90,6 @@ function ChatPage() {
         setHasMore(!!data.hasMore);
         if (isLoadMore) {
           setTimeout(restoreScrollPosition, 0);
-        } else {
-          setTimeout(() => {
-            scrollToBottom();
-          }, 100);
         }
       } else {
         setHasMore(false);
@@ -128,7 +105,7 @@ function ChatPage() {
         setIsHistoryLoading(false);
       }
     }
-  }, [chatId, transformMessage, scrollToBottom]);
+  }, [chatId, transformMessage]);
 
   useEffect(() => {
     if (!chatId) {
@@ -139,33 +116,7 @@ function ChatPage() {
     setMessages([]);
     setHasMore(true);
     loadHistory();
-    shouldScrollToBottom.current = true;
   }, [chatId, agent, loadHistory]);
-
-  useEffect(() => {
-    if (isHistoryLoading) return;
-    const container = chatContainerRef.current;
-    if (!container) return;
-    if (shouldScrollToBottom.current) {
-      scrollToBottom();
-      shouldScrollToBottom.current = false;
-      lastMessageCount.current = messages.length;
-      return;
-    }
-    if (messages.length > lastMessageCount.current) {
-      const newMessageCount = messages.length - lastMessageCount.current;
-      const newMessages = messages.slice(-newMessageCount);
-      const shouldScroll = newMessages.some(msg =>
-        msg.type === 'outgoing' || msg.type === 'incoming'
-      );
-      if (shouldScroll) {
-        setTimeout(() => {
-          smoothScrollToBottom();
-        }, 50);
-      }
-      lastMessageCount.current = messages.length;
-    }
-  }, [messages, isHistoryLoading, scrollToBottom, smoothScrollToBottom]);
 
   const handleScroll = useCallback(() => {
     const container = chatContainerRef.current;
@@ -225,9 +176,6 @@ function ChatPage() {
     setInputValue('');
     textareaRef.current && (textareaRef.current.style.height = 'auto');
     setIsLoading(true);
-    setTimeout(() => {
-      smoothScrollToBottom();
-    }, 0);
     try {
       const { data } = await apiClient.post('/api/chats/send', { message: text, agent });
       setMessages(prev => {
@@ -242,9 +190,6 @@ function ChatPage() {
         }
         return list;
       });
-      setTimeout(() => {
-        smoothScrollToBottom();
-      }, 100);
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
       setMessages(prev => prev.filter(m => m.id !== tempId));
@@ -260,12 +205,19 @@ function ChatPage() {
     }
   };
 
+  const scrollToTop = () => {
+    chatContainerRef.current?.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   if (isPageLoading || (isHistoryLoading && messages.length === 0)) {
     return <Spinner />;
   }
 
   return (
-    <div className={`${styles.body} ${styles.chatPage}`}>
+    <div className={`${styles.body} ${styles.chatPage}`} style={{ position: 'relative' }}>
       <nav className={styles.navbar}>
         <div className="container-fluid d-flex justify-content-between align-items-center px-0">
           <a href="#" onClick={(e) => { e.preventDefault(); navigate('/agents_list'); }} className={styles.prev}>
@@ -338,6 +290,27 @@ function ChatPage() {
         >
           <img src={IMAGES.send} alt="Отправить" />
         </div>
+      </div>
+      <div
+        onClick={scrollToTop}
+        style={{
+          position: 'absolute',
+          bottom: '70px',
+          right: '20px',
+          zIndex: 1004,
+          background: '#2D2D2D',
+          color: '#FFFFFF',
+          borderRadius: '50%',
+          width: '40px',
+          height: '40px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          fontSize: '20px',
+        }}
+      >
+        ↑
       </div>
     </div>
   );
