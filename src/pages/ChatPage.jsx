@@ -55,8 +55,12 @@ function ChatPage() {
   const scrollToBottom = useCallback(() => {
     const container = chatContainerRef.current;
     if (!container) return;
+
     requestAnimationFrame(() => {
-      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth',
+      });
     });
   }, []);
 
@@ -254,6 +258,27 @@ function ChatPage() {
         >
           <img src={IMAGES.send} alt="Отправить" />
         </div>
+      </div>
+      <div
+        onClick={scrollToBottom}
+        style={{
+          position: 'absolute',
+          bottom: '80px',
+          right: '20px',
+          transform: 'rotate(-90deg)',
+          transformOrigin: 'center center',
+          cursor: 'pointer',
+          borderRadius: '50%',
+          backgroundColor: '#2d2d2d',
+          zIndex: 9999,
+          width: '40px',
+          height: '40px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        <img style={{ width: '20px', height: '20px' }} src={IMAGES.back} alt="Вниз" />
       </div>
     </div>
   );
