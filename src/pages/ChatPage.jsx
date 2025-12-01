@@ -39,10 +39,12 @@ function ChatPage() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingTimestamp, setLoadingTimestamp] = useState(null);
 
-  // Флаг: нужно ли принудительно прокрутить вниз при следующем обновлении messages
+  // Флаг: нужно ли принудительно прокрутить вниз
   const shouldScrollToBottom = useRef(false);
   // Сохраняем предыдущую высоту скролла для плавной подгрузки
   const previousScrollHeight = useRef(0);
+  // Отслеживаем, было ли отправлено новое сообщение
+  const lastMessageCount = useRef(0);
 
   // Форматирование времени
   const formatTime = (input) => {
@@ -60,13 +62,13 @@ function ChatPage() {
     timestamp: msg.timestamp ? Number(msg.timestamp) : new Date(msg.create_at || Date.now()).getTime(),
   }), []);
 
-  // Прокрутка вниз — только когда явно нужно
-  const scrollToBottom = () => {
+  // Прокрутка вниз (моментальная, без анимации)
+  const scrollToBottom = useCallback(() => {
     const container = chatContainerRef.current;
     if (container) {
-      container.scrollTop = container.scrollHeight - container.clientHeight;
+      container.scrollTop = container.scrollHeight;
     }
-  };
+  }, []);
 
   // Сохраняем позицию скролла перед обновлением сообщений
   const saveScrollPosition = () => {
@@ -119,6 +121,11 @@ function ChatPage() {
         // Восстанавливаем позицию скролла после обновления DOM
         if (isLoadMore) {
           setTimeout(restoreScrollPosition, 0);
+        } else {
+          // При первой загрузке скроллим вниз
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
         }
       } else {
         setHasMore(false);
@@ -134,9 +141,9 @@ function ChatPage() {
         setIsHistoryLoading(false);
       }
     }
-  }, [chatId, transformMessage]);
+  }, [chatId, transformMessage, scrollToBottom]);
 
-  // Первичная загрузка — прокручиваем вниз один раз
+  // Первичная загрузка
   useEffect(() => {
     if (!chatId) {
       setIsHistoryLoading(false);
@@ -152,7 +159,7 @@ function ChatPage() {
     shouldScrollToBottom.current = true;
   }, [chatId, agent, loadHistory]);
 
-  // Автоскролл ТОЛЬКО в двух случаях
+  // Улучшенный автоскролл
   useEffect(() => {
     if (isHistoryLoading) return;
 
@@ -162,32 +169,43 @@ function ChatPage() {
     // 1. При первом открытии чата
     if (shouldScrollToBottom.current) {
       scrollToBottom();
-      shouldScrollToBottom.current = false; // больше не трогаем
+      shouldScrollToBottom.current = false;
+      lastMessageCount.current = messages.length;
       return;
     }
 
-    // 2. При отправке своего сообщения (isLoading = true → false)
-    if (isLoading === false && messages.length > 0) {
-      const lastMsg = messages[messages.length - 1];
-      if (lastMsg.type === 'outgoing') {
-        scrollToBottom();
+    // 2. Если добавилось новое сообщение (от пользователя или бота)
+    if (messages.length > lastMessageCount.current) {
+      const newMessageCount = messages.length - lastMessageCount.current;
+      const newMessages = messages.slice(-newMessageCount);
+      
+      // Проверяем, есть ли среди новых сообщений наши исходящие или входящие от бота
+      const shouldScroll = newMessages.some(msg => 
+        msg.type === 'outgoing' || msg.type === 'incoming'
+      );
+      
+      if (shouldScroll) {
+        // Моментальный скролл без анимации
+        setTimeout(() => {
+          scrollToBottom();
+        }, 50);
       }
+      
+      lastMessageCount.current = messages.length;
     }
-  }, [messages, isLoading, isHistoryLoading]);
+  }, [messages, isHistoryLoading, scrollToBottom]);
 
-  // Подгрузка старых сообщений — с улучшенной логикой
+  // Подгрузка старых сообщений
   const handleScroll = useCallback(() => {
     const container = chatContainerRef.current;
     if (!container || isLoadingMore || !hasMore || messages.length === 0) return;
 
-    // Более надежная проверка достижения верха
-    const scrollThreshold = 100; // Уменьшаем порог для более раннего срабатывания
+    const scrollThreshold = 100;
     const nearTop = container.scrollTop <= scrollThreshold;
     
     if (nearTop) {
       const oldest = messages[0]?.timestamp;
       
-      // Защита от дублирующих запросов
       if (oldest && oldest !== loadingTimestamp) {
         setLoadingTimestamp(oldest);
         loadHistory(oldest, true);
@@ -244,10 +262,16 @@ function ChatPage() {
       timestamp: Date.now(),
     };
 
+    // Сразу скроллим вниз при отправке пользователем
     setMessages(prev => [...prev, newMsg]);
     setInputValue('');
     textareaRef.current && (textareaRef.current.style.height = 'auto');
     setIsLoading(true);
+
+    // Моментальный скролл вниз сразу после добавления временного сообщения
+    setTimeout(() => {
+      scrollToBottom();
+    }, 0);
 
     try {
       const { data } = await apiClient.post('/api/chats/send', { message: text, agent });
@@ -266,6 +290,12 @@ function ChatPage() {
 
         return list;
       });
+
+      // Моментальный скролл вниз после получения ответа от бота
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
       setMessages(prev => prev.filter(m => m.id !== tempId));
