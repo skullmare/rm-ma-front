@@ -385,7 +385,7 @@ function ChatPage() {
         style={{
           position: 'absolute',
           bottom: '80px',
-          right: '25px',
+          right: '20px',
           transform: 'rotate(-90deg)',
           cursor: 'pointer',
           borderRadius: '50%',
