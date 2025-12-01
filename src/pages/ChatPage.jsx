@@ -63,12 +63,30 @@ function ChatPage() {
     if (container && previousScrollHeight.current > 0) {
       const newScrollHeight = container.scrollHeight;
       const heightDifference = newScrollHeight - previousScrollHeight.current;
-      container.scrollTop = heightDifference;
+      
+      if (heightDifference > 0) {
+        requestAnimationFrame(() => {
+          container.scrollTop = heightDifference;
+        });
+      }
     }
   };
 
+  const scrollToBottom = useCallback(() => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+    
+    requestAnimationFrame(() => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
+      });
+    });
+  }, []);
+
   const loadHistory = useCallback(async (beforeTimestamp = null, isLoadMore = false) => {
     if (!chatId) return;
+    
     try {
       if (isLoadMore) {
         saveScrollPosition();
@@ -76,9 +94,15 @@ function ChatPage() {
       } else {
         setIsHistoryLoading(true);
       }
+      
       const params = { chat_id: chatId };
       if (beforeTimestamp) params.timestamp = String(beforeTimestamp);
-      const { data } = await apiClient.get('/api/chats/history', { params });
+      
+      const { data } = await apiClient.get('/api/chats/history', { 
+        params,
+        timeout: 10000
+      });
+      
       if (Array.isArray(data?.messages)) {
         const newMsgs = data.messages.map(transformMessage);
         setMessages(prev => {
@@ -87,11 +111,13 @@ function ChatPage() {
             .sort((a, b) => a.timestamp - b.timestamp);
           return unique;
         });
+        
         setHasMore(!!data.hasMore);
+        
         if (isLoadMore) {
-          setTimeout(restoreScrollPosition, 0);
+          setTimeout(restoreScrollPosition, 50);
         } else {
-          setTimeout(scrollToBottom, 0);
+          setTimeout(scrollToBottom, 100);
         }
       } else {
         setHasMore(false);
@@ -99,6 +125,10 @@ function ChatPage() {
     } catch (err) {
       console.error('Ошибка загрузки истории:', err);
       setHasMore(false);
+      // В случае ошибки все равно разрешаем скролл
+      if (!isLoadMore) {
+        setTimeout(scrollToBottom, 100);
+      }
     } finally {
       if (isLoadMore) {
         setIsLoadingMore(false);
@@ -107,24 +137,34 @@ function ChatPage() {
         setIsHistoryLoading(false);
       }
     }
-  }, [chatId, transformMessage]);
+  }, [chatId, transformMessage, scrollToBottom]);
 
   useEffect(() => {
     if (!chatId) {
       setIsHistoryLoading(false);
       return;
     }
+    
     setIsHistoryLoading(true);
     setMessages([]);
     setHasMore(true);
-    loadHistory();
-  }, [chatId, agent, loadHistory]);
+    
+    const loadInitial = async () => {
+      await loadHistory();
+      setTimeout(scrollToBottom, 100);
+    };
+    
+    loadInitial();
+  }, [chatId, agent, loadHistory, scrollToBottom]);
 
   const handleScroll = useCallback(() => {
     const container = chatContainerRef.current;
     if (!container || isLoadingMore || !hasMore || messages.length === 0) return;
+    
     const scrollThreshold = 100;
-    const nearTop = container.scrollTop <= scrollThreshold;
+    const nearTop = container.scrollTop <= scrollThreshold && 
+                    container.scrollHeight > container.clientHeight;
+    
     if (nearTop) {
       const oldest = messages[0]?.timestamp;
       if (oldest && oldest !== loadingTimestamp) {
@@ -137,13 +177,15 @@ function ChatPage() {
   useEffect(() => {
     const container = chatContainerRef.current;
     if (!container) return;
+    
     let scrollTimeout;
     const debouncedHandleScroll = () => {
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         handleScroll();
-      }, 100);
+      }, 50); // Уменьшено до 50мс
     };
+    
     container.addEventListener('scroll', debouncedHandleScroll, { passive: true });
     return () => {
       container.removeEventListener('scroll', debouncedHandleScroll);
@@ -151,21 +193,37 @@ function ChatPage() {
     };
   }, [handleScroll]);
 
+  // Добавьте обработку ресайза окна
+  useEffect(() => {
+    const handleResize = () => {
+      if (messages.length > 0 && !isHistoryLoading) {
+        setTimeout(scrollToBottom, 100);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [messages.length, isHistoryLoading, scrollToBottom]);
+
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
+    
     const resize = () => {
       ta.style.height = 'auto';
       ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
     };
+    
     ta.addEventListener('input', resize);
     resize();
+    
     return () => ta.removeEventListener('input', resize);
   }, []);
 
   const sendMessage = async () => {
     const text = inputValue.trim();
     if (!text || isLoading || !chatId) return;
+    
     const tempId = `temp-${Date.now()}`;
     const newMsg = {
       id: tempId,
@@ -174,24 +232,31 @@ function ChatPage() {
       time: formatTime(),
       timestamp: Date.now(),
     };
+    
     setMessages(prev => [...prev, newMsg]);
     setInputValue('');
     textareaRef.current && (textareaRef.current.style.height = 'auto');
     setIsLoading(true);
+    
     try {
       const { data } = await apiClient.post('/api/chats/send', { message: text, agent });
       setMessages(prev => {
         let list = prev.map(m =>
           m.id === tempId && data?.userMessageId ? { ...m, id: data.userMessageId } : m
         );
+        
         if (data?.message && data.autor === 'ai_agent') {
           const aiMsg = transformMessage(data);
           if (!list.some(m => m.id === aiMsg.id)) {
             list.push(aiMsg);
           }
         }
+        
         return list;
       });
+      
+      // Скролл вниз после получения ответа
+      setTimeout(scrollToBottom, 100);
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
       setMessages(prev => prev.filter(m => m.id !== tempId));
@@ -205,13 +270,6 @@ function ChatPage() {
       e.preventDefault();
       sendMessage();
     }
-  };
-
-  const scrollToBottom = () => {
-    chatContainerRef.current?.scrollTo({
-      top: chatContainerRef.current.scrollHeight,
-      behavior: 'smooth'
-    });
   };
 
   if (isPageLoading || (isHistoryLoading && messages.length === 0)) {
