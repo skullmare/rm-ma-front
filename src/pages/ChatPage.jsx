@@ -307,10 +307,10 @@ function ChatPage() {
         {isLoadingMore && (
           <div className={styles.loadingMore}>
             <div className={styles.typingIndicator}>
+              Загрузка предыдущих сообщений
               <span className={styles.dots}>
                 <span></span><span></span><span></span>
               </span>
-              Загрузка предыдущих сообщений...
             </div>
           </div>
         )}
