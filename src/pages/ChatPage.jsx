@@ -34,7 +34,8 @@ function ChatPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [loadingTimestamp, setLoadingTimestamp] = useState(null);
-  const previousScrollHeight = useRef(0);
+  const scrollPositionRef = useRef(0);
+  const isScrollRestoring = useRef(false);
 
   const formatTime = (input) => {
     const date = new Date(
@@ -54,23 +55,28 @@ function ChatPage() {
   const saveScrollPosition = () => {
     const container = chatContainerRef.current;
     if (container) {
-      previousScrollHeight.current = container.scrollHeight;
+      scrollPositionRef.current = container.scrollHeight - container.scrollTop;
     }
   };
 
-  const restoreScrollPosition = () => {
+  const restoreScrollPosition = useCallback(() => {
     const container = chatContainerRef.current;
-    if (container && previousScrollHeight.current > 0) {
+    if (!container || scrollPositionRef.current === 0) return;
+
+    isScrollRestoring.current = true;
+    
+    requestAnimationFrame(() => {
       const newScrollHeight = container.scrollHeight;
-      const heightDifference = newScrollHeight - previousScrollHeight.current;
+      const targetScrollTop = newScrollHeight - scrollPositionRef.current;
       
-      if (heightDifference > 0) {
-        requestAnimationFrame(() => {
-          container.scrollTop = heightDifference;
-        });
-      }
-    }
-  };
+      container.scrollTop = targetScrollTop;
+      
+      // Снимаем блокировку после завершения скролла
+      setTimeout(() => {
+        isScrollRestoring.current = false;
+      }, 100);
+    });
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     const container = chatContainerRef.current;
@@ -85,7 +91,7 @@ function ChatPage() {
   }, []);
 
   const loadHistory = useCallback(async (beforeTimestamp = null, isLoadMore = false) => {
-    if (!chatId) return;
+    if (!chatId || (isLoadMore && isLoadingMore)) return;
     
     try {
       if (isLoadMore) {
@@ -105,6 +111,7 @@ function ChatPage() {
       
       if (Array.isArray(data?.messages)) {
         const newMsgs = data.messages.map(transformMessage);
+        
         setMessages(prev => {
           const combined = beforeTimestamp ? [...newMsgs, ...prev] : newMsgs;
           const unique = Array.from(new Map(combined.map(m => [m.id, m])).values())
@@ -115,6 +122,7 @@ function ChatPage() {
         setHasMore(!!data.hasMore);
         
         if (isLoadMore) {
+          // Даем время на рендер новых сообщений перед восстановлением скролла
           setTimeout(restoreScrollPosition, 50);
         } else {
           setTimeout(scrollToBottom, 100);
@@ -125,7 +133,6 @@ function ChatPage() {
     } catch (err) {
       console.error('Ошибка загрузки истории:', err);
       setHasMore(false);
-      // В случае ошибки все равно разрешаем скролл
       if (!isLoadMore) {
         setTimeout(scrollToBottom, 100);
       }
@@ -137,7 +144,7 @@ function ChatPage() {
         setIsHistoryLoading(false);
       }
     }
-  }, [chatId, transformMessage, scrollToBottom]);
+  }, [chatId, transformMessage, scrollToBottom, restoreScrollPosition, isLoadingMore]);
 
   useEffect(() => {
     if (!chatId) {
@@ -158,12 +165,14 @@ function ChatPage() {
   }, [chatId, agent, loadHistory, scrollToBottom]);
 
   const handleScroll = useCallback(() => {
+    // Игнорируем события скролла во время восстановления позиции
+    if (isScrollRestoring.current) return;
+    
     const container = chatContainerRef.current;
     if (!container || isLoadingMore || !hasMore || messages.length === 0) return;
     
     const scrollThreshold = 100;
-    const nearTop = container.scrollTop <= scrollThreshold && 
-                    container.scrollHeight > container.clientHeight;
+    const nearTop = container.scrollTop <= scrollThreshold;
     
     if (nearTop) {
       const oldest = messages[0]?.timestamp;
@@ -180,10 +189,13 @@ function ChatPage() {
     
     let scrollTimeout;
     const debouncedHandleScroll = () => {
+      // Пропускаем события во время восстановления позиции
+      if (isScrollRestoring.current) return;
+      
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         handleScroll();
-      }, 50); // Уменьшено до 50мс
+      }, 50);
     };
     
     container.addEventListener('scroll', debouncedHandleScroll, { passive: true });
@@ -193,17 +205,30 @@ function ChatPage() {
     };
   }, [handleScroll]);
 
-  // Добавьте обработку ресайза окна
+  // Улучшенная обработка ресайза
   useEffect(() => {
+    let resizeTimeout;
     const handleResize = () => {
-      if (messages.length > 0 && !isHistoryLoading) {
-        setTimeout(scrollToBottom, 100);
-      }
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (messages.length > 0 && !isHistoryLoading && !isLoadingMore) {
+          const container = chatContainerRef.current;
+          if (container) {
+            const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+            if (isNearBottom) {
+              scrollToBottom();
+            }
+          }
+        }
+      }, 100);
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [messages.length, isHistoryLoading, scrollToBottom]);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, [messages.length, isHistoryLoading, isLoadingMore, scrollToBottom]);
 
   useEffect(() => {
     const ta = textareaRef.current;
@@ -255,7 +280,6 @@ function ChatPage() {
         return list;
       });
       
-      // Скролл вниз после получения ответа
       setTimeout(scrollToBottom, 100);
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
@@ -356,7 +380,7 @@ function ChatPage() {
         style={{
           position: 'absolute',
           bottom: '80px',
-          right: '25px',
+          right: '20px',
           transform: 'rotate(-90deg)',
           transformOrigin: 'center center',
           cursor: 'pointer',
