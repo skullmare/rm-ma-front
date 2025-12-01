@@ -296,18 +296,23 @@ function ChatPage() {
         style={{
           position: 'absolute',
           bottom: '80px',
-          right: '10px',
+          right: '25px',
           transform: 'rotate(-90deg)',
-          transformOrigin: 'center',
+          transformOrigin: 'center center',
           cursor: 'pointer',
           borderRadius: '50%',
-          backgroundColor: '#FFFFFF',
-          padding: '8px'
+          backgroundColor: '#2d2d2d',
+          zIndex: 9999,
+          width: '40px',
+          height: '40px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
         }}
       >
-        <img style={{width: '20px', height: '20px'}} src={IMAGES.back} alt="Наверх" />
+        <img style={{ width: '20px', height: '20px' }} src={IMAGES.back} alt="Наверх" />
       </div>
-    </div>
+    </div >
   );
 }
 
