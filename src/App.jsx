@@ -10,6 +10,7 @@ import ChatPage from './pages/ChatPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import TariffPage from './pages/TariffPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import PaymentSuccess from './pages/PaymentSuccess.jsx';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path="/agent_nick" element={<AgentNickPage />} />
       <Route path="/agent_lida" element={<AgentLidaPage />} />
       <Route path="/agent_mark" element={<AgentMarkPage />} />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route
         path="/chat"
         element={
