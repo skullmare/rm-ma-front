@@ -295,22 +295,14 @@ function ChatPage() {
         onClick={scrollToTop}
         style={{
           position: 'absolute',
-          bottom: '70px',
-          right: '20px',
-          zIndex: 1004,
-          background: '#2D2D2D',
-          color: '#FFFFFF',
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          fontSize: '20px',
+          bottom: '80px',
+          right: '10px',
+          transform: 'rotate(90deg)',
+          transformOrigin: 'center',
+          cursor: 'pointer'
         }}
       >
-        ↑
+        <img src={IMAGES.back} alt="Наверх" />
       </div>
     </div>
   );
