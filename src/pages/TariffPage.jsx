@@ -126,9 +126,9 @@ function TariffPage() {
       <div className={`${styles.contentBlock} d-flex align-items-center`}>
         <div className={styles.buttonBlock}>
           {tariff === 'free' ? (
-            <button className={styles.buttonActive}>АКТИВИРОВАН</button>
+            <button className={styles.buttonActive} disabled>АКТИВИРОВАН</button>
           ) : (
-            <button className={styles.buttonDisabled} disabled>НЕ ДОСТУПНО</button>
+            <button className={styles.buttonActive} disabled>НЕ ДОСТУПНО</button>
           )}
         </div>
       </div>
@@ -152,7 +152,7 @@ function TariffPage() {
       <div className={`${styles.contentBlock} d-flex align-items-center ${styles.contentBlockLast}`}>
         <div className={styles.buttonBlock}>
           {tariff === 'premium' ? (
-            <button className={styles.buttonActive} aria-pressed="true">
+            <button className={styles.buttonActive} disabled aria-pressed="true">
               АКТИВИРОВАН
             </button>
           ) : (
