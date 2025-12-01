@@ -157,7 +157,7 @@ function ChatPage() {
     setMessages(prev => [...prev, newMsg]);
     setInputValue(''); // Значение очистится, useEffect сам обработает сброс высоты
     setIsLoading(true);
-
+    setTimeout(scrollToBottom, 100);
     try {
       const { data } = await apiClient.post('/api/chats/send', { message: text, agent });
 
@@ -173,7 +173,7 @@ function ChatPage() {
         return list;
       });
 
-      setTimeout(scrollToBottom, 100);
+      
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
       setMessages(prev => prev.filter(m => m.id !== tempId));
