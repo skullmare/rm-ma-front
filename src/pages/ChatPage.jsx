@@ -1,3 +1,6 @@
+// Ниже — обновлённая версия ChatPage с кнопкой "Загрузить предыдущие сообщения"
+// Удалён весь код, связанный со скроллом для подгрузки истории.
+
 import React, {
   useCallback,
   useEffect,
@@ -27,18 +30,12 @@ function ChatPage() {
   const isPageLoading = usePageLoader(500);
   const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
-
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-
-  // 👇 Новые состояния
-  const [showScrollButton, setShowScrollButton] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isUserAtBottom, setIsUserAtBottom] = useState(true);
 
   const formatTime = (input) => {
     const date = new Date(
@@ -55,7 +52,6 @@ function ChatPage() {
     timestamp: msg.timestamp ? Number(msg.timestamp) : new Date(msg.create_at || Date.now()).getTime(),
   }), []);
 
-  // 👇 Скролл вниз
   const scrollToBottom = useCallback(() => {
     const container = chatContainerRef.current;
     if (!container) return;
@@ -66,28 +62,7 @@ function ChatPage() {
         behavior: 'smooth',
       });
     });
-
-    // После того как пользователь вернулся вниз — нет непрочитанных
-    setUnreadCount(0);
   }, []);
-
-  // 👇 Проверка, находится ли пользователь внизу
-  const checkIsUserAtBottom = () => {
-    const c = chatContainerRef.current;
-    if (!c) return true;
-
-    const threshold = 80; // px
-    return c.scrollHeight - c.scrollTop - c.clientHeight < threshold;
-  };
-
-  // 👇 Обработчик скролла
-  const handleScroll = () => {
-    const atBottom = checkIsUserAtBottom();
-    setIsUserAtBottom(atBottom);
-
-    // Показать кнопку, если пользователь не внизу
-    setShowScrollButton(!atBottom);
-  };
 
   const loadHistory = useCallback(async (beforeTimestamp = null) => {
     if (!chatId) return;
@@ -141,8 +116,6 @@ function ChatPage() {
     loadHistory();
   }, [chatId, agent, loadHistory]);
 
-
-  // 👇 resize textarea
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -155,15 +128,6 @@ function ChatPage() {
     ta.addEventListener('input', resize);
     resize();
     return () => ta.removeEventListener('input', resize);
-  }, []);
-
-  // 👇 Подписка на scroll
-  useEffect(() => {
-    const c = chatContainerRef.current;
-    if (!c) return;
-
-    c.addEventListener('scroll', handleScroll);
-    return () => c.removeEventListener('scroll', handleScroll);
   }, []);
 
   const sendMessage = async () => {
@@ -194,16 +158,12 @@ function ChatPage() {
 
         if (data?.message && data.autor === 'ai_agent') {
           const aiMsg = transformMessage(data);
-
-          // 👇 Новое: если пользователь НЕ внизу — увеличиваем непрочитанные
-          if (!isUserAtBottom) setUnreadCount(c => c + 1);
-
           if (!list.some(m => m.id === aiMsg.id)) list.push(aiMsg);
         }
         return list;
       });
 
-      if (isUserAtBottom) setTimeout(scrollToBottom, 100);
+      setTimeout(scrollToBottom, 100);
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
       setMessages(prev => prev.filter(m => m.id !== tempId));
@@ -225,8 +185,6 @@ function ChatPage() {
 
   return (
     <div className={`${styles.body} ${styles.chatPage}`} style={{ position: 'relative' }}>
-      
-      {/* Навбар */}
       <nav className={styles.navbar}>
         <div className="container-fluid d-flex justify-content-between align-items-center px-0">
           <a href="#" onClick={(e) => { e.preventDefault(); navigate('/agents_list'); }} className={styles.prev}>
@@ -243,9 +201,8 @@ function ChatPage() {
 
       <div className={styles.glow} />
 
-      {/* Чат */}
-      <main ref={chatContainerRef} className={styles.chatContainer}>
 
+      <main ref={chatContainerRef} className={styles.chatContainer}>
         {hasMore && !isHistoryLoading && (
           <button
             onClick={() => {
@@ -257,7 +214,6 @@ function ChatPage() {
             {isLoadingMore ? 'Загрузка...' : 'Загрузить предыдущие сообщения'}
           </button>
         )}
-
         {messages.map(msg => (
           <div
             key={msg.id}
@@ -278,12 +234,10 @@ function ChatPage() {
             </div>
           </div>
         )}
-
       </main>
 
       <div className={styles.glowBottom} />
 
-      {/* Поле ввода */}
       <div className={styles.formBlock}>
         <div className={styles.blockQuestionField}>
           <textarea
@@ -305,8 +259,6 @@ function ChatPage() {
           <img src={IMAGES.send} alt="Отправить" />
         </div>
       </div>
-
-      {/* КНОПКА СКРОЛЛА ВНИЗ */}
       <div
         onClick={scrollToBottom}
         style={{
@@ -323,39 +275,11 @@ function ChatPage() {
           height: '40px',
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center',
-          
-          opacity: showScrollButton ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-          pointerEvents: showScrollButton ? 'auto' : 'none'
+          alignItems: 'center'
         }}
       >
         <img style={{ width: '20px', height: '20px' }} src={IMAGES.back} alt="Вниз" />
       </div>
-
-      {/* БЕЙДЖ «Новые сообщения» */}
-      {unreadCount > 0 && !showScrollButton && (
-        <div
-          onClick={scrollToBottom}
-          style={{
-            position: 'absolute',
-            bottom: '130px',
-            right: '20px',
-            backgroundColor: '#ff4444',
-            borderRadius: '12px',
-            padding: '6px 10px',
-            fontSize: '13px',
-            color: 'white',
-            cursor: 'pointer',
-            boxShadow: '0 0 10px rgba(0,0,0,0.25)',
-            opacity: 1,
-            transition: 'opacity 0.3s'
-          }}
-        >
-          Новые сообщения ({unreadCount})
-        </div>
-      )}
-
     </div>
   );
 }
