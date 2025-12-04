@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage.jsx';
 import AgentsListPage from './pages/AgentsListPage.jsx';
 import AgentSergyPage from './pages/AgentSergyPage.jsx';
@@ -13,9 +13,31 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import PaymentSuccess from './pages/PaymentSuccess.jsx';
 
 function App() {
+  const [firstVisitChecked, setFirstVisitChecked] = useState(false);
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
+
+  useEffect(() => {
+    const visited = localStorage.getItem('visited');
+    if (!visited) {
+      // первый визит
+      setIsFirstVisit(true);
+      localStorage.setItem('visited', 'true');
+    }
+    setFirstVisitChecked(true);
+  }, []);
+
+  if (!firstVisitChecked) {
+    return null; // или лоадер, пока проверяем localStorage
+  }
+
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route
+        path="/"
+        element={
+          isFirstVisit ? <HomePage /> : <Navigate to="/agents_list" replace />
+        }
+      />
       <Route path="/agents_list" element={<AgentsListPage />} />
       <Route path="/agent_sergy" element={<AgentSergyPage />} />
       <Route path="/agent_nick" element={<AgentNickPage />} />
@@ -51,5 +73,3 @@ function App() {
 }
 
 export default App;
-
-
