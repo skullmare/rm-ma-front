@@ -111,8 +111,7 @@ export function AuthProvider({ children }) {
             {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                timeout: 15000, // ← явный таймаут
+                }
             }
         );
 
