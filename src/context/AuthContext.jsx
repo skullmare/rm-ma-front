@@ -92,31 +92,28 @@ export function AuthProvider({ children }) {
         });
     }, []);
 
-    const authorize = useCallback(async (initData) => {
-        if (!initData) throw new Error('initData отсутствует');
+const authorize = useCallback(async (initData) => {
+    if (!initData) throw new Error('initData отсутствует');
 
-        setState(prev => ({
-            ...prev,
-            status: 'loading',
-            error: null,
-            initData,
-        }));
+    setState(prev => ({
+        ...prev,
+        status: 'loading',
+        error: null,
+        initData,
+    }));
 
-        const form = new URLSearchParams();
-        form.append('initData', initData);
-
-        const { data } = await apiClient.post(
-            '/api/auth/telegram/login',
-            form,
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                }
+    const { data } = await apiClient.post(
+        '/api/auth/telegram/login',
+        { initData }, // <— raw строка, НИКАКИХ энкодингов
+        {
+            headers: {
+                'Content-Type': 'application/json',
             }
-        );
+        }
+    );
 
-        applySession({ token: data.token, user: data.user }, initData);
-    }, [applySession]);
+    applySession({ token: data.token, user: data.user }, initData);
+}, [applySession]);
 
     // === Загрузка при старте ===
     useEffect(() => {
