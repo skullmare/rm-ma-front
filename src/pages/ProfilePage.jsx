@@ -55,9 +55,6 @@ function ProfilePage() {
   const photoUrl = profile?.photo_url || user?.photoUrl || DEFAULT_AVATAR;
   const roles = Array.isArray(profile?.roles) ? profile.roles : [];
 
-  // Получаем chat_id из профиля или пользователя
-  const chatId = profile?.chat_id || user?.telegramId || user?.id;
-
   // Обработчик изменения профессии с debounce
   const handleProfessionChange = (e) => {
     const newProfession = e.target.value;
@@ -70,11 +67,6 @@ function ProfilePage() {
 
     // Устанавливаем новый таймер на 1 секунду
     professionDebounceRef.current = setTimeout(async () => {
-      if (!chatId) {
-        console.error('chat_id not found, cannot update profession');
-        return;
-      }
-
       // Сохраняем фокус перед обновлением состояния
       const inputElement = professionInputRef.current;
       const hadFocus = document.activeElement === inputElement;
@@ -82,7 +74,6 @@ function ProfilePage() {
       setIsUpdatingProfession(true);
       try {
         await apiClient.put('/api/profile/profession', {
-          chat_id: String(chatId),
           profession: newProfession,
         });
         // Обновляем профиль локально

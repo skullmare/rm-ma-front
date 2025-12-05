@@ -72,7 +72,7 @@ function ChatPage() {
       if (beforeTimestamp) setIsLoadingMore(true);
       else setIsHistoryLoading(true);
 
-      const params = { chat_id: chatId };
+      const params = {};
       if (beforeTimestamp) params.timestamp = String(beforeTimestamp);
 
       const { data } = await apiClient.get('/api/chats/history', {

@@ -4,7 +4,6 @@ import styles from '../css/modules/TariffPage.module.css';
 import Spinner from '../components/Spinner';
 import { usePageLoader } from '../hooks/usePageLoader';
 import apiClient from '../lib/apiClient';
-import { useAuth } from '../context/AuthContext.jsx';
 
 const backArrowImg = '/img/Rectangle 42215.svg';
 const settingIconImg = '/img/setting_icon.svg';
@@ -12,17 +11,10 @@ const settingIconImg = '/img/setting_icon.svg';
 function TariffPage() {
   const navigate = useNavigate();
   const isLoadingPage = usePageLoader(300);
-  const { user } = useAuth();
 
   const [profile, setProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [error, setError] = useState('');
-
-  const chatId =
-    profile?.chat_id ||
-    user?.telegramId ||
-    user?.id ||
-    null;
 
   // ---- 1. Загружаем профиль (тариф пользователя) ----
   useEffect(() => {
@@ -60,14 +52,8 @@ function TariffPage() {
   // ---- 2. Обработка нажатия “НАЧАТЬ” ----
   const handleSubscribe = async () => {
     try {
-      if (!chatId) {
-        alert('Ошибка: chat_id отсутствует');
-        return;
-      }
-
       const { data } = await apiClient.post(
-        '/api/payments/create-payment',
-        { chat_id: String(chatId) }
+        '/api/payments/create-payment'
       );
 
       const redirectUrl = data?.confirmation?.confirmation_url;
