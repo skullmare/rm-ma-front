@@ -7,13 +7,12 @@ import React, {
     useState,
     useRef,
 } from 'react';
-import apiClient, { setAuthHeader } from '../lib/apiClient';
+import apiClient, { setInitDataHeader } from '../lib/apiClient';
 
 const AuthContext = createContext(null);
 
 const initialState = {
     status: 'booting', // booting | loading | authenticated | unauthorized | error
-    token: null,
     user: null,
     error: null,
     initData: null, // ← добавлено: сохраняем initData для reload()
@@ -21,10 +20,10 @@ const initialState = {
 
 const STORAGE_KEY = 'tg_miniapp_auth';
 
-const saveSessionToStorage = (token, user) => {
-    if (!token || !user) return;
+const saveSessionToStorage = (initData, user) => {
+    if (!initData || !user) return;
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ initData, user }));
     } catch (e) {
         console.warn('Не удалось сохранить сессию в localStorage', e);
     }
@@ -56,40 +55,57 @@ export function AuthProvider({ children }) {
         };
     }, []);
 
-    const applySession = useCallback((session, initData = null) => {
-        if (!isMounted.current) return;
-
-        // Сохраняем initData в ref
-        if (initData) {
-            initDataRef.current = initData;
-        }
-
-        setAuthHeader(session.token);
-        saveSessionToStorage(session.token, session.user);
-
-        // Используем функциональное обновление, чтобы не зависеть от state.initData
-        setState(prev => ({
-            status: 'authenticated',
-            token: session.token,
-            user: session.user,
-            error: null,
-            initData: initData || initDataRef.current || prev.initData,
-        }));
-    }, []); // Убираем зависимость от state.initData
+    const applySession = useCallback((session, initData = null) => {
+        if (!isMounted.current) return;
+
+        const resolvedInitData = initData || session.initData || initDataRef.current;
+
+        if (resolvedInitData) {
+            initDataRef.current = resolvedInitData;
+            setInitDataHeader(resolvedInitData);
+            saveSessionToStorage(resolvedInitData, session.user);
+        } else {
+            setInitDataHeader(null);
+            clearSessionStorage();
+        }
+
+        // D~??D?D_D??OD???D?D? ?,??D?D??+D,D_D?D?D??OD?D_D? D_D?D?D_D?D?D?D?D,D?, ???,D_D??< D?D? D?D?D?D,??D??,?O D_?, state.initData
+        setState(prev => ({
+            status: 'authenticated',
+            user: session.user,
+            error: null,
+            initData: resolvedInitData || prev.initData,
+        }));
+    }, []); // D?D?D,??D?D?D? D?D?D?D,??D,D?D_???,?O D_?, state.initData
 
     const handleError = useCallback((message) => {
+
         if (!isMounted.current) return;
 
-        setAuthHeader(null);
+
+
+        setInitDataHeader(null);
+
         clearSessionStorage();
 
+        initDataRef.current = null;
+
+        hasAuthorizedRef.current = false;
+
+
+
         setState({
+
             status: 'error',
-            token: null,
+
             user: null,
+
             error: message,
+
             initData: null,
+
         });
+
     }, []);
 
 const authorize = useCallback(async (initData) => {
@@ -112,7 +128,7 @@ const authorize = useCallback(async (initData) => {
         }
     );
 
-    applySession({ token: data.token, user: data.user }, initData);
+    applySession({ user: data.user }, initData);
 }, [applySession]);
 
     // === Загрузка при старте ===
@@ -134,7 +150,6 @@ const authorize = useCallback(async (initData) => {
                 // Нет initData → просим открыть в Telegram
                 setState({
                     status: 'unauthorized',
-                    token: null,
                     user: null,
                     error: 'Откройте мини-апп внутри Telegram',
                     initData: null,
@@ -171,12 +186,11 @@ const authorize = useCallback(async (initData) => {
 
     // === Выход ===
     const logout = useCallback(() => {
-        setAuthHeader(null);
+        setInitDataHeader(null);
         clearSessionStorage();
         hasAuthorizedRef.current = false; // Сбрасываем флаг при выходе
         setState({
             status: 'unauthorized',
-            token: null,
             user: null,
             error: null,
             initData: null,
@@ -221,4 +235,3 @@ export const useAuth = () => {
     }
     return context;
 };
-

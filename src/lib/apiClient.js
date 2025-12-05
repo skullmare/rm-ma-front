@@ -1,16 +1,18 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://rm-ma-back-rocketmind.amvera.io',
+  baseURL: 'http://localhost:4000',
 });
 
-export const setAuthHeader = (token) => {
-  if (token) {
-    apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
+const INIT_DATA_HEADER = 'X-Telegram-Init-Data';
+
+export const setInitDataHeader = (initData) => {
+  if (initData) {
+    apiClient.defaults.headers.common[INIT_DATA_HEADER] = initData;
     return;
   }
 
-  delete apiClient.defaults.headers.common.Authorization;
+  delete apiClient.defaults.headers.common[INIT_DATA_HEADER];
 };
 
 export default apiClient;
