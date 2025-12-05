@@ -186,16 +186,10 @@
     background: none;
     color: #A172F8;
     font-size: 13px;
-    font-weight: 600;
     text-transform: none;
     padding: 0;
     cursor: pointer;
     text-decoration: underline;
-    text-underline-offset: 2px;
-}
-
-.tariffPage .unsubscribeButton:hover {
-    color: #CDB0FF;
 }
 
 .tariffPage .autorenewInfo {

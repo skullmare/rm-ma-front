@@ -91,17 +91,7 @@ function TariffPage() {
     setUnsubscribeError('');
     try {
       await apiClient.post('/api/payments/unsubscribe');
-      setProfile((prev) => ({
-        ...(prev || {}),
-        tariff: 'free',
-        payment_method_id: null,
-        paymentMethodId: null,
-        last_payment_timestamp: null,
-        lastPaymentTimestamp: null,
-        last_payment_datetime: null,
-        lastPaymentDatetime: null,
-      }));
-      setIsUnsubscribeModalOpen(false);
+      window.location.reload();
     } catch (err) {
       console.error('Unsubscribe error:', err);
       setUnsubscribeError(
