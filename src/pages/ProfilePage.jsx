@@ -211,7 +211,6 @@ function ProfilePage() {
         <a href="#" className={styles.linkCorporatePage}>Политика конфиденциальности</a>
         <a href="#" className={styles.linkCorporatePage}>Условия использования</a>
         <a href="#" className={styles.linkCorporatePage}>О сервисе</a>
-        <a href="#" className={styles.linkCorporatePage}>ИНН 910232977414</a>
       </div>
     </div>
   );
