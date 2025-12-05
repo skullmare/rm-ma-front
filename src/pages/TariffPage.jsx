@@ -94,8 +94,12 @@ function TariffPage() {
       setProfile((prev) => ({
         ...(prev || {}),
         tariff: 'free',
+        payment_method_id: null,
+        paymentMethodId: null,
         last_payment_timestamp: null,
+        lastPaymentTimestamp: null,
         last_payment_datetime: null,
+        lastPaymentDatetime: null,
       }));
       setIsUnsubscribeModalOpen(false);
     } catch (err) {
@@ -136,6 +140,26 @@ function TariffPage() {
   const hasActiveSubscription =
     typeof lastPaymentTimestamp === 'number' &&
     Date.now() - lastPaymentTimestamp < THIRTY_DAYS_MS;
+  const paymentMethodId =
+    profile?.payment_method_id || profile?.paymentMethodId || null;
+  const hasPaymentMethod = Boolean(
+    typeof paymentMethodId === 'string'
+      ? paymentMethodId.trim()
+      : paymentMethodId
+  );
+  const subscriptionEndTimestamp =
+    typeof lastPaymentTimestamp === 'number'
+      ? lastPaymentTimestamp + THIRTY_DAYS_MS
+      : null;
+  const subscriptionEndDateText = subscriptionEndTimestamp
+    ? new Date(subscriptionEndTimestamp).toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+    : null;
+  const shouldShowUnsubscribeButton =
+    hasActiveSubscription || hasPaymentMethod;
 
   if (isLoadingPage || isLoadingProfile) return <Spinner />;
 
@@ -183,17 +207,6 @@ function TariffPage() {
             <button className={styles.buttonActive} disabled>НЕ ДОСТУПНО</button>
           )}
         </div>
-        {hasActiveSubscription && (
-          <div className={styles.unsubscribeLinkWrapper}>
-            <button
-              type="button"
-              className={styles.unsubscribeLink}
-              onClick={handleOpenUnsubscribeModal}
-            >
-              Отменить подписку
-            </button>
-          </div>
-        )}
       </div>
 
       {/* PREMIUM */}
@@ -212,7 +225,7 @@ function TariffPage() {
         </div>
       </section>
 
-      <div className={`${styles.contentBlock} d-flex align-items-center ${styles.contentBlockLast}`}>
+      <div className={`${styles.contentBlock} d-flex align-items-center`}>
         <div className={styles.buttonBlock}>
           {hasActiveSubscription ? (
             <button className={styles.buttonActive} disabled aria-pressed="true">
@@ -227,6 +240,25 @@ function TariffPage() {
             </button>
           )}
         </div>
+      </div>
+
+      <div className={`${styles.contentBlock} ${styles.contentBlockLast}`}>
+        {shouldShowUnsubscribeButton ? (
+          <div className={styles.unsubscribeButtonWrapper}>
+            <button
+              type="button"
+              className={styles.unsubscribeButton}
+              onClick={handleOpenUnsubscribeModal}
+            >
+              Отменить подписку
+            </button>
+          </div>
+        ) : (
+          <p className={styles.autorenewInfo}>
+            автопродление отключено, подписка действует до{' '}
+            {subscriptionEndDateText || '—'}
+          </p>
+        )}
       </div>
 
       {error && (

@@ -176,20 +176,35 @@
     gap: 4px;
 }
 
-.tariffPage .unsubscribeLinkWrapper {
+.tariffPage .unsubscribeButtonWrapper {
     width: 100%;
-    margin-top: 12px;
     text-align: center;
 }
 
-.tariffPage .unsubscribeLink {
-    border: none;
-    background: none;
+.tariffPage .unsubscribeButton {
+    border: 1px solid #A172F8;
+    background: transparent;
     color: #A172F8;
-    text-decoration: underline;
     font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 6px;
+    padding: 10px 16px;
     cursor: pointer;
-    padding: 0;
+    transition: opacity 0.2s ease;
+    width: 100%;
+    max-width: 320px;
+}
+
+.tariffPage .unsubscribeButton:hover {
+    opacity: 0.85;
+}
+
+.tariffPage .autorenewInfo {
+    font-size: 13px;
+    color: #A9A9A9;
+    text-align: center;
+    margin: 0;
 }
 
 .tariffPage .modalOverlay {
