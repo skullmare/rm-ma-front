@@ -175,3 +175,77 @@
     flex-direction: column;
     gap: 4px;
 }
+
+.tariffPage .unsubscribeLinkWrapper {
+    width: 100%;
+    margin-top: 12px;
+    text-align: center;
+}
+
+.tariffPage .unsubscribeLink {
+    border: none;
+    background: none;
+    color: #A172F8;
+    text-decoration: underline;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.tariffPage .modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.tariffPage .modalContent {
+    background: #1F1F1F;
+    border: 1px solid #3E3E3E;
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%;
+    max-width: 360px;
+    color: #E0E0E0;
+    text-align: center;
+}
+
+.tariffPage .modalTitle {
+    font-size: 16px;
+    margin-bottom: 16px;
+}
+
+.tariffPage .modalError {
+    color: #f66;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.tariffPage .modalActions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.tariffPage .modalButton {
+    flex: 1;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.tariffPage .modalButtonConfirm {
+    background: #FFCC00;
+    color: #000;
+}
+
+.tariffPage .modalButtonCancel {
+    background: #372558;
+    color: #E0E0E0;
+}

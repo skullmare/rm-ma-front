@@ -15,6 +15,9 @@ function TariffPage() {
   const [profile, setProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [error, setError] = useState('');
+  const [isUnsubscribeModalOpen, setIsUnsubscribeModalOpen] = useState(false);
+  const [isUnsubscribing, setIsUnsubscribing] = useState(false);
+  const [unsubscribeError, setUnsubscribeError] = useState('');
 
   // ---- 1. Загружаем профиль (тариф пользователя) ----
   useEffect(() => {
@@ -69,7 +72,42 @@ function TariffPage() {
     }
   };
 
+  const handleOpenUnsubscribeModal = (e) => {
+    e.preventDefault();
+    setUnsubscribeError('');
+    setIsUnsubscribeModalOpen(true);
+  };
+
+  const handleCloseUnsubscribeModal = () => {
+    if (isUnsubscribing) return;
+    setIsUnsubscribeModalOpen(false);
+    setUnsubscribeError('');
+  };
+
+  const handleConfirmUnsubscribe = async () => {
+    setIsUnsubscribing(true);
+    setUnsubscribeError('');
+    try {
+      await apiClient.post('/api/payments/unsubscribe');
+      setProfile((prev) => ({
+        ...(prev || {}),
+        tariff: 'free',
+      }));
+      setIsUnsubscribeModalOpen(false);
+    } catch (err) {
+      console.error('Unsubscribe error:', err);
+      setUnsubscribeError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          'Не удалось отменить подписку'
+      );
+    } finally {
+      setIsUnsubscribing(false);
+    }
+  };
+
   const tariff = profile?.tariff || 'free';
+  const isPremium = tariff === 'premium';
 
   if (isLoadingPage || isLoadingProfile) return <Spinner />;
 
@@ -117,6 +155,17 @@ function TariffPage() {
             <button className={styles.buttonActive} disabled>НЕ ДОСТУПНО</button>
           )}
         </div>
+        {isPremium && (
+          <div className={styles.unsubscribeLinkWrapper}>
+            <button
+              type="button"
+              className={styles.unsubscribeLink}
+              onClick={handleOpenUnsubscribeModal}
+            >
+              Отменить подписку
+            </button>
+          </div>
+        )}
       </div>
 
       {/* PREMIUM */}
@@ -137,7 +186,7 @@ function TariffPage() {
 
       <div className={`${styles.contentBlock} d-flex align-items-center ${styles.contentBlockLast}`}>
         <div className={styles.buttonBlock}>
-          {tariff === 'premium' ? (
+          {isPremium ? (
             <button className={styles.buttonActive} disabled aria-pressed="true">
               АКТИВИРОВАН
             </button>
@@ -155,6 +204,43 @@ function TariffPage() {
       {error && (
         <div className={styles.contentBlock}>
           <p style={{ color: '#f66' }}>{error}</p>
+        </div>
+      )}
+
+      {isUnsubscribeModalOpen && (
+        <div
+          className={styles.modalOverlay}
+          role="dialog"
+          aria-modal="true"
+          onClick={handleCloseUnsubscribeModal}
+        >
+          <div
+            className={styles.modalContent}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className={styles.modalTitle}>Вы точно хотите отменить подписку?</p>
+            {unsubscribeError && (
+              <p className={styles.modalError}>{unsubscribeError}</p>
+            )}
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={`${styles.modalButton} ${styles.modalButtonConfirm}`}
+                onClick={handleConfirmUnsubscribe}
+                disabled={isUnsubscribing}
+              >
+                {isUnsubscribing ? 'Отменяем...' : 'Да'}
+              </button>
+              <button
+                type="button"
+                className={`${styles.modalButton} ${styles.modalButtonCancel}`}
+                onClick={handleCloseUnsubscribeModal}
+                disabled={isUnsubscribing}
+              >
+                Нет
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
