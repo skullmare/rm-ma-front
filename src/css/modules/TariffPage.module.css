@@ -182,22 +182,20 @@
 }
 
 .tariffPage .unsubscribeButton {
-    border: 1px solid #A172F8;
-    background: transparent;
+    border: none;
+    background: none;
     color: #A172F8;
     font-size: 13px;
     font-weight: 600;
-    text-transform: uppercase;
-    border-radius: 6px;
-    padding: 10px 16px;
+    text-transform: none;
+    padding: 0;
     cursor: pointer;
-    transition: opacity 0.2s ease;
-    width: 100%;
-    max-width: 320px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .tariffPage .unsubscribeButton:hover {
-    opacity: 0.85;
+    color: #CDB0FF;
 }
 
 .tariffPage .autorenewInfo {

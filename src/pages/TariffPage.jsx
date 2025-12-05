@@ -106,8 +106,8 @@ function TariffPage() {
       console.error('Unsubscribe error:', err);
       setUnsubscribeError(
         err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          'Не удалось отменить подписку'
+        err?.response?.data?.error ||
+        'Не удалось отменить подписку'
       );
     } finally {
       setIsUnsubscribing(false);
@@ -153,10 +153,10 @@ function TariffPage() {
       : null;
   const subscriptionEndDateText = subscriptionEndTimestamp
     ? new Date(subscriptionEndTimestamp).toLocaleDateString('ru-RU', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      })
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
     : null;
   const shouldShowUnsubscribeButton =
     hasActiveSubscription && hasPaymentMethod;
@@ -240,26 +240,27 @@ function TariffPage() {
             </button>
           )}
         </div>
+        <div>
+          {shouldShowUnsubscribeButton ? (
+            <div className={styles.unsubscribeButtonWrapper}>
+              <button
+                type="button"
+                className={styles.unsubscribeButton}
+                onClick={handleOpenUnsubscribeModal}
+              >
+                Отменить подписку
+              </button>
+            </div>
+          ) : (
+            <p className={styles.autorenewInfo}>
+              автопродление отключено, подписка действует до{' '}
+              {subscriptionEndDateText || '—'}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className={`${styles.contentBlock} ${styles.contentBlockLast}`}>
-        {shouldShowUnsubscribeButton ? (
-          <div className={styles.unsubscribeButtonWrapper}>
-            <button
-              type="button"
-              className={styles.unsubscribeButton}
-              onClick={handleOpenUnsubscribeModal}
-            >
-              Отменить подписку
-            </button>
-          </div>
-        ) : (
-          <p className={styles.autorenewInfo}>
-            автопродление отключено, подписка действует до{' '}
-            {subscriptionEndDateText || '—'}
-          </p>
-        )}
-      </div>
+
 
       {error && (
         <div className={styles.contentBlock}>
