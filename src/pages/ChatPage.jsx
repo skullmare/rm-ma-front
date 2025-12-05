@@ -77,7 +77,6 @@ function ChatPage() {
 
       const { data } = await apiClient.get('/api/chats/history', {
         params,
-        timeout: 10000,
       });
 
       if (Array.isArray(data?.messages)) {
