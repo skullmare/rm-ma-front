@@ -159,7 +159,7 @@ function TariffPage() {
       })
     : null;
   const shouldShowUnsubscribeButton =
-    hasActiveSubscription || hasPaymentMethod;
+    hasActiveSubscription && hasPaymentMethod;
 
   if (isLoadingPage || isLoadingProfile) return <Spinner />;
 
