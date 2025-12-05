@@ -8,6 +8,8 @@ import apiClient from '../lib/apiClient';
 const backArrowImg = '/img/Rectangle 42215.svg';
 const settingIconImg = '/img/setting_icon.svg';
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 function TariffPage() {
   const navigate = useNavigate();
   const isLoadingPage = usePageLoader(300);
@@ -92,6 +94,8 @@ function TariffPage() {
       setProfile((prev) => ({
         ...(prev || {}),
         tariff: 'free',
+        last_payment_timestamp: null,
+        last_payment_datetime: null,
       }));
       setIsUnsubscribeModalOpen(false);
     } catch (err) {
@@ -106,8 +110,32 @@ function TariffPage() {
     }
   };
 
-  const tariff = profile?.tariff || 'free';
-  const isPremium = tariff === 'premium';
+  const resolveLastPaymentTimestamp = () => {
+    if (!profile) return null;
+
+    const ts = profile.last_payment_timestamp ?? profile.lastPaymentTimestamp;
+    if (ts !== undefined && ts !== null) {
+      const tsNumber = Number(ts);
+      if (!Number.isNaN(tsNumber)) {
+        return tsNumber;
+      }
+    }
+
+    const iso = profile.last_payment_datetime ?? profile.lastPaymentDatetime;
+    if (iso) {
+      const parsed = Date.parse(iso);
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+
+    return null;
+  };
+
+  const lastPaymentTimestamp = resolveLastPaymentTimestamp();
+  const hasActiveSubscription =
+    typeof lastPaymentTimestamp === 'number' &&
+    Date.now() - lastPaymentTimestamp < THIRTY_DAYS_MS;
 
   if (isLoadingPage || isLoadingProfile) return <Spinner />;
 
@@ -149,13 +177,13 @@ function TariffPage() {
 
       <div className={`${styles.contentBlock} d-flex align-items-center`}>
         <div className={styles.buttonBlock}>
-          {tariff === 'free' ? (
+          {hasActiveSubscription ? (
             <button className={styles.buttonActive} disabled>АКТИВИРОВАН</button>
           ) : (
             <button className={styles.buttonActive} disabled>НЕ ДОСТУПНО</button>
           )}
         </div>
-        {isPremium && (
+        {hasActiveSubscription && (
           <div className={styles.unsubscribeLinkWrapper}>
             <button
               type="button"
@@ -186,7 +214,7 @@ function TariffPage() {
 
       <div className={`${styles.contentBlock} d-flex align-items-center ${styles.contentBlockLast}`}>
         <div className={styles.buttonBlock}>
-          {isPremium ? (
+          {hasActiveSubscription ? (
             <button className={styles.buttonActive} disabled aria-pressed="true">
               АКТИВИРОВАН
             </button>
