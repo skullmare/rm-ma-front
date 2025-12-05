@@ -148,8 +148,11 @@ function TariffPage() {
       year: 'numeric',
     })
     : null;
+  const isFreeTierActive = !hasActiveSubscription;
   const shouldShowUnsubscribeButton =
     hasActiveSubscription && hasPaymentMethod;
+  const shouldShowAutorenewInfo =
+    hasActiveSubscription && !hasPaymentMethod;
 
   if (isLoadingPage || isLoadingProfile) return <Spinner />;
 
@@ -191,11 +194,9 @@ function TariffPage() {
 
       <div className={`${styles.contentBlock} d-flex align-items-center`}>
         <div className={styles.buttonBlock}>
-          {hasActiveSubscription ? (
-            <button className={styles.buttonActive} disabled>АКТИВИРОВАН</button>
-          ) : (
-            <button className={styles.buttonActive} disabled>НЕ ДОСТУПНО</button>
-          )}
+          <button className={styles.buttonActive} disabled>
+            {isFreeTierActive ? 'АКТИВИРОВАН' : 'НЕ ДОСТУПНО'}
+          </button>
         </div>
       </div>
 
@@ -230,24 +231,27 @@ function TariffPage() {
             </button>
           )}
         </div>
-        <div>
-          {shouldShowUnsubscribeButton ? (
-            <div className={styles.unsubscribeButtonWrapper}>
-              <button
-                type="button"
-                className={styles.unsubscribeButton}
-                onClick={handleOpenUnsubscribeModal}
-              >
-                Отменить подписку
-              </button>
-            </div>
-          ) : (
-            <p className={styles.autorenewInfo}>
-              автопродление отключено, подписка действует до{' '}
-              {subscriptionEndDateText || '—'}
-            </p>
-          )}
-        </div>
+        {hasActiveSubscription && (
+          <div>
+            {shouldShowUnsubscribeButton && (
+              <div className={styles.unsubscribeButtonWrapper}>
+                <button
+                  type="button"
+                  className={styles.unsubscribeButton}
+                  onClick={handleOpenUnsubscribeModal}
+                >
+                  Отменить подписку
+                </button>
+              </div>
+            )}
+            {shouldShowAutorenewInfo && (
+              <p className={styles.autorenewInfo}>
+                автопродление отключено, подписка действует до{' '}
+                {subscriptionEndDateText || '—'}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
 
