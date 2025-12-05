@@ -225,7 +225,7 @@ function TariffPage() {
         </div>
       </section>
 
-      <div className={`${styles.contentBlock} d-flex align-items-center`}>
+      <div className={`${styles.contentBlock} d-flex flex-column align-items-center`}>
         <div className={styles.buttonBlock}>
           {hasActiveSubscription ? (
             <button className={styles.buttonActive} disabled aria-pressed="true">
