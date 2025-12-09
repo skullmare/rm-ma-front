@@ -215,11 +215,11 @@ function ProfilePage() {
             placeholder="Генеральный директор.."
             value={role}
             onChange={handleRoleChange}
-            disabled={isUpdatingRole}
+            aria-busy={isUpdatingRole}
           />
           {isUpdatingRole && (
             <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
-              Saving...
+              Сохранение...
             </div>
           )}
         </div>
@@ -236,7 +236,7 @@ function ProfilePage() {
             placeholder="Укажите вашу сферу деятельности.."
             value={profession}
             onChange={handleProfessionChange}
-            disabled={isUpdatingProfession}
+            aria-busy={isUpdatingProfession}
           />
           {isUpdatingProfession && (
             <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
