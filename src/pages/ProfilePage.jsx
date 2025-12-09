@@ -22,6 +22,10 @@ function ProfilePage() {
   const [isUpdatingProfession, setIsUpdatingProfession] = useState(false);
   const professionDebounceRef = useRef(null);
   const professionInputRef = useRef(null);
+  const [role, setRole] = useState('');
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  const roleDebounceRef = useRef(null);
+  const roleInputRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -32,6 +36,11 @@ function ProfilePage() {
         if (isMounted && data?.profile) {
           setProfile(data.profile);
           setProfession(data.profile.profession || '');
+          if (Array.isArray(data.profile.roles) && data.profile.roles.length > 0) {
+            setRole(data.profile.roles[0] || '');
+          } else {
+            setRole(data.profile.role || '');
+          }
         }
       } catch (err) {
         if (isMounted) {
@@ -53,7 +62,6 @@ function ProfilePage() {
   const username = usernameRaw.startsWith('@') ? usernameRaw.slice(1) : usernameRaw;
 
   const photoUrl = profile?.photo_url || user?.photoUrl || DEFAULT_AVATAR;
-  const roles = Array.isArray(profile?.roles) ? profile.roles : [];
 
   // Обработчик изменения профессии с debounce
   const handleProfessionChange = (e) => {
@@ -95,11 +103,55 @@ function ProfilePage() {
     }, 1000);
   };
 
+  const handleRoleChange = (e) => {
+    const newRole = e.target.value;
+    setRole(newRole);
+
+    if (roleDebounceRef.current) {
+      clearTimeout(roleDebounceRef.current);
+    }
+
+    roleDebounceRef.current = setTimeout(async () => {
+      const inputElement = roleInputRef.current;
+      const hadFocus = document.activeElement === inputElement;
+
+      setIsUpdatingRole(true);
+      try {
+        await apiClient.put('/api/profile/role', {
+          role: newRole,
+        });
+        setProfile((prev) => {
+          if (!prev) {
+            return prev;
+          }
+          return {
+            ...prev,
+            roles: newRole ? [newRole] : [],
+          };
+        });
+      } catch (err) {
+        console.error('Failed to update role:', err);
+        setError(err?.response?.data?.message || 'Failed to update role');
+      } finally {
+        setIsUpdatingRole(false);
+
+        if (hadFocus && inputElement) {
+          setTimeout(() => {
+            inputElement.focus();
+          }, 0);
+        }
+      }
+    }, 1000);
+  };
+
   // Очистка таймера при размонтировании
   useEffect(() => {
     return () => {
       if (professionDebounceRef.current) {
         clearTimeout(professionDebounceRef.current);
+      }
+      if (roleDebounceRef.current) {
+        clearTimeout(roleDebounceRef.current);
       }
     };
   }, []);
@@ -155,16 +207,20 @@ function ProfilePage() {
       {/* Роли */}
       <div className={styles.contentBlock}>
         <span className={styles.sectionTitle}>ВАША РОЛЬ:</span>
-        <div className="d-flex flex-wrap gap-2 mt-2">
-          {roles.length > 0 ? (
-            roles.map((role, i) => (
-              <div key={i} className={styles.addRole}>{role}</div>
-            ))
-          ) : (
-            <>
-              <div className={styles.addRole}>Добавить роль +</div>
-              <div className={styles.addRole}>Добавить роль +</div>
-            </>
+        <div className="mt-2">
+          <input
+            ref={roleInputRef}
+            className={styles.personActivity}
+            type="text"
+            placeholder="Генеральный директор.."
+            value={role}
+            onChange={handleRoleChange}
+            disabled={isUpdatingRole}
+          />
+          {isUpdatingRole && (
+            <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+              Saving...
+            </div>
           )}
         </div>
       </div>
