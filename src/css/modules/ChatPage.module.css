@@ -302,3 +302,264 @@
 .chatPage .loadMoreButton:active {
     transform: scale(0.97);
 }
+
+/* MARKDOWN STYLES - добавьте эти стили в конец вашего файла */
+
+/* Основные стили для markdown контента */
+.chatPage .markdownContent {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  line-height: 1.6;
+  color: #E0E0E0;
+  width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Заголовки */
+.chatPage .markdownH1 {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin: 1em 0 0.5em 0;
+  color: #FFFFFF;
+  border-bottom: 1px solid #3E3E3E;
+  padding-bottom: 0.3em;
+}
+
+.chatPage .markdownH2 {
+  font-size: 1.3em;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em 0;
+  color: #F0F0F0;
+}
+
+.chatPage .markdownH3 {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 0.6em 0 0.3em 0;
+  color: #E8E8E8;
+}
+
+.chatPage .markdownH4 {
+  font-size: 1em;
+  font-weight: 600;
+  margin: 0.5em 0 0.25em 0;
+  color: #E0E0E0;
+}
+
+/* Параграфы */
+.chatPage .markdownP {
+  margin: 0.5em 0;
+  color: #E0E0E0;
+}
+
+/* Списки */
+.chatPage .markdownUl,
+.chatPage .markdownOl {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+  color: #E0E0E0;
+}
+
+.chatPage .markdownLi {
+  margin: 0.3em 0;
+  padding-left: 0.2em;
+}
+
+.chatPage .markdownUl li::marker {
+  color: #888;
+}
+
+.chatPage .markdownOl li::marker {
+  color: #888;
+}
+
+/* Таблицы */
+.chatPage .tableWrapper {
+  overflow-x: auto;
+  margin: 1em 0;
+  border-radius: 8px;
+  border: 1px solid #3E3E3E;
+  background: #1E1E1E;
+}
+
+.chatPage .markdownTable {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 300px;
+  font-size: 0.9em;
+}
+
+.chatPage .markdownTh {
+  background-color: #2D2D2D;
+  border: 1px solid #3E3E3E;
+  padding: 8px 12px;
+  font-weight: 600;
+  text-align: left;
+  color: #D0D0D0;
+}
+
+.chatPage .markdownTd {
+  border: 1px solid #3E3E3E;
+  padding: 8px 12px;
+  color: #E0E0E0;
+}
+
+.chatPage .markdownTable tr:nth-child(even) {
+  background-color: #252525;
+}
+
+.chatPage .markdownTable tr:hover {
+  background-color: #2A2A2A;
+}
+
+/* Код */
+.chatPage .codeBlock {
+  margin: 0.8em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #3E3E3E;
+}
+
+.chatPage .inlineCode {
+  background-color: #2A2A2A;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.9em;
+  color: #A172F8;
+  border: 1px solid #3E3E3E;
+}
+
+/* Цитаты */
+.chatPage .markdownBlockquote {
+  border-left: 3px solid #A172F8;
+  margin: 0.5em 0;
+  padding-left: 1em;
+  color: #B0B0B0;
+  font-style: italic;
+  background: rgba(161, 114, 248, 0.05);
+  padding: 8px 12px;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Разделители */
+.chatPage .markdownHr {
+  border: none;
+  border-top: 1px solid #3E3E3E;
+  margin: 1.5em 0;
+}
+
+/* Ссылки */
+.chatPage .markdownLink {
+  color: #A172F8;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.chatPage .markdownLink:hover {
+  border-bottom: 1px solid #A172F8;
+}
+
+/* Текст */
+.chatPage .markdownStrong {
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.chatPage .markdownEm {
+  font-style: italic;
+  color: #E0E0E0;
+}
+
+/* Специальные элементы для сообщений */
+.chatPage .message.incoming .markdownContent {
+  color: #E0E0E0;
+}
+
+.chatPage .message.outgoing .markdownContent {
+  color: #FFFFFF;
+}
+
+/* Дополнительные стили для улучшенного отображения */
+.chatPage .markdownContent pre {
+  margin: 0;
+  background: #1A1A1A !important;
+}
+
+.chatPage .markdownContent code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+/* Стили для SyntaxHighlighter (подсветка кода) */
+.chatPage .codeBlock pre {
+  margin: 0 !important;
+  padding: 12px !important;
+  background: #1A1A1A !important;
+  border-radius: 8px !important;
+}
+
+.chatPage .codeBlock code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
+  font-size: 0.85em !important;
+  line-height: 1.4 !important;
+}
+
+/* Скроллбар для таблиц */
+.chatPage .tableWrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.chatPage .tableWrapper::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.chatPage .tableWrapper::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 3px;
+}
+
+.chatPage .tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* Адаптивные стили для мобильных */
+@media (max-width: 480px) {
+  .chatPage .markdownTable {
+    font-size: 0.85em;
+  }
+  
+  .chatPage .markdownTh,
+  .chatPage .markdownTd {
+    padding: 6px 8px;
+  }
+  
+  .chatPage .markdownH1 {
+    font-size: 1.3em;
+  }
+  
+  .chatPage .markdownH2 {
+    font-size: 1.2em;
+  }
+  
+  .chatPage .markdownH3 {
+    font-size: 1.1em;
+  }
+}
+
+/* Анимация появления для плавности */
+.chatPage .markdownContent * {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

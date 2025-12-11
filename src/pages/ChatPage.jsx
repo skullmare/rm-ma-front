@@ -1,6 +1,3 @@
-// Ниже — обновлённая версия ChatPage с кнопкой "Загрузить предыдущие сообщения"
-// Удалён весь код, связанный со скроллом для подгрузки истории.
-
 import React, {
   useCallback,
   useEffect,
@@ -13,6 +10,7 @@ import Spinner from '../components/Spinner';
 import { usePageLoader } from '../hooks/usePageLoader';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../context/AuthContext.jsx';
+import Message from '../components/Message'; // Импортируем компонент Message
 
 const IMAGES = {
   back: '/img/Rectangle 42215.svg',
@@ -36,7 +34,7 @@ function ChatPage() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [textareaHeight, setTextareaHeight] = useState(44); // Начальная высота textarea
+  const [textareaHeight, setTextareaHeight] = useState(44);
 
   const formatTime = (input) => {
     const date = new Date(
@@ -116,27 +114,18 @@ function ChatPage() {
     loadHistory();
   }, [chatId, agent, loadHistory]);
 
-  // Исправленный useEffect для адаптации высоты textarea
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
 
     const resize = () => {
-      // Сбрасываем высоту для корректного расчета
       ta.style.height = 'auto';
-      
-      // Рассчитываем новую высоту (ограничение 140px)
       const newHeight = Math.min(ta.scrollHeight, 140);
       ta.style.height = newHeight + 'px';
-      
-      // Включаем прокрутку только если достигнут максимум
       ta.style.overflowY = newHeight >= 140 ? 'auto' : 'hidden';
-      
-      // Сохраняем текущую высоту для расчета положения кнопки
       setTextareaHeight(newHeight);
     };
 
-    // Вызываем при каждом изменении значения
     resize();
   }, [inputValue]);
 
@@ -154,9 +143,10 @@ function ChatPage() {
     };
 
     setMessages(prev => [...prev, newMsg]);
-    setInputValue(''); // Значение очистится, useEffect сам обработает сброс высоты
+    setInputValue('');
     setIsLoading(true);
     setTimeout(scrollToBottom, 100);
+    
     try {
       const { data } = await apiClient.post('/api/chats/send', { message: text, agent });
 
@@ -171,8 +161,6 @@ function ChatPage() {
         }
         return list;
       });
-
-      
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
       setMessages(prev => prev.filter(m => m.id !== tempId));
@@ -188,13 +176,10 @@ function ChatPage() {
     }
   };
 
-  // Динамически рассчитываем bottom отступ для кнопки прокрутки
   const calculateButtonBottom = () => {
-    const minTextareaHeight = 44; // Минимальная высота textarea
-    const baseBottom = 80; // Базовый отступ при минимальной высоте
+    const minTextareaHeight = 44;
+    const baseBottom = 80;
     const heightDifference = Math.max(0, textareaHeight - minTextareaHeight);
-    
-    // Увеличиваем отступ пропорционально увеличению высоты textarea
     return baseBottom + heightDifference;
   };
 
@@ -232,14 +217,10 @@ function ChatPage() {
             {isLoadingMore ? 'Загрузка...' : 'Загрузить предыдущие сообщения'}
           </button>
         )}
+        
+        {/* Используем компонент Message для рендеринга всех сообщений */}
         {messages.map(msg => (
-          <div
-            key={msg.id}
-            className={`${styles.message} ${msg.type === 'incoming' ? styles.incoming : styles.outgoing}`}
-          >
-            {msg.text}
-            <div className={styles.messageTime}>{msg.time}</div>
-          </div>
+          <Message key={msg.id} msg={msg} />
         ))}
 
         {isLoading && (
@@ -256,11 +237,10 @@ function ChatPage() {
 
       <div className={styles.glowBottom} />
 
-      {/* Кнопка прокрутки с динамическим положением */}
       <div
         onClick={scrollToBottom}
         style={{
-          position: 'fixed', // Используем fixed для независимого позиционирования
+          position: 'fixed',
           bottom: `${calculateButtonBottom()}px`,
           right: '20px',
           transform: 'rotate(-90deg)',
@@ -268,14 +248,14 @@ function ChatPage() {
           cursor: 'pointer',
           borderRadius: '50%',
           backgroundColor: '#2d2d2d',
-          zIndex: 10000, // Увеличиваем z-index
+          zIndex: 10000,
           width: '40px',
           height: '40px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          transition: 'bottom 0.2s ease', // Плавная анимация изменения положения
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)' // Тень для лучшей видимости
+          transition: 'bottom 0.2s ease',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
         }}
       >
         <img 
