@@ -9,16 +9,20 @@ import { ROUTES } from '../constants/routes';
  * @param {Object} props
  * @param {'back'|'logo'|'none'} props.leftIcon - Тип левой иконки
  * @param {string} props.centerText - Текст в центре навбара
+ * @param {string} props.tariffLabel - Текст тарифа (например, "Базовый")
  * @param {Function} props.onLeftClick - Обработчик клика на левую иконку (опционально)
  * @param {Function} props.onRightClick - Обработчик клика на правую иконку (опционально)
+ * @param {Function} props.onTariffClick - Обработчик клика на тариф (опционально)
  * @param {boolean} props.showProfileIcon - Показывать ли иконку профиля справа (по умолчанию true)
  * @param {string} props.className - Дополнительные CSS классы
  */
 function PageNavbar({
   leftIcon = 'back',
   centerText = '',
+  tariffLabel = '',
   onLeftClick,
   onRightClick,
+  onTariffClick,
   showProfileIcon = true,
   className = '',
 }) {
@@ -48,6 +52,16 @@ function PageNavbar({
     }
   };
 
+  const handleTariffClick = (e) => {
+    e.preventDefault();
+    if (onTariffClick) {
+      onTariffClick(e);
+    } else {
+      // Дефолтное поведение - переход на тарифы
+      navigate(ROUTES.TARIFF);
+    }
+  };
+
   const getLeftIconSrc = () => {
     if (leftIcon === 'back') return IMAGES.BACK_ARROW;
     if (leftIcon === 'logo') return IMAGES.LOGO;
@@ -58,8 +72,8 @@ function PageNavbar({
 
   return (
     <nav className={`${styles.navbar} ${className}`}>
-      <div className="container-fluid d-flex justify-content-between align-items-center px-0">
-        {/* Левая часть */}
+      <div className={styles.navbarContainer}>
+        {/* Левая часть - логотип или кнопка назад */}
         {leftIcon !== 'none' && leftIconSrc && (
           <a
             className={leftIcon === 'logo' ? styles.navbarBrand : styles.prev}
@@ -73,14 +87,22 @@ function PageNavbar({
         {/* Центральная часть */}
         {centerText && <span className={styles.centerText}>{centerText}</span>}
 
-        {/* Правая часть - иконка профиля */}
-        {showProfileIcon && (
-          <a className={styles.navbarAccount} href="#" onClick={handleRightClick}>
-            <div className={styles.accountIcon}>
+        {/* Правая часть - тариф и профиль */}
+        <div className={styles.navbarRight}>
+          {/* Кнопка тарифа */}
+          {tariffLabel && (
+            <a href="#" onClick={handleTariffClick} className={styles.tariffButton}>
+              {tariffLabel}
+            </a>
+          )}
+
+          {/* Иконка профиля */}
+          {showProfileIcon && (
+            <a className={styles.profileIcon} href="#" onClick={handleRightClick}>
               <img src={IMAGES.PERSON} alt="Профиль" />
-            </div>
-          </a>
-        )}
+            </a>
+          )}
+        </div>
       </div>
     </nav>
   );
