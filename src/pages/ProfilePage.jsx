@@ -7,7 +7,7 @@ import apiClient from '../lib/apiClient';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const BACK_ARROW = '/img/Rectangle 42215.svg';
-const SETTINGS_ICON = '/img/setting_icon.svg';
+const SETTINGS_ICON = '/img/person.svg';
 const DEFAULT_AVATAR = '/img/person.svg';
 
 function ProfilePage() {

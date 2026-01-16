@@ -4,7 +4,7 @@ import styles from '../css/modules/AgentLidaPage.module.css';
 import Spinner from '../components/Spinner';
 import { usePageLoader } from '../hooks/usePageLoader';
 const backArrowImg = '/img/Rectangle 42215.svg';
-const settingIconImg = '/img/setting_icon.svg';
+const settingIconImg = '/img/person.svg';
 const lidaImg = '/img/Lida.png';
 
 function AgentLidaPage() {
