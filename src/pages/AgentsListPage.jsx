@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../css/modules/AgentsListPage.module.css';
 import Spinner from '../components/Spinner';
@@ -6,10 +6,35 @@ import PageNavbar from '../components/PageNavbar';
 import { usePageLoader } from '../hooks/usePageLoader';
 import { AGENTS_LIST } from '../constants/agents';
 import { IMAGES } from '../constants/images';
+import apiClient from '../lib/apiClient';
 
 function AgentsListPage() {
   const navigate = useNavigate();
   const isLoading = usePageLoader(500);
+  const [tariffLabel, setTariffLabel] = useState('Базовый');
+
+  // Загрузка профиля для определения тарифа
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const { data } = await apiClient.get('/api/profile');
+        if (data?.profile?.role) {
+          // Определяем тариф на основе роли
+          const role = data.profile.role.toLowerCase();
+          if (role.includes('premium') || role.includes('про')) {
+            setTariffLabel('Премиум');
+          } else {
+            setTariffLabel('Базовый');
+          }
+        }
+      } catch (err) {
+        // В случае ошибки оставляем дефолтный тариф
+        console.log('Не удалось загрузить профиль:', err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleAgentClick = (e, agentRoute) => {
     e.preventDefault();
@@ -22,7 +47,7 @@ function AgentsListPage() {
 
   return (
     <div className={`${styles.body} ${styles.agentsListPage}`}>
-      <PageNavbar leftIcon="logo" />
+      <PageNavbar leftIcon="logo" tariffLabel={tariffLabel} />
 
       <div className={styles.glow}></div>
 
