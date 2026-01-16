@@ -2,13 +2,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../css/modules/ProfilePage.module.css';
 import Spinner from '../components/Spinner';
+import PageNavbar from '../components/PageNavbar';
 import { usePageLoader } from '../hooks/usePageLoader';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../context/AuthContext.jsx';
-
-const BACK_ARROW = '/img/Rectangle 42215.svg';
-const SETTINGS_ICON = '/img/person.svg';
-const DEFAULT_AVATAR = '/img/person.svg';
+import { IMAGES } from '../constants/images';
+import { ROUTES } from '../constants/routes';
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -61,7 +60,7 @@ function ProfilePage() {
   const usernameRaw = profile?.username || user?.username || '';
   const username = usernameRaw.startsWith('@') ? usernameRaw.slice(1) : usernameRaw;
 
-  const photoUrl = profile?.photo_url || user?.photoUrl || DEFAULT_AVATAR;
+  const photoUrl = profile?.photo_url || user?.photoUrl || IMAGES.PERSON;
 
   // Обработчик изменения профессии с debounce
   const handleProfessionChange = (e) => {
@@ -159,27 +158,14 @@ function ProfilePage() {
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || 
                    (username ? `@${username}` : 'Пользователь');
 
-  const goBack = () => navigate('/agents_list');
-  const goToTariff = () => navigate('/tariff');
+  const goBack = () => navigate(ROUTES.AGENTS_LIST);
+  const goToTariff = () => navigate(ROUTES.TARIFF);
 
   if (isPageLoading || isLoading) return <Spinner />;
 
   return (
     <div className={`${styles.body} ${styles.profilePage}`}>
-      {/* Навбар */}
-      <nav className={styles.navbar}>
-        <div className="container-fluid d-flex justify-content-between px-0">
-          <a href="#" onClick={goBack} className={styles.prev} aria-label="Назад">
-            <img src={BACK_ARROW} alt="" />
-          </a>
-
-          <a href="#" className={styles.navbarAccount} aria-label="Настройки">
-            <div className={styles.accountIcon}>
-              <img src={SETTINGS_ICON} alt="" />
-            </div>
-          </a>
-        </div>
-      </nav>
+      <PageNavbar leftIcon="back" onLeftClick={goBack} />
 
       <div className={styles.glow} aria-hidden="true" />
 
@@ -194,7 +180,7 @@ function ProfilePage() {
             src={photoUrl}
             alt="Аватар"
             onError={(e) => {
-              e.currentTarget.src = DEFAULT_AVATAR;
+              e.currentTarget.src = IMAGES.PERSON;
             }}
           />
         </div>

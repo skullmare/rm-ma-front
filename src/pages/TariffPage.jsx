@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../css/modules/TariffPage.module.css';
 import Spinner from '../components/Spinner';
+import PageNavbar from '../components/PageNavbar';
 import { usePageLoader } from '../hooks/usePageLoader';
 import apiClient from '../lib/apiClient';
-
-const backArrowImg = '/img/Rectangle 42215.svg';
-const settingIconImg = '/img/person.svg';
+import { ROUTES } from '../constants/routes';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -44,14 +43,8 @@ function TariffPage() {
     return () => (mounted = false);
   }, []);
 
-  const handleBackClick = (e) => {
-    e.preventDefault();
-    navigate('/profile');
-  };
-
-  const handleProfileClick = (e) => {
-    e.preventDefault();
-    navigate('/profile');
+  const handleBackClick = () => {
+    navigate(ROUTES.PROFILE);
   };
 
   // ---- 2. Обработка нажатия “НАЧАТЬ” ----
@@ -158,18 +151,7 @@ function TariffPage() {
 
   return (
     <div className={`${styles.body} ${styles.tariffPage}`}>
-      <nav className={styles.navbar} aria-label="Основная навигация">
-        <div className="container-fluid d-flex justify-content-between px-0">
-          <a className={styles.prev} href="#" onClick={handleBackClick} aria-label="Вернуться назад">
-            <img src={backArrowImg} alt="Стрелка назад" />
-          </a>
-          <a className={styles.navbarAccount} href="#" onClick={handleProfileClick} aria-label="Настройки аккаунта">
-            <div className={styles.accountIcon}>
-              <img src={settingIconImg} alt="Иконка настроек" />
-            </div>
-          </a>
-        </div>
-      </nav>
+      <PageNavbar leftIcon="back" onLeftClick={handleBackClick} />
 
       <div className={styles.glow} aria-hidden="true"></div>
 

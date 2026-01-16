@@ -7,16 +7,13 @@ import React, {
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../css/modules/ChatPage.module.css';
 import Spinner from '../components/Spinner';
+import PageNavbar from '../components/PageNavbar';
 import { usePageLoader } from '../hooks/usePageLoader';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../context/AuthContext.jsx';
-import Message from '../components/Message'; // Импортируем компонент Message
-
-const IMAGES = {
-  back: '/img/Rectangle 42215.svg',
-  settings: '/img/person.svg',
-  send: '/img/send-button.png',
-};
+import Message from '../components/Message';
+import { IMAGES } from '../constants/images';
+import { ROUTES } from '../constants/routes';
 
 function ChatPage() {
   const navigate = useNavigate();
@@ -189,19 +186,12 @@ function ChatPage() {
 
   return (
     <div className={`${styles.body} ${styles.chatPage}`} style={{ position: 'relative' }}>
-      <nav className={styles.navbar}>
-        <div className="container-fluid d-flex justify-content-between align-items-center px-0">
-          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/agents_list'); }} className={styles.prev}>
-            <img src={IMAGES.back} alt="назад" />
-          </a>
-          <div style={{ fontWeight: 500, color: '#BEBEBE', fontSize: '16px' }}>{agentName}</div>
-          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/profile'); }} className={styles.navbarAccount}>
-            <div className={styles.accountIcon}>
-              <img src={IMAGES.settings} alt="настройки" />
-            </div>
-          </a>
-        </div>
-      </nav>
+      <PageNavbar
+        leftIcon="back"
+        centerText={agentName}
+        onLeftClick={() => navigate(ROUTES.AGENTS_LIST)}
+        onRightClick={() => navigate(ROUTES.PROFILE)}
+      />
 
       <div className={styles.glow} />
 
@@ -287,7 +277,7 @@ function ChatPage() {
           onClick={sendMessage}
           style={{ opacity: isLoading ? 0.5 : 1 }}
         >
-          <img src={IMAGES.send} alt="Отправить" />
+          <img src={IMAGES.SEND_BUTTON} alt="Отправить" />
         </div>
       </div>
     </div>

@@ -1,0 +1,159 @@
+/* AgentDetailPage Styles - Универсальные стили для всех агентов */
+
+.body {
+  min-height: 100vh;
+  background: #121212;
+}
+
+.agentDetailPage {
+  height: 100%;
+  padding: 0;
+  background: #121212;
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-width: 500px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.agentDetailPage main {
+  flex: 1;
+}
+
+/* Glow effect */
+.agentDetailPage .glow {
+  position: absolute;
+  top: -70px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  background: #A172F880;
+  filter: blur(60px);
+  z-index: 1001;
+  pointer-events: none;
+}
+
+/* Content blocks */
+.agentDetailPage .contentBlock {
+  width: 100%;
+  padding: 20px;
+  border-bottom: 0.75px solid #3E3E3E;
+  position: relative;
+  background-color: #121212;
+}
+
+.agentDetailPage .contentBlockLast {
+  border-bottom: none;
+}
+
+/* Agent info section */
+.agentDetailPage .agentContentWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.agentDetailPage .agentImg {
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.agentDetailPage .agentTextContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.agentDetailPage .agentLabel {
+  color: #A172F8;
+  font-family: 'Roboto Condensed';
+  font-weight: 500;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.agentDetailPage .agentTitle {
+  font-family: 'Roboto Condensed';
+  font-weight: 500;
+  font-size: 17px;
+  text-transform: uppercase;
+  color: #E0E0E0;
+  line-height: 1.2;
+  margin: 2px 0 0;
+}
+
+/* Description */
+.agentDetailPage .descriptionText {
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 130%;
+  color: #A9A9A9;
+  margin: 0 0 12px 10px;
+}
+
+/* Bottom button */
+.agentDetailPage .buttonBlock {
+  width: 100%;
+  padding: 20px 30px;
+  margin-bottom: 30px;
+  text-align: center;
+  border-top: 0.75px solid #3E3E3E;
+  border-bottom: 0.75px solid #3E3E3E;
+  background-color: #121212;
+  flex-shrink: 0;
+  z-index: 40;
+}
+
+.agentDetailPage .buttonBlock button {
+  background: #FFCC00;
+  color: black;
+  border: none;
+  height: 44px;
+  cursor: pointer;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 4px;
+  margin: 0 auto;
+  display: block;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.agentDetailPage .buttonBlock button:hover {
+  background: #FFD633;
+}
+
+/* Error state */
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  text-align: center;
+  color: #E0E0E0;
+}
+
+.error h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.error button {
+  background: #FFCC00;
+  color: black;
+  border: none;
+  height: 44px;
+  padding: 0 30px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+}

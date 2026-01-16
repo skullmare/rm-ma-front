@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage.jsx';
 import AgentsListPage from './pages/AgentsListPage.jsx';
-import AgentSergyPage from './pages/AgentSergyPage.jsx';
-import AgentNickPage from './pages/AgentNickPage.jsx';
-import AgentLidaPage from './pages/AgentLidaPage.jsx';
-import AgentMarkPage from './pages/AgentMarkPage.jsx';
+import AgentDetailPage from './pages/AgentDetailPage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import TariffPage from './pages/TariffPage.jsx';
@@ -39,10 +36,10 @@ function App() {
         }
       />
       <Route path="/agents_list" element={<AgentsListPage />} />
-      <Route path="/agent_sergy" element={<AgentSergyPage />} />
-      <Route path="/agent_nick" element={<AgentNickPage />} />
-      <Route path="/agent_lida" element={<AgentLidaPage />} />
-      <Route path="/agent_mark" element={<AgentMarkPage />} />
+      <Route path="/agent_sergy" element={<AgentDetailPage />} />
+      <Route path="/agent_nick" element={<AgentDetailPage />} />
+      <Route path="/agent_lida" element={<AgentDetailPage />} />
+      <Route path="/agent_mark" element={<AgentDetailPage />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route
         path="/chat"
