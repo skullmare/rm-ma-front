@@ -6,7 +6,7 @@ import { usePageLoader } from '../hooks/usePageLoader';
 import apiClient from '../lib/apiClient';
 
 const backArrowImg = '/img/Rectangle 42215.svg';
-const settingIconImg = '/img/setting_icon.svg';
+const settingIconImg = '/img/person.svg';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 

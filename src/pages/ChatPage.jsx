@@ -14,7 +14,7 @@ import Message from '../components/Message'; // Импортируем комп�
 
 const IMAGES = {
   back: '/img/Rectangle 42215.svg',
-  settings: '/img/setting_icon.svg',
+  settings: '/img/person.svg',
   send: '/img/send-button.png',
 };
 

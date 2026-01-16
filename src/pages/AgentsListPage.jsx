@@ -4,7 +4,7 @@ import styles from '../css/modules/AgentsListPage.module.css';
 import Spinner from '../components/Spinner';
 import { usePageLoader } from '../hooks/usePageLoader';
 const logoImg = '/img/Logo container.svg';
-const settingIconImg = '/img/setting_icon.svg';
+const settingIconImg = '/img/person.svg';
 const infoIconImg = '/img/Info icon.svg';
 const sergyImg = '/img/Sergy.png';
 const nickImg = '/img/Nick.png';

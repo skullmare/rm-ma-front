@@ -4,7 +4,7 @@ import styles from '../css/modules/AgentNickPage.module.css';
 import Spinner from '../components/Spinner';
 import { usePageLoader } from '../hooks/usePageLoader';
 const backArrowImg = '/img/Rectangle 42215.svg';
-const settingIconImg = '/img/setting_icon.svg';
+const settingIconImg = '/img/person.svg';
 const nickImg = '/img/Nick.png';
 
 function AgentNickPage() {
