@@ -1,0 +1,71 @@
+/* PageNavbar Component Styles */
+
+.navbar {
+  width: 100%;
+  background: #121212;
+  z-index: 1000;
+  padding: 0;
+  border-bottom: 0.75px solid #3E3E3E;
+}
+
+.navbarBrand {
+  display: flex;
+  align-items: center;
+  height: 45px;
+  padding: 0 12px;
+  text-decoration: none;
+}
+
+.navbarBrand img {
+  height: auto;
+  max-height: 30px;
+}
+
+.prev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  text-decoration: none;
+}
+
+.prev img {
+  width: 12px;
+  height: auto;
+}
+
+.centerText {
+  flex: 1;
+  text-align: center;
+  color: #E0E0E0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.navbarAccount {
+  width: 45px;
+  height: 45px;
+  border-left: 0.75px solid #3E3E3E;
+  color: #E0E0E0;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.accountIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border: 0.75px solid #3E3E3E;
+  border-radius: 50%;
+  text-align: center;
+}
+
+.accountIcon img {
+  width: 16px;
+  height: 16px;
+}
