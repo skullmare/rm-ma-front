@@ -6,7 +6,7 @@ import AgentDetailPage from './pages/AgentDetailPage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import TariffPage from './pages/TariffPage.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
+import AuthGuard from './components/AuthGuard.jsx';
 import PaymentSuccess from './pages/PaymentSuccess.jsx';
 
 function App() {
@@ -28,44 +28,25 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          isFirstVisit ? <HomePage /> : <Navigate to="/agents_list" replace />
-        }
-      />
-      <Route path="/agents_list" element={<AgentsListPage />} />
-      <Route path="/agent_sergy" element={<AgentDetailPage />} />
-      <Route path="/agent_nick" element={<AgentDetailPage />} />
-      <Route path="/agent_lida" element={<AgentDetailPage />} />
-      <Route path="/agent_mark" element={<AgentDetailPage />} />
-      <Route path="/payment-success" element={<PaymentSuccess />} />
-      <Route
-        path="/chat"
-        element={
-          <ProtectedRoute>
-            <ChatPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tariff"
-        element={
-          <ProtectedRoute>
-            <TariffPage />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+    <AuthGuard>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            isFirstVisit ? <HomePage /> : <Navigate to="/agents_list" replace />
+          }
+        />
+        <Route path="/agents_list" element={<AgentsListPage />} />
+        <Route path="/agent_sergy" element={<AgentDetailPage />} />
+        <Route path="/agent_nick" element={<AgentDetailPage />} />
+        <Route path="/agent_lida" element={<AgentDetailPage />} />
+        <Route path="/agent_mark" element={<AgentDetailPage />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/tariff" element={<TariffPage />} />
+      </Routes>
+    </AuthGuard>
   );
 }
 
