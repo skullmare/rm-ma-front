@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../css/modules/AgentDetailPage.module.css';
 import Spinner from '../components/Spinner';
 import PageNavbar from '../components/PageNavbar';
 import { usePageLoader } from '../hooks/usePageLoader';
+import { useAuth } from '../context/AuthContext.jsx';
 import { getAgentById } from '../constants/agents';
 import { ROUTES } from '../constants/routes';
+import apiClient from '../lib/apiClient';
 
 /**
  * Универсальная страница для отображения деталей агента
@@ -15,6 +17,8 @@ function AgentDetailPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const isLoading = usePageLoader(500);
+  const { user } = useAuth();
+  const [tariffLabel, setTariffLabel] = useState('Базовый');
 
   // Извлекаем agentId из пути URL (например, /agent_sergy -> sergey)
   const pathToAgentId = {
@@ -26,6 +30,44 @@ function AgentDetailPage() {
 
   const agentId = pathToAgentId[location.pathname];
   const agent = getAgentById(agentId);
+
+  // Загрузка профиля для определения тарифа (только для авторизованных пользователей)
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const { data } = await apiClient.get('/api/profile');
+
+        if (data?.profile) {
+          const profile = data.profile;
+          const tariffInfo = (
+            profile.subscription_type ||
+            profile.plan ||
+            profile.tariff ||
+            profile.role ||
+            profile.roles?.[0] ||
+            ''
+          ).toLowerCase();
+
+          if (tariffInfo.includes('premium') ||
+              tariffInfo.includes('премиум') ||
+              tariffInfo.includes('про') ||
+              tariffInfo.includes('paid')) {
+            setTariffLabel('Премиум');
+          } else {
+            setTariffLabel('Базовый');
+          }
+        }
+      } catch (err) {
+        console.error('Не удалось загрузить профиль:', err);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   const handleStartClick = () => {
     if (agent) {
@@ -58,7 +100,7 @@ function AgentDetailPage() {
 
   return (
     <div className={`${styles.body} ${styles.agentDetailPage}`}>
-      <PageNavbar leftIcon="back" />
+      <PageNavbar leftIcon="back" tariffLabel={tariffLabel} />
 
       <div className={styles.glow}></div>
 
