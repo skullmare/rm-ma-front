@@ -4,6 +4,7 @@ import styles from '../css/modules/AgentsListPage.module.css';
 import Spinner from '../components/Spinner';
 import PageNavbar from '../components/PageNavbar';
 import { usePageLoader } from '../hooks/usePageLoader';
+import { useAuth } from '../context/AuthContext.jsx';
 import { AGENTS_LIST } from '../constants/agents';
 import { IMAGES } from '../constants/images';
 import apiClient from '../lib/apiClient';
@@ -11,10 +12,17 @@ import apiClient from '../lib/apiClient';
 function AgentsListPage() {
   const navigate = useNavigate();
   const isLoading = usePageLoader(500);
+  const { user } = useAuth();
   const [tariffLabel, setTariffLabel] = useState('Базовый');
 
-  // Загрузка профиля для определения тарифа
+  // Загрузка профиля для определения тарифа (только для авторизованных пользователей)
   useEffect(() => {
+    // Проверяем, авторизован ли пользователь
+    if (!user) {
+      // Если не авторизован, оставляем "Базовый" и не делаем запрос
+      return;
+    }
+
     const fetchProfile = async () => {
       try {
         const { data } = await apiClient.get('/api/profile');
@@ -47,12 +55,12 @@ function AgentsListPage() {
         }
       } catch (err) {
         // В случае ошибки оставляем дефолтный тариф
-        console.log('Не удалось загрузить профиль:', err);
+        console.error('Не удалось загрузить профиль:', err);
       }
     };
 
     fetchProfile();
-  }, []);
+  }, [user]);
 
   const handleAgentClick = (e, agentRoute) => {
     e.preventDefault();
