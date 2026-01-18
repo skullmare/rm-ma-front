@@ -18,10 +18,28 @@ function AgentsListPage() {
     const fetchProfile = async () => {
       try {
         const { data } = await apiClient.get('/api/profile');
-        if (data?.profile?.role) {
-          // Определяем тариф на основе роли
-          const role = data.profile.role.toLowerCase();
-          if (role.includes('premium') || role.includes('про')) {
+        console.log('Profile data:', data); // Отладочный лог
+
+        if (data?.profile) {
+          const profile = data.profile;
+
+          // Проверяем различные поля, где может быть информация о тарифе
+          const tariffInfo = (
+            profile.subscription_type ||
+            profile.plan ||
+            profile.tariff ||
+            profile.role ||
+            profile.roles?.[0] ||
+            ''
+          ).toLowerCase();
+
+          console.log('Tariff info:', tariffInfo); // Отладочный лог
+
+          // Определяем тариф
+          if (tariffInfo.includes('premium') ||
+              tariffInfo.includes('премиум') ||
+              tariffInfo.includes('про') ||
+              tariffInfo.includes('paid')) {
             setTariffLabel('Премиум');
           } else {
             setTariffLabel('Базовый');
