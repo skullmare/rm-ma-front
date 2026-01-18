@@ -15,12 +15,14 @@
   padding: 0;
   max-width: 500px;
   margin: 0 auto;
+  height: 45px;
 }
 
 /* Логотип - увеличен и без отступов */
 .navbarBrand {
   display: flex;
   align-items: center;
+  height: 45px;
   padding: 0;
   text-decoration: none;
 }
@@ -37,7 +39,7 @@
   align-items: center;
   justify-content: center;
   width: 45px;
-  height: 60px;
+  height: 45px;
   text-decoration: none;
 }
 
