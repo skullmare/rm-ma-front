@@ -55,21 +55,16 @@
 .homePage .contentBlock {
     width: 100%;
     padding: 20px;
-    border-bottom: 0.75px solid #3E3E3E;
     position: relative;
 }
 
-.homePage .contentBlockLast {
-    border-bottom: none;
-}
+/* Класс больше не нужен, т.к. у contentBlock нет border */
 
 /* === КНОПКИ === */
 .homePage .buttonBlock {
     width: 100%;
     padding: 20px 30px;
     text-align: center;
-    border-top: 0.75px solid #3E3E3E;
-    border-bottom: 0.75px solid #3E3E3E;
     z-index: 40;
     background-color: #121212;
     flex-shrink: 0;
