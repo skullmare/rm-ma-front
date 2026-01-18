@@ -15,7 +15,7 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^6.20.0",
     "react-syntax-highlighter": "^16.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^3.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
