@@ -316,7 +316,7 @@ function HomePage() {
                   <h2 className="section-title">ЛИНЕЙКА AI-АГЕНТОВ</h2>
                 </div>
 
-                <div className="content-block">
+                <div className="content-block contentBlockBorderBottom">
                   <div className="agent-card">
                     <img src={slide3UpImg} alt="Сергей" className="agent-image" />
                     <div className="agent-info">
@@ -379,7 +379,7 @@ function HomePage() {
                   <h2 className="section-title">ЛИНЕЙКА AI-АГЕНТОВ</h2>
                 </div>
 
-                <div className="content-block">
+                <div className="content-block contentBlockBorderBottom">
                   <div className="agent-card">
                     <img src={slide4GirlImg} alt="Лида" className="agent-image" />
                     <div className="agent-info">

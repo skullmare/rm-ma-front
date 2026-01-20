@@ -45,9 +45,9 @@ function AgentsListPage() {
 
           // Определяем тариф
           if (tariffInfo.includes('premium') ||
-              tariffInfo.includes('премиум') ||
-              tariffInfo.includes('про') ||
-              tariffInfo.includes('paid')) {
+            tariffInfo.includes('премиум') ||
+            tariffInfo.includes('про') ||
+            tariffInfo.includes('paid')) {
             setTariffLabel('Премиум');
           } else {
             setTariffLabel('Базовый');
@@ -78,17 +78,19 @@ function AgentsListPage() {
       <div className={styles.glow}></div>
 
       <div className={styles.contentBlock}>
-        <h2 className={styles.headingSection}>ВЫБЕРИ ПАРТНЕРА</h2>
+        <h2 className={styles.headingSection}>ВЫБЕРИ АГЕНТА</h2>
       </div>
 
       {/* Динамический список агентов */}
-      {AGENTS_LIST.map((agent) => (
-        <div key={agent.id} className={styles.contentBlock}>
+      {AGENTS_LIST.map((agent, index) => (
+        <div
+          key={agent.id}
+          className={`${styles.contentBlock} ${index < AGENTS_LIST.length - 1 ? styles.contentBlockBorderBottom : ''}`}
+        >
           <a href="#" className={styles.agentLink} onClick={(e) => handleAgentClick(e, agent.route)}>
             <div className="d-flex align-items-center justify-content-between gap-3">
-              <div className="d-flex gap-1">
+              <div className="d-flex gap-2">
                 <div className={styles.agentAvatar}>
-                  <img className={styles.agentInfoIcon} src={IMAGES.INFO_ICON} alt="Информация" />
                   <img className={styles.agentImage} src={agent.image} alt={agent.name} />
                 </div>
                 <div className={styles.agentContent}>

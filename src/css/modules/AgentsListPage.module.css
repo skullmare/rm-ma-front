@@ -88,7 +88,10 @@
 
 .agentsListPage .contentBlock {
     width: 100%;
-    padding: 20px;
+    padding: 10px 20px;
+}
+
+.agentsListPage .contentBlockBorderBottom {
     border-bottom: 0.75px solid #3E3E3E;
 }
 
@@ -114,7 +117,7 @@
 }
 
 .agentsListPage .agentImage {
-    width: 90px;
+    width: 100px;
     flex-shrink: 0;
 }
 

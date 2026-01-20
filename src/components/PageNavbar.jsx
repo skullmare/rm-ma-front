@@ -99,7 +99,7 @@ function PageNavbar({
           {/* Иконка профиля */}
           {showProfileIcon && (
             <a className={styles.profileIcon} href="#" onClick={handleRightClick}>
-              <svg width="17" height="23" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="25" height="25" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M16.5 17.9983C16.5 16.3151 16.3261 11.9488 11.2826 11.9488H5.71739C0.673913 11.9488 0.5 16.3151 0.5 17.9983M12.8478 4.70792C12.8478 7.03189 10.9012 8.91584 8.5 8.91584C6.09876 8.91584 4.15217 7.03189 4.15217 4.70792C4.15217 2.38395 6.09876 0.5 8.5 0.5C10.9012 0.5 12.8478 2.38395 12.8478 4.70792Z" stroke="#BBB4C8" strokeLinecap="round"/>
               </svg>
             </a>

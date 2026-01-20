@@ -39,7 +39,6 @@
 .agentDetailPage .contentBlock {
   width: 100%;
   padding: 20px;
-  border-bottom: 0.75px solid #3E3E3E;
   position: relative;
   background-color: #121212;
 }
@@ -51,12 +50,11 @@
 /* Agent info section */
 .agentDetailPage .agentContentWrapper {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 5px;
 }
 
 .agentDetailPage .agentImg {
-  width: 90px;
+  width: 100px;
   flex-shrink: 0;
 }
 
@@ -99,8 +97,6 @@
   padding: 20px 30px;
   margin-bottom: 30px;
   text-align: center;
-  border-top: 0.75px solid #3E3E3E;
-  border-bottom: 0.75px solid #3E3E3E;
   background-color: #121212;
   flex-shrink: 0;
   z-index: 40;

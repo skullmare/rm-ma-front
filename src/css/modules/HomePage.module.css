@@ -58,7 +58,11 @@
     position: relative;
 }
 
-/* Класс больше не нужен, т.к. у contentBlock нет border */
+.homePage .contentBlockBorderBottom {
+    border-bottom: 0.75px solid #3E3E3E;
+}
+
+/* Класс больше не нужен, т.к. у contentBlock нет border */ 
 
 /* === КНОПКИ === */
 .homePage .buttonBlock {

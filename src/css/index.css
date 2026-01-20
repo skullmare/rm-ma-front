@@ -113,6 +113,10 @@
     position: relative;
 }
 
+.homePage .contentBlockBorderBottom {
+    border-bottom: 0.75px solid #3E3E3E;
+}
+
 /* === КНОПКИ === */
 .homePage .button-block {
     width: 100%;
