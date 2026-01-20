@@ -63,24 +63,7 @@
     transition: transform 0.3s ease-in-out !important;
 }
 
-.homePage .carousel-item::before,
-.homePage .carousel-item::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 0.75px;
-    background: var(--color-border);
-    z-index: 1000;
-}
-
-.homePage .carousel-item::before {
-    left: 12px;
-}
-
-.homePage .carousel-item::after {
-    right: 12px;
-}
+/* Vertical borders removed */
 
 /* === НАВИГАЦИЯ === */
 .homePage .navbar {
@@ -127,12 +110,7 @@
 .homePage .content-block {
     width: 100%;
     padding: 20px;
-    border-bottom: 0.75px solid var(--color-border);
     position: relative;
-}
-
-.homePage .content-block-last {
-    border-bottom: none;
 }
 
 /* === КНОПКИ === */
@@ -140,8 +118,6 @@
     width: 100%;
     padding: 20px 30px;
     text-align: center;
-    border-top: 0.75px solid var(--color-border);
-    border-bottom: 0.75px solid var(--color-border);
     z-index: 40;
     background-color: var(--color-bg);
     flex-shrink: 0;
