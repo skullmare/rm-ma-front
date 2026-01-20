@@ -8,6 +8,7 @@ import React, {
     useRef,
 } from 'react';
 import apiClient, { setInitDataHeader } from '../lib/apiClient';
+import DevAuthForm from '../components/DevAuthForm';
 
 const AuthContext = createContext(null);
 
@@ -19,6 +20,8 @@ const initialState = {
 };
 
 const STORAGE_KEY = 'tg_miniapp_auth';
+const DEV_INIT_DATA_KEY = 'dev_telegram_init_params';
+const IS_DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true';
 
 const saveSessionToStorage = (initData, user) => {
     if (!initData || !user) return;
@@ -43,8 +46,39 @@ const clearSessionStorage = () => {
     localStorage.removeItem(STORAGE_KEY);
 };
 
+const loadDevInitData = () => {
+    if (!IS_DEV_MODE) return null;
+
+    try {
+        const raw = localStorage.getItem(DEV_INIT_DATA_KEY);
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw);
+
+        // Create mock Telegram WebApp object
+        if (!window.Telegram) {
+            window.Telegram = {};
+        }
+
+        window.Telegram.WebApp = {
+            initData: parsed.tgWebAppData,
+            version: parsed.tgWebAppVersion || '7.0',
+            platform: parsed.tgWebAppPlatform || 'web',
+            themeParams: parsed.tgWebAppThemeParams ? JSON.parse(parsed.tgWebAppThemeParams) : {},
+            ready: () => {},
+            expand: () => {},
+        };
+
+        return parsed.tgWebAppData;
+    } catch (e) {
+        console.warn('Failed to load dev init data', e);
+        return null;
+    }
+};
+
 export function AuthProvider({ children }) {
     const [state, setState] = useState(initialState);
+    const [showDevForm, setShowDevForm] = useState(false);
     const isMounted = useRef(true);
     const initDataRef = useRef(null); // Храним initData в ref, чтобы избежать пересоздания функций
     const hasAuthorizedRef = useRef(false); // Отслеживаем, был ли уже вызван authorize
@@ -144,18 +178,40 @@ const authorize = useCallback(async (initData) => {
                 tg.expand?.();
             }
 
-            const currentInitData = tg?.initData || new URLSearchParams(window.location.search).get('mockInitData');
+            // Try to get initData from multiple sources
+            let currentInitData = tg?.initData ||
+                                 new URLSearchParams(window.location.search).get('mockInitData');
+
+            // If no initData, try to load from dev storage (only in dev mode)
+            if (!currentInitData && IS_DEV_MODE) {
+                currentInitData = loadDevInitData();
+            }
 
             if (!currentInitData) {
-                // Нет initData → просим открыть в Telegram
-                setState({
-                    status: 'unauthorized',
-                    user: null,
-                    error: 'Откройте мини-апп внутри Telegram',
-                    initData: null,
-                });
+                // No initData available
+                if (IS_DEV_MODE) {
+                    // Show dev form to enter init params
+                    setShowDevForm(true);
+                    setState({
+                        status: 'unauthorized',
+                        user: null,
+                        error: null,
+                        initData: null,
+                    });
+                } else {
+                    // Production mode - require Telegram
+                    setState({
+                        status: 'unauthorized',
+                        user: null,
+                        error: 'Откройте мини-апп внутри Telegram',
+                        initData: null,
+                    });
+                }
                 return;
             }
+
+            // Hide dev form if it was shown
+            setShowDevForm(false);
 
             // Проверяем, не вызывали ли мы уже authorize
             if (hasAuthorizedRef.current) return;
@@ -216,6 +272,27 @@ const authorize = useCallback(async (initData) => {
         }
     }, [state.initData, authorize, handleError]);
 
+    // === Dev form submit handler ===
+    const handleDevFormSubmit = useCallback(async (initData) => {
+        setShowDevForm(false);
+        hasAuthorizedRef.current = false; // Reset flag to allow authorization
+
+        try {
+            await authorize(initData);
+        } catch (error) {
+            hasAuthorizedRef.current = false;
+            handleError(
+                error?.response?.data?.message ||
+                error?.message ||
+                'Не удалось авторизоваться'
+            );
+            // Show form again on error
+            if (IS_DEV_MODE) {
+                setShowDevForm(true);
+            }
+        }
+    }, [authorize, handleError]);
+
     const value = useMemo(
         () => ({
             ...state,
@@ -224,6 +301,11 @@ const authorize = useCallback(async (initData) => {
         }),
         [state, logout, reload]
     );
+
+    // Show dev form if in dev mode and no init data
+    if (showDevForm) {
+        return <DevAuthForm onSubmit={handleDevFormSubmit} />;
+    }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
