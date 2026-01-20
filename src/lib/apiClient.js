@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Для Vite используем import.meta.env
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+const baseURL = "https://rm-ma-back-rocketmind.amvera.io";
 
 const apiClient = axios.create({
   baseURL: baseURL,
