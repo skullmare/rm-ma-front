@@ -15,7 +15,7 @@ const initialState = {
     status: 'booting', // booting | loading | authenticated | unauthorized | error
     user: null,
     error: null,
-    initData: null, // ← добавлено: сохраняем initData для reload()
+    initData: null,
 };
 
 const STORAGE_KEY = 'tg_miniapp_auth';
@@ -46,8 +46,9 @@ const clearSessionStorage = () => {
 export function AuthProvider({ children }) {
     const [state, setState] = useState(initialState);
     const isMounted = useRef(true);
-    const initDataRef = useRef(null); // Храним initData в ref, чтобы избежать пересоздания функций
-    const hasAuthorizedRef = useRef(false); // Отслеживаем, был ли уже вызван authorize
+    const initDataRef = useRef(null);
+    const hasAuthorizedRef = useRef(false);
+    const bootCompletedRef = useRef(false);
 
     useEffect(() => {
         return () => {
@@ -55,124 +56,179 @@ export function AuthProvider({ children }) {
         };
     }, []);
 
-    const applySession = useCallback((session, initData = null) => {
-        if (!isMounted.current) return;
-
-        const resolvedInitData = initData || session.initData || initDataRef.current;
-
-        if (resolvedInitData) {
-            initDataRef.current = resolvedInitData;
-            setInitDataHeader(resolvedInitData);
-            saveSessionToStorage(resolvedInitData, session.user);
-        } else {
-            setInitDataHeader(null);
-            clearSessionStorage();
-        }
-
-        // D~??D?D_D??OD???D?D? ?,??D?D??+D,D_D?D?D??OD?D_D? D_D?D?D_D?D?D?D?D,D?, ???,D_D??< D?D? D?D?D?D,??D??,?O D_?, state.initData
-        setState(prev => ({
-            status: 'authenticated',
-            user: session.user,
-            error: null,
-            initData: resolvedInitData || prev.initData,
-        }));
-    }, []); // D?D?D,??D?D?D? D?D?D?D,??D,D?D_???,?O D_?, state.initData
-
-    const handleError = useCallback((message) => {
-
+    const applySession = useCallback((session, initData = null) => {
         if (!isMounted.current) return;
 
+        const resolvedInitData = initData || session.initData || initDataRef.current;
 
-
-        setInitDataHeader(null);
-
-        clearSessionStorage();
-
-        initDataRef.current = null;
-
-        hasAuthorizedRef.current = false;
-
-
-
-        setState({
-
-            status: 'error',
-
-            user: null,
-
-            error: message,
-
-            initData: null,
-
+        console.log('✅ applySession called with:', {
+            hasUser: !!session.user,
+            initDataLength: resolvedInitData?.length,
+            status: 'authenticated'
         });
 
+        if (resolvedInitData) {
+            initDataRef.current = resolvedInitData;
+            setInitDataHeader(resolvedInitData);
+            saveSessionToStorage(resolvedInitData, session.user);
+        }
+
+        setState({
+            status: 'authenticated',
+            user: session.user,
+            error: null,
+            initData: resolvedInitData,
+        });
+
+        bootCompletedRef.current = true;
     }, []);
 
-const authorize = useCallback(async (initData) => {
-    if (!initData) throw new Error('initData отсутствует');
+    const handleError = useCallback((message) => {
+        if (!isMounted.current) return;
 
-    setState(prev => ({
-        ...prev,
-        status: 'loading',
-        error: null,
-        initData,
-    }));
+        console.log('❌ handleError called:', message);
 
-    const { data } = await apiClient.post(
-        '/api/auth/telegram/login',
-        { initData }, // <— raw строка, НИКАКИХ энкодингов
-        {
-            headers: {
-                'Content-Type': 'application/json',
-            }
+        setInitDataHeader(null);
+        clearSessionStorage();
+        initDataRef.current = null;
+        hasAuthorizedRef.current = false;
+        bootCompletedRef.current = true;
+
+        setState({
+            status: 'error',
+            user: null,
+            error: message,
+            initData: null,
+        });
+    }, []);
+
+    const authorize = useCallback(async (initData) => {
+        if (!initData) {
+            const error = new Error('initData отсутствует');
+            handleError(error.message);
+            throw error;
         }
-    );
 
-    applySession({ user: data.user }, initData);
-}, [applySession]);
+        console.log('🚀 authorize called with initData length:', initData.length);
+
+        setState(prev => ({
+            ...prev,
+            status: 'loading',
+            error: null,
+            initData,
+        }));
+
+        try {
+            const response = await apiClient.post(
+                '/api/auth/telegram/login',
+                { initData },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }
+            );
+
+            console.log('✅ authorize success, user:', response.data.user);
+
+            applySession({ user: response.data.user }, initData);
+            return response.data;
+        } catch (error) {
+            console.error('❌ authorize error:', error);
+            
+            hasAuthorizedRef.current = false;
+            
+            const errorMessage = error?.response?.data?.message || 
+                               error?.message || 
+                               'Ошибка авторизации';
+            
+            if (isMounted.current) {
+                setState({
+                    status: 'error',
+                    user: null,
+                    error: errorMessage,
+                    initData: null,
+                });
+            }
+            
+            bootCompletedRef.current = true;
+            throw error;
+        }
+    }, [applySession, handleError]);
 
     // === Загрузка при старте ===
     useEffect(() => {
         let cancelled = false;
 
         const boot = async () => {
+            console.log('🔧 Booting auth system...');
+            
+            // DEV MODE: Simulate delay
+            if (process.env.NODE_ENV === 'development') {
+                console.log('⚙️ Development mode detected');
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
             const tg = window.Telegram?.WebApp;
 
             // Telegram WebApp
             if (tg) {
+                console.log('🤖 Telegram WebApp detected');
                 tg.ready?.();
                 tg.expand?.();
             }
 
-            const currentInitData = tg?.initData || new URLSearchParams(window.location.search).get('mockInitData');
+            const currentInitData = tg?.initData || 
+                new URLSearchParams(window.location.search).get('mockInitData');
+
+            console.log('🔍 Current initData:', currentInitData ? `found (${currentInitData.length} chars)` : 'not found');
 
             if (!currentInitData) {
-                // Нет initData → просим открыть в Telegram
-                setState({
-                    status: 'unauthorized',
-                    user: null,
-                    error: 'Откройте мини-апп внутри Telegram',
-                    initData: null,
-                });
+                console.log('⚠️ No initData available');
+                if (!cancelled) {
+                    setState({
+                        status: 'unauthorized',
+                        user: null,
+                        error: 'Откройте мини-апп внутри Telegram',
+                        initData: null,
+                    });
+                    bootCompletedRef.current = true;
+                }
                 return;
             }
 
-            // Проверяем, не вызывали ли мы уже authorize
-            if (hasAuthorizedRef.current) return;
+            // Check saved session first
+            const savedSession = loadSessionFromStorage();
+            if (savedSession && savedSession.initData === currentInitData) {
+                console.log('📂 Using saved session');
+                if (!cancelled) {
+                    applySession(savedSession, currentInitData);
+                }
+                return;
+            }
+
+            // Don't call authorize if already in progress or completed
+            if (hasAuthorizedRef.current) {
+                console.log('⏸️ Authorization already in progress, skipping');
+                return;
+            }
+
             hasAuthorizedRef.current = true;
+            console.log('🚀 Starting authorization...');
 
             try {
                 if (!cancelled) {
                     await authorize(currentInitData);
+                    console.log('🎉 Authorization successful');
                 }
             } catch (error) {
                 if (!cancelled) {
-                    hasAuthorizedRef.current = false; // Сбрасываем флаг при ошибке
-                    handleError(
-                        error?.response?.data?.message ||
-                        error?.message ||
-                        'Не удалось авторизоваться'
-                    );
+                    console.log('💥 Authorization failed:', error.message);
+                    // Don't reset hasAuthorizedRef here - let it stay true to prevent loops
+                }
+            } finally {
+                if (!cancelled) {
+                    bootCompletedRef.current = true;
                 }
             }
         };
@@ -182,13 +238,15 @@ const authorize = useCallback(async (initData) => {
         return () => {
             cancelled = true;
         };
-    }, [authorize, handleError]); // Зависимости теперь стабильны благодаря исправлению applySession
+    }, [authorize, applySession]);
 
     // === Выход ===
     const logout = useCallback(() => {
+        console.log('👋 Logging out');
         setInitDataHeader(null);
         clearSessionStorage();
-        hasAuthorizedRef.current = false; // Сбрасываем флаг при выходе
+        hasAuthorizedRef.current = false;
+        bootCompletedRef.current = false;
         setState({
             status: 'unauthorized',
             user: null,
@@ -197,9 +255,13 @@ const authorize = useCallback(async (initData) => {
         });
     }, []);
 
-    // === Повторная авторизация (например, после истечения токена) ===
+    // === Повторная авторизация ===
     const reload = useCallback(async () => {
-        const initData = initDataRef.current || // Используем ref в первую очередь
+        console.log('🔄 Reloading auth');
+        hasAuthorizedRef.current = false;
+        bootCompletedRef.current = false;
+        
+        const initData = initDataRef.current ||
             state.initData ||
             window.Telegram?.WebApp?.initData ||
             new URLSearchParams(window.location.search).get('mockInitData');

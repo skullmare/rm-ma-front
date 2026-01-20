@@ -4,7 +4,6 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 
-// Создаем роутер с future flags
 const router = createBrowserRouter([
   {
     path: "/*",
@@ -19,9 +18,7 @@ const router = createBrowserRouter([
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  </React.StrictMode>
+  <AuthProvider>
+    <RouterProvider router={router} />
+  </AuthProvider>
 );

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://rm-ma-back-rocketmind.amvera.io',
+  baseURL: 'http://localhost:4000',
 });
 
 const INIT_DATA_HEADER = 'X-Telegram-Init-Data';
