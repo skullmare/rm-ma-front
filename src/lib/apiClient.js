@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Используем переменную окружения для базового URL, с fallback на localhost для разработки
-const baseURL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+// Для Vite используем import.meta.env
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 const apiClient = axios.create({
   baseURL: baseURL,
