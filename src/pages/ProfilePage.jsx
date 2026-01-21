@@ -243,7 +243,7 @@ function ProfilePage() {
 
   return (
     <div className={`${styles.body} ${styles.profilePage}`}>
-      <PageNavbar leftIcon="back" onLeftClick={goBack} />
+      <PageNavbar leftIcon="back" onLeftClick={goBack} showProfileIcon={false} />
 
       <div className={styles.glow} aria-hidden="true" />
 

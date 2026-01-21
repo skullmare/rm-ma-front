@@ -151,21 +151,28 @@ function TariffPage() {
 
   return (
     <div className={`${styles.body} ${styles.tariffPage}`}>
-      <PageNavbar leftIcon="back" onLeftClick={handleBackClick} />
+      <PageNavbar leftIcon="back" onLeftClick={handleBackClick} showProfileIcon={false} />
 
       <div className={styles.glow} aria-hidden="true"></div>
 
-      <section className={styles.contentBlock}>
+      <section className={`${styles.contentBlock} mb-3`}>
         <h2 className={styles.tariffTitle}>ТАРИФЫ</h2>
         <p className={styles.tariffSubtitle}>Выберите подходящий тарифный план</p>
       </section>
 
       {/* FREE TIER */}
-      <section className={`${styles.contentBlock} d-flex flex-column`}>
-        <div className={`${styles.tariffType} ${styles.tariffTypeFree}`}>
-          БЕСПЛАТНЫЙ
+      <section className={`${styles.contentBlock} ${styles.tariffBlock} d-flex flex-column`}>
+        <div className='d-flex justify-content-between'>
+          <div className={`${styles.tariffType} ${styles.tariffTypeFree}`}>
+            БАЗОВЫЙ
+          </div>
+          <div className={`${styles.freeBadge}`}>
+            {isFreeTierActive ? 'Подключен' : 'Использован'}
+          </div>
         </div>
-        <h3 className={styles.tariffTitle}>0 ₽/месяц</h3>
+
+        
+        <h3 className={`${styles.tariffTitle} mb-3`}>0 ₽/месяц</h3>
 
         <div className={styles.featuresList}>
           <div className={styles.elementList}>- 10 бесплатных сообщений</div>
@@ -174,32 +181,22 @@ function TariffPage() {
         </div>
       </section>
 
-      <div className={`${styles.contentBlock} d-flex align-items-center`}>
-        <div className={styles.buttonBlock}>
-          <button className={styles.buttonActive} disabled>
-            {isFreeTierActive ? 'АКТИВИРОВАН' : 'НЕ ДОСТУПНО'}
-          </button>
-        </div>
-      </div>
-
       {/* PREMIUM */}
-      <section className={`${styles.contentBlock} d-flex flex-column`}>
+      <section className={`${styles.contentBlock} ${styles.tariffActiveBlock} d-flex flex-column`}>
         <div className={`${styles.tariffType} ${styles.tariffTypePremium}`}>
           ПРЕМИУМ
         </div>
-        <h3 className={styles.tariffTitle}>1000 ₽/месяц</h3>
+        <h3 className={`${styles.tariffTitle} mb-3`}>1000 ₽/месяц</h3>
 
-        <div className={styles.featuresList}>
+        <div className={`${styles.featuresList} mb-3`}>
           <div className={styles.elementList}>- Неограниченные сообщения</div>
           <div className={styles.elementList}>- Приоритетная поддержка</div>
           <div className={styles.elementList}>- Быстрое время ответа</div>
           <div className={styles.elementList}>- Расширенные функции бота</div>
           <div className={styles.elementList}>- Персонализированные ответы</div>
         </div>
-      </section>
 
-      <div className={`${styles.contentBlock} d-flex flex-column align-items-center`}>
-        <div className={styles.buttonBlock}>
+        <div className={`${styles.buttonBlock} mb-1`}>
           {hasActiveSubscription ? (
             <button className={styles.buttonActive} disabled aria-pressed="true">
               АКТИВИРОВАН
@@ -209,7 +206,7 @@ function TariffPage() {
               className={styles.buttonSubscribe}
               onClick={handleSubscribe}
             >
-              НАЧАТЬ
+              ПОДКЛЮЧИТЬ
             </button>
           )}
         </div>
@@ -234,7 +231,9 @@ function TariffPage() {
             )}
           </div>
         )}
-      </div>
+      </section>
+
+
 
 
 

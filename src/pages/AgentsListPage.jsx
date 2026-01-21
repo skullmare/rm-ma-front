@@ -9,6 +9,8 @@ import { AGENTS_LIST } from '../constants/agents';
 import { IMAGES } from '../constants/images';
 import apiClient from '../lib/apiClient';
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 function AgentsListPage() {
   const navigate = useNavigate();
   const isLoading = usePageLoader(500);
@@ -26,32 +28,37 @@ function AgentsListPage() {
     const fetchProfile = async () => {
       try {
         const { data } = await apiClient.get('/api/profile');
-        console.log('Profile data:', data); // Отладочный лог
 
         if (data?.profile) {
           const profile = data.profile;
 
-          // Проверяем различные поля, где может быть информация о тарифе
-          const tariffInfo = (
-            profile.subscription_type ||
-            profile.plan ||
-            profile.tariff ||
-            profile.role ||
-            profile.roles?.[0] ||
-            ''
-          ).toLowerCase();
+          // Логика определения тарифа (идентична TariffPage.jsx и ProfilePage.jsx)
+          const resolveLastPaymentTimestamp = () => {
+            const ts = profile.last_payment_timestamp ?? profile.lastPaymentTimestamp;
+            if (ts !== undefined && ts !== null) {
+              const tsNumber = Number(ts);
+              if (!Number.isNaN(tsNumber)) {
+                return tsNumber;
+              }
+            }
 
-          console.log('Tariff info:', tariffInfo); // Отладочный лог
+            const iso = profile.last_payment_datetime ?? profile.lastPaymentDatetime;
+            if (iso) {
+              const parsed = Date.parse(iso);
+              if (!Number.isNaN(parsed)) {
+                return parsed;
+              }
+            }
 
-          // Определяем тариф
-          if (tariffInfo.includes('premium') ||
-            tariffInfo.includes('премиум') ||
-            tariffInfo.includes('про') ||
-            tariffInfo.includes('paid')) {
-            setTariffLabel('Премиум');
-          } else {
-            setTariffLabel('Базовый');
-          }
+            return null;
+          };
+
+          const lastPaymentTimestamp = resolveLastPaymentTimestamp();
+          const hasActiveSubscription =
+            typeof lastPaymentTimestamp === 'number' &&
+            Date.now() - lastPaymentTimestamp < THIRTY_DAYS_MS;
+
+          setTariffLabel(hasActiveSubscription ? 'Премиум' : 'Базовый');
         }
       } catch (err) {
         // В случае ошибки оставляем дефолтный тариф

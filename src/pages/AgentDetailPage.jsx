@@ -9,6 +9,8 @@ import { getAgentById } from '../constants/agents';
 import { ROUTES } from '../constants/routes';
 import apiClient from '../lib/apiClient';
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 /**
  * Универсальная страница для отображения деталей агента
  * Заменяет 4 отдельных компонента: AgentSergyPage, AgentNickPage, AgentLidaPage, AgentMarkPage
@@ -43,23 +45,34 @@ function AgentDetailPage() {
 
         if (data?.profile) {
           const profile = data.profile;
-          const tariffInfo = (
-            profile.subscription_type ||
-            profile.plan ||
-            profile.tariff ||
-            profile.role ||
-            profile.roles?.[0] ||
-            ''
-          ).toLowerCase();
 
-          if (tariffInfo.includes('premium') ||
-              tariffInfo.includes('премиум') ||
-              tariffInfo.includes('про') ||
-              tariffInfo.includes('paid')) {
-            setTariffLabel('Премиум');
-          } else {
-            setTariffLabel('Базовый');
-          }
+          // Логика определения тарифа (идентична TariffPage.jsx и ProfilePage.jsx)
+          const resolveLastPaymentTimestamp = () => {
+            const ts = profile.last_payment_timestamp ?? profile.lastPaymentTimestamp;
+            if (ts !== undefined && ts !== null) {
+              const tsNumber = Number(ts);
+              if (!Number.isNaN(tsNumber)) {
+                return tsNumber;
+              }
+            }
+
+            const iso = profile.last_payment_datetime ?? profile.lastPaymentDatetime;
+            if (iso) {
+              const parsed = Date.parse(iso);
+              if (!Number.isNaN(parsed)) {
+                return parsed;
+              }
+            }
+
+            return null;
+          };
+
+          const lastPaymentTimestamp = resolveLastPaymentTimestamp();
+          const hasActiveSubscription =
+            typeof lastPaymentTimestamp === 'number' &&
+            Date.now() - lastPaymentTimestamp < THIRTY_DAYS_MS;
+
+          setTariffLabel(hasActiveSubscription ? 'Премиум' : 'Базовый');
         }
       } catch (err) {
         console.error('Не удалось загрузить профиль:', err);
