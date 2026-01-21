@@ -151,7 +151,7 @@ function TariffPage() {
 
   return (
     <div className={`${styles.body} ${styles.tariffPage}`}>
-      <PageNavbar leftIcon="back" onLeftClick={handleBackClick} />
+      <PageNavbar leftIcon="back" onLeftClick={handleBackClick} showProfileIcon={false} />
 
       <div className={styles.glow} aria-hidden="true"></div>
 
