@@ -70,9 +70,19 @@
 }
 
 .tariffPage .contentBlock {
-    width: 100%;
-    padding: 20px 15px;
-    border-bottom: 0.75px solid #3E3E3E;
+    margin: 15px 20px;
+}
+
+.tariffPage .tariffBlock {
+    border-radius: 16px;
+    padding: 15px;
+    border: 1px solid #483F59;
+}
+
+.tariffPage .tariffActiveBlock {
+    border-radius: 16px;
+    padding: 15px;
+    background-color: #25202F;
 }
 
 .tariffPage .contentBlockLast {
@@ -195,7 +205,6 @@
 .tariffPage .autorenewInfo {
     font-size: 13px;
     color: #A9A9A9;
-    text-align: center;
     margin: 0;
 }
 
@@ -255,4 +264,14 @@
 .tariffPage .modalButtonCancel {
     background: #372558;
     color: #E0E0E0;
+}
+
+.tariffPage .freeBadge {
+    background-color: #372650;
+    padding: 4px 6px;
+    font-size: 11px;
+    border-radius: 4px;
+    line-height: 125%;
+    color: #BBB4C8;
+    letter-spacing: 0%;
 }
