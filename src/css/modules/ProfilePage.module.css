@@ -87,14 +87,16 @@
 }
 
 .profilePage .avatarBlock {
-    width: 48px;
-    height: 48px;
-    border: 0.75px solid #3E3E3E;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
+    background: linear-gradient(135deg, #A172F8 0%, #7C4DFF 100%);
+    position: relative;
+    overflow: hidden;
 }
 
 .profilePage .avatarBlock img {
@@ -102,6 +104,18 @@
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.profilePage .avatarInitials {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 .profilePage .prev {
@@ -115,18 +129,29 @@
     display: block;
 }
 
+.profilePage .userInfoSection {
+    display: flex;
+    align-items: center;
+}
+
 .profilePage .infoBlock {
     margin-left: 15px;
-    font-size: 14px;
-    font-weight: 400;
-    color: #A9A9A9;
-    line-height: 1.25;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.profilePage .fullName {
+    font-size: 16px;
+    font-weight: 500;
+    color: #E0E0E0;
+    line-height: 1.2;
 }
 
 .profilePage .username {
-    margin-top: 4px;
-    font-size: 12px;
-    color: #6F6F6F;
+    font-size: 13px;
+    color: #888888;
+    line-height: 1.2;
 }
 
 .profilePage .addRole {
@@ -139,6 +164,43 @@
     font-weight: 400;
     line-height: 1.25;
     white-space: nowrap;
+}
+
+.profilePage .fieldLabel {
+    font-size: 13px;
+    font-weight: 400;
+    color: #C4C3C7;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.profilePage .fieldInput {
+    background-color: #1E1E1E;
+    border: 0.75px solid #3E3E3E;
+    border-radius: 8px;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 400;
+    color: #E0E0E0;
+    line-height: 1.4;
+    padding: 12px 15px;
+    transition: border-color 0.2s ease;
+}
+
+.profilePage .fieldInput:focus {
+    border-color: #A172F8;
+}
+
+.profilePage .fieldInput::placeholder {
+    color: #6F6F6F;
+}
+
+.profilePage .fieldHint {
+    font-size: 12px;
+    color: #6F6F6F;
+    margin-top: 6px;
+    line-height: 1.3;
 }
 
 .profilePage .personActivity {
@@ -158,17 +220,72 @@
     opacity: 0.8;
 }
 
+.profilePage .tariffSection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.profilePage .tariffLabel {
+    font-size: 13px;
+    font-weight: 400;
+    color: #C4C3C7;
+}
+
+.profilePage .tariffBadge {
+    font-size: 12px;
+    font-weight: 500;
+    color: #E0E0E0;
+    background: #2A2A2A;
+    border: 0.75px solid #3E3E3E;
+    border-radius: 4px;
+    padding: 4px 10px;
+}
+
+.profilePage .tariffDescription {
+    font-size: 13px;
+    font-weight: 400;
+    color: #888888;
+    line-height: 1.4;
+    margin-bottom: 16px;
+}
+
+.profilePage .updateButton {
+    background: #A172F8;
+    border: none;
+    border-radius: 4px;
+    width: 100%;
+    height: 44px;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.profilePage .updateButton:hover {
+    opacity: 0.9;
+}
+
+.profilePage .updateButton:active {
+    opacity: 0.8;
+}
+
 .profilePage .linkCorporatePage {
     font-size: 14px;
     font-weight: 400;
-    color: #A9A9A9;
-    line-height: 1.25;
+    color: #888888;
+    line-height: 1.8;
     text-decoration: none;
     display: block;
 }
 
 .profilePage .linkCorporatePage:hover {
-    color: #E0E0E0;
+    color: #A9A9A9;
 }
 
 .profilePage .sectionTitle {
