@@ -204,7 +204,7 @@ function ProfilePage() {
   // Get first letter for avatar initials
   const initials = firstName ? firstName.charAt(0).toUpperCase() : (username ? username.charAt(0).toUpperCase() : 'П');
 
-  const tariffLabel = tariff?.name || 'Базовый';
+  const tariffLabel = profile.tariff; // вот тут задание deepseek-у, надо бы сделать чтобы в зависимости от того какой тариф и взависимости от того тариф премиум закончился или нет должно переменной присваиватьсь базовый или премиум
 
   const goBack = () => navigate(ROUTES.AGENTS_LIST);
   const goToTariff = () => navigate(ROUTES.TARIFF);
@@ -244,7 +244,7 @@ function ProfilePage() {
           {username && <div className={styles.username}>@{username}</div>}
         </div>
       </div>
-
+      
       {/* Роль в бизнесе */}
       <div className={styles.contentBlock}>
         <div className={styles.fieldLabel}>Роль в бизнесе</div>
@@ -276,7 +276,7 @@ function ProfilePage() {
       </div>
 
       {/* Регион */}
-      <div className={styles.contentBlock}>
+      <div className={`${styles.contentBlock} ${styles.contentBlockBorderBottom} pb-4 mb-3`}>
         <div className={styles.fieldLabel}>Регион</div>
         <input
           ref={regionInputRef}
@@ -291,13 +291,13 @@ function ProfilePage() {
       </div>
 
       {/* Тарифный план */}
-      <div className={styles.contentBlock}>
+      <div className={`${styles.contentBlock} ${styles.contentBlockBorderBottom} pb-4`}>
         <div className={styles.tariffSection}>
           <span className={styles.tariffLabel}>Тарифный план</span>
           <span className={styles.tariffBadge}>{tariffLabel}</span>
         </div>
         <div className={styles.tariffDescription}>
-          Испытайте самый глубинный опыт с тарифом Премиум
+          Испытайте самый глубинный опыт <br /> с тарифом <span  className={styles.tariffPremiumInDescription}>Премиум</span>
         </div>
         <button onClick={goToTariff} className={styles.updateButton}>
           ОБНОВИТЬ

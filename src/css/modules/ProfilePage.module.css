@@ -72,7 +72,10 @@
 
 .profilePage .contentBlock {
     width: 100%;
-    padding: 20px 15px;
+    padding: 10px 15px;
+}
+
+.profilePage .contentBlockBorderBottom {
     border-bottom: 0.75px solid #3E3E3E;
 }
 
@@ -167,24 +170,24 @@
 }
 
 .profilePage .fieldLabel {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 400;
-    color: #C4C3C7;
+    color: #A09BA8;
     margin-bottom: 8px;
     display: block;
 }
 
 .profilePage .fieldInput {
-    background-color: #1E1E1E;
-    border: 0.75px solid #3E3E3E;
-    border-radius: 8px;
+    background-color: #25202F;
+    border: none;
+    border-radius: 4px;
     outline: none;
     width: 100%;
     font-size: 14px;
     font-weight: 400;
     color: #E0E0E0;
     line-height: 1.4;
-    padding: 12px 15px;
+    padding: 11px 15px;
     transition: border-color 0.2s ease;
 }
 
@@ -223,24 +226,31 @@
 .profilePage .tariffSection {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    grid: 20px;
     margin-bottom: 10px;
 }
 
 .profilePage .tariffLabel {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 400;
-    color: #C4C3C7;
+    color: #E0E0E0;
+    letter-spacing: 0%;
+    line-height: 125%;
+    margin-right: 15px;
 }
 
 .profilePage .tariffBadge {
-    font-size: 12px;
-    font-weight: 500;
-    color: #E0E0E0;
-    background: #2A2A2A;
-    border: 0.75px solid #3E3E3E;
+    font-size: 11px;
+    font-weight: 400;
+    color: #BBB4C8;
+    border: 1px solid #483F59;
     border-radius: 4px;
-    padding: 4px 10px;
+    padding: 4px;
+    line-height: 125%;
+}
+
+.profilePage .tariffPremiumInDescription {
+    color: #BBB4C8;
 }
 
 .profilePage .tariffDescription {
@@ -248,23 +258,19 @@
     font-weight: 400;
     color: #888888;
     line-height: 1.4;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 .profilePage .updateButton {
-    background: #A172F8;
+    color: #A172F8;
     border: none;
-    border-radius: 4px;
-    width: 100%;
-    height: 44px;
+    
     font-family: 'Roboto Condensed', sans-serif;
     font-size: 14px;
-    font-weight: 700;
-    color: #000000;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
     cursor: pointer;
-    transition: opacity 0.2s ease;
+    background-color: transparent;
 }
 
 .profilePage .updateButton:hover {
@@ -277,11 +283,14 @@
 
 .profilePage .linkCorporatePage {
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 300;
+    font-style: light;
     color: #888888;
-    line-height: 1.8;
+    line-height: 125%;
+    letter-spacing: 0%;
     text-decoration: none;
     display: block;
+    margin: 15px 0px;
 }
 
 .profilePage .linkCorporatePage:hover {
