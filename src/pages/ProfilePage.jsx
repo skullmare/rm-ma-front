@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { IMAGES } from '../constants/images';
 import { ROUTES } from '../constants/routes';
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 function ProfilePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -204,7 +206,35 @@ function ProfilePage() {
   // Get first letter for avatar initials
   const initials = firstName ? firstName.charAt(0).toUpperCase() : (username ? username.charAt(0).toUpperCase() : 'П');
 
-  const tariffLabel = profile.tariff; // вот тут задание deepseek-у, надо бы сделать чтобы в зависимости от того какой тариф и взависимости от того тариф премиум закончился или нет должно переменной присваиватьсь базовый или премиум
+  // Determine tariff status (same logic as TariffPage.jsx)
+  const resolveLastPaymentTimestamp = () => {
+    if (!profile) return null;
+
+    const ts = profile.last_payment_timestamp ?? profile.lastPaymentTimestamp;
+    if (ts !== undefined && ts !== null) {
+      const tsNumber = Number(ts);
+      if (!Number.isNaN(tsNumber)) {
+        return tsNumber;
+      }
+    }
+
+    const iso = profile.last_payment_datetime ?? profile.lastPaymentDatetime;
+    if (iso) {
+      const parsed = Date.parse(iso);
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+
+    return null;
+  };
+
+  const lastPaymentTimestamp = resolveLastPaymentTimestamp();
+  const hasActiveSubscription =
+    typeof lastPaymentTimestamp === 'number' &&
+    Date.now() - lastPaymentTimestamp < THIRTY_DAYS_MS;
+
+  const tariffLabel = hasActiveSubscription ? 'Премиум' : 'Базовый';
 
   const goBack = () => navigate(ROUTES.AGENTS_LIST);
   const goToTariff = () => navigate(ROUTES.TARIFF);
