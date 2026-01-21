@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { IMAGES } from '../constants/images';
 import { ROUTES } from '../constants/routes';
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 function ProfilePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -25,6 +27,11 @@ function ProfilePage() {
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const roleDebounceRef = useRef(null);
   const roleInputRef = useRef(null);
+  const [region, setRegion] = useState('');
+  const [isUpdatingRegion, setIsUpdatingRegion] = useState(false);
+  const regionDebounceRef = useRef(null);
+  const regionInputRef = useRef(null);
+  const [tariff, setTariff] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -40,6 +47,8 @@ function ProfilePage() {
           } else {
             setRole(data.profile.role || '');
           }
+          setRegion(data.profile.region || '');
+          setTariff(data.tariff || null);
         }
       } catch (err) {
         if (isMounted) {
@@ -143,6 +152,39 @@ function ProfilePage() {
     }, 1000);
   };
 
+  const handleRegionChange = (e) => {
+    const newRegion = e.target.value;
+    setRegion(newRegion);
+
+    if (regionDebounceRef.current) {
+      clearTimeout(regionDebounceRef.current);
+    }
+
+    regionDebounceRef.current = setTimeout(async () => {
+      const inputElement = regionInputRef.current;
+      const hadFocus = document.activeElement === inputElement;
+
+      setIsUpdatingRegion(true);
+      try {
+        await apiClient.put('/api/profile/region', {
+          region: newRegion,
+        });
+        setProfile(prev => ({ ...prev, region: newRegion }));
+      } catch (err) {
+        console.error('Failed to update region:', err);
+        setError(err?.response?.data?.message || 'Не удалось обновить регион');
+      } finally {
+        setIsUpdatingRegion(false);
+
+        if (hadFocus && inputElement) {
+          setTimeout(() => {
+            inputElement.focus();
+          }, 0);
+        }
+      }
+    }, 1000);
+  };
+
   // Очистка таймера при размонтировании
   useEffect(() => {
     return () => {
@@ -152,11 +194,47 @@ function ProfilePage() {
       if (roleDebounceRef.current) {
         clearTimeout(roleDebounceRef.current);
       }
+      if (regionDebounceRef.current) {
+        clearTimeout(regionDebounceRef.current);
+      }
     };
   }, []);
 
-  const fullName = [firstName, lastName].filter(Boolean).join(' ') || 
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') ||
                    (username ? `@${username}` : 'Пользователь');
+
+  // Get first letter for avatar initials
+  const initials = firstName ? firstName.charAt(0).toUpperCase() : (username ? username.charAt(0).toUpperCase() : 'П');
+
+  // Determine tariff status (same logic as TariffPage.jsx)
+  const resolveLastPaymentTimestamp = () => {
+    if (!profile) return null;
+
+    const ts = profile.last_payment_timestamp ?? profile.lastPaymentTimestamp;
+    if (ts !== undefined && ts !== null) {
+      const tsNumber = Number(ts);
+      if (!Number.isNaN(tsNumber)) {
+        return tsNumber;
+      }
+    }
+
+    const iso = profile.last_payment_datetime ?? profile.lastPaymentDatetime;
+    if (iso) {
+      const parsed = Date.parse(iso);
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+
+    return null;
+  };
+
+  const lastPaymentTimestamp = resolveLastPaymentTimestamp();
+  const hasActiveSubscription =
+    typeof lastPaymentTimestamp === 'number' &&
+    Date.now() - lastPaymentTimestamp < THIRTY_DAYS_MS;
+
+  const tariffLabel = hasActiveSubscription ? 'Премиум' : 'Базовый';
 
   const goBack = () => navigate(ROUTES.AGENTS_LIST);
   const goToTariff = () => navigate(ROUTES.TARIFF);
@@ -169,87 +247,104 @@ function ProfilePage() {
 
       <div className={styles.glow} aria-hidden="true" />
 
+      {/* Заголовок */}
       <div className={styles.contentBlock}>
         <h2 className={styles.profileTitle}>ПРОФИЛЬ</h2>
       </div>
 
       {/* Аватар + имя */}
-      <div className={`${styles.contentBlock} d-flex align-items-center`}>
+      <div className={`${styles.contentBlock} ${styles.userInfoSection}`}>
         <div className={styles.avatarBlock}>
-          <img
-            src={photoUrl}
-            alt="Аватар"
-            onError={(e) => {
-              e.currentTarget.src = IMAGES.PERSON;
-            }}
-          />
+          {photoUrl && photoUrl !== IMAGES.PERSON ? (
+            <img
+              src={photoUrl}
+              alt="Аватар"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling.style.display = 'flex';
+              }}
+            />
+          ) : (
+            <div className={styles.avatarInitials}>{initials}</div>
+          )}
         </div>
         <div className={styles.infoBlock}>
-          <div>{fullName}</div>
+          <div className={styles.fullName}>{fullName}</div>
           {username && <div className={styles.username}>@{username}</div>}
         </div>
       </div>
-
-      {/* Роли */}
+      
+      {/* Роль в бизнесе */}
       <div className={styles.contentBlock}>
-        <span className={styles.sectionTitle}>ВАША РОЛЬ:</span>
-        <div className="mt-2">
-          <input
-            ref={roleInputRef}
-            className={styles.personActivity}
-            type="text"
-            placeholder="Генеральный директор.."
-            value={role}
-            onChange={handleRoleChange}
-            aria-busy={isUpdatingRole}
-          />
-          {isUpdatingRole && (
-            <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
-              Сохранение...
-            </div>
-          )}
-        </div>
+        <div className={styles.fieldLabel}>Роль в бизнесе</div>
+        <input
+          ref={roleInputRef}
+          className={styles.fieldInput}
+          type="text"
+          placeholder="Укажите роль"
+          value={role}
+          onChange={handleRoleChange}
+          aria-busy={isUpdatingRole}
+        />
+        <div className={styles.fieldHint}>Например: генеральный директор</div>
       </div>
 
       {/* Сфера деятельности */}
       <div className={styles.contentBlock}>
-        <span className={styles.sectionTitle}>СФЕРА ДЕЯТЕЛЬНОСТИ:</span>
-        <div className="mt-2">
-          <input
-            ref={professionInputRef}
-            className={styles.personActivity}
-            type="text"
-            placeholder="Укажите вашу сферу деятельности.."
-            value={profession}
-            onChange={handleProfessionChange}
-            aria-busy={isUpdatingProfession}
-          />
-          {isUpdatingProfession && (
-            <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
-              Сохранение...
-            </div>
-          )}
-        </div>
+        <div className={styles.fieldLabel}>Сфера деятельности</div>
+        <input
+          ref={professionInputRef}
+          className={styles.fieldInput}
+          type="text"
+          placeholder="Укажите сферу"
+          value={profession}
+          onChange={handleProfessionChange}
+          aria-busy={isUpdatingProfession}
+        />
+        <div className={styles.fieldHint}>Например: производство, образование</div>
       </div>
 
-      {/* Тариф */}
-      <div className={styles.contentBlock}>
-        <a href="#" onClick={goToTariff} className={styles.linkCorporatePage}>
-          Выбрать тариф
-        </a>
+      {/* Регион */}
+      <div className={`${styles.contentBlock} ${styles.contentBlockBorderBottom} pb-4 mb-3`}>
+        <div className={styles.fieldLabel}>Регион</div>
+        <input
+          ref={regionInputRef}
+          className={styles.fieldInput}
+          type="text"
+          placeholder="Укажите регион"
+          value={region}
+          onChange={handleRegionChange}
+          aria-busy={isUpdatingRegion}
+        />
+        <div className={styles.fieldHint}>Например: Московская область</div>
+      </div>
+
+      {/* Тарифный план */}
+      <div className={`${styles.contentBlock} ${styles.contentBlockBorderBottom} pb-4`}>
+        <div className={styles.tariffSection}>
+          <span className={styles.tariffLabel}>Тарифный план</span>
+          <span className={styles.tariffBadge}>{tariffLabel}</span>
+        </div>
+        <div className={styles.tariffDescription}>
+          Испытайте самый глубинный опыт <br /> с тарифом <span  className={styles.tariffPremiumInDescription}>Премиум</span>
+        </div>
+        <button onClick={goToTariff} className={styles.updateButton}>
+          ОБНОВИТЬ
+        </button>
       </div>
 
       {/* Ошибка */}
       {error && (
         <div className={styles.contentBlock}>
-          <div className={styles.infoBlock} style={{ color: '#F87171' }}>
+          <div style={{ color: '#F87171', fontSize: '14px' }}>
             {error}
           </div>
         </div>
       )}
 
       {/* Нижние ссылки */}
-      <div className={`${styles.contentBlock} d-flex flex-column gap-3`}>
+      <div className={styles.contentBlock}>
         <a href="#" className={styles.linkCorporatePage}>Политика конфиденциальности</a>
         <a href="#" className={styles.linkCorporatePage}>Условия использования</a>
         <a href="#" className={styles.linkCorporatePage}>О сервисе</a>
