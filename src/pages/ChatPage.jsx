@@ -184,9 +184,8 @@ function ChatPage() {
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
-      const hasEnoughMessages = messages.length > 5;
 
-      setShowScrollButton(hasEnoughMessages && !isNearBottom);
+      setShowScrollButton(!isNearBottom);
     };
 
     container.addEventListener('scroll', handleScroll);
