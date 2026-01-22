@@ -13,51 +13,52 @@ const MarkdownMessage = ({ content }) => {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          h1: ({ children }) => <h1 className={styles.markdownH1}>{children}</h1>,
-          h2: ({ children }) => <h2 className={styles.markdownH2}>{children}</h2>,
-          h3: ({ children }) => <h3 className={styles.markdownH3}>{children}</h3>,
-          h4: ({ children }) => <h4 className={styles.markdownH4}>{children}</h4>,
-          p: ({ children }) => <p className={styles.markdownP}>{children}</p>,
-          ul: ({ children }) => <ul className={styles.markdownUl}>{children}</ul>,
-          ol: ({ children }) => <ol className={styles.markdownOl}>{children}</ol>,
-          li: ({ children }) => <li className={styles.markdownLi}>{children}</li>,
-          table: ({ children }) => (
+          h1: (props) => <h1 className={styles.markdownH1}>{props.children}</h1>,
+          h2: (props) => <h2 className={styles.markdownH2}>{props.children}</h2>,
+          h3: (props) => <h3 className={styles.markdownH3}>{props.children}</h3>,
+          h4: (props) => <h4 className={styles.markdownH4}>{props.children}</h4>,
+          p: (props) => <p className={styles.markdownP}>{props.children}</p>,
+          ul: (props) => <ul className={styles.markdownUl}>{props.children}</ul>,
+          ol: (props) => <ol className={styles.markdownOl}>{props.children}</ol>,
+          li: (props) => <li className={styles.markdownLi}>{props.children}</li>,
+          table: (props) => (
             <div className={styles.tableWrapper}>
-              <table className={styles.markdownTable}>{children}</table>
+              <table className={styles.markdownTable}>{props.children}</table>
             </div>
           ),
-          th: ({ children }) => <th className={styles.markdownTh}>{children}</th>,
-          td: ({ children }) => <td className={styles.markdownTd}>{children}</td>,
-          blockquote: ({ children }) => (
-            <blockquote className={styles.markdownBlockquote}>{children}</blockquote>
+          th: (props) => <th className={styles.markdownTh}>{props.children}</th>,
+          td: (props) => <td className={styles.markdownTd}>{props.children}</td>,
+          blockquote: (props) => (
+            <blockquote className={styles.markdownBlockquote}>{props.children}</blockquote>
           ),
-          hr: () => <hr className={styles.markdownHr} />,
-          a: ({ href, children }) => (
-            <a 
-              href={href} 
-              className={styles.markdownLink} 
-              target="_blank" 
+          hr: (props) => <hr className={styles.markdownHr} />,
+          a: (props) => (
+            <a
+              href={props.href}
+              className={styles.markdownLink}
+              target="_blank"
               rel="noopener noreferrer"
             >
-              {children}
+              {props.children}
             </a>
           ),
-          strong: ({ children }) => <strong className={styles.markdownStrong}>{children}</strong>,
-          em: ({ children }) => <em className={styles.markdownEm}>{children}</em>,
-          code({ node, inline, className, children, ...props }) {
+          strong: (props) => <strong className={styles.markdownStrong}>{props.children}</strong>,
+          em: (props) => <em className={styles.markdownEm}>{props.children}</em>,
+          code(props) {
+            const { node, inline, className, children, ...rest } = props;
             const match = /language-(\w+)/.exec(className || '');
-            
+
             if (inline) {
-              return <code className={styles.inlineCode} {...props}>{children}</code>;
+              return <code className={styles.inlineCode} {...rest}>{children}</code>;
             }
-            
+
             return (
               <div className={styles.codeBlock}>
                 <SyntaxHighlighter
                   style={oneDark}
                   language={match ? match[1] : 'text'}
                   PreTag="div"
-                  {...props}
+                  {...rest}
                 >
                   {String(children).replace(/\n$/, '')}
                 </SyntaxHighlighter>
