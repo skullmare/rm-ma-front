@@ -8,7 +8,6 @@ import styles from '../css/modules/ChatPage.module.css';
 
 const MarkdownMessage = ({ content }) => {
   return (
-    // УБРАТЬ className у ReactMarkdown и обернуть в div
     <div className={styles.markdownContent}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
@@ -44,11 +43,12 @@ const MarkdownMessage = ({ content }) => {
           ),
           strong: ({ children }) => <strong className={styles.markdownStrong}>{children}</strong>,
           em: ({ children }) => <em className={styles.markdownEm}>{children}</em>,
-          code({ node, inline, className, children, ...props }) {
+          // ИСПРАВЛЕННЫЙ КОМПОНЕНТ CODE
+          code: ({ inline, className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || '');
             
             if (inline) {
-              return <code className={styles.inlineCode} {...props}>{children}</code>;
+              return <code className={styles.inlineCode}>{children}</code>;
             }
             
             return (
@@ -57,7 +57,6 @@ const MarkdownMessage = ({ content }) => {
                   style={oneDark}
                   language={match ? match[1] : 'text'}
                   PreTag="div"
-                  {...props}
                 >
                   {String(children).replace(/\n$/, '')}
                 </SyntaxHighlighter>
