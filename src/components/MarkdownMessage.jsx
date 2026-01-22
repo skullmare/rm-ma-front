@@ -46,11 +46,11 @@ const MarkdownMessage = ({ content }) => {
           // ИСПРАВЛЕННЫЙ КОМПОНЕНТ CODE
           code: ({ inline, className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || '');
-            
+
             if (inline) {
               return <code className={styles.inlineCode}>{children}</code>;
             }
-            
+
             return (
               <div className={styles.codeBlock}>
                 <SyntaxHighlighter
