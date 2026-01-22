@@ -15,6 +15,8 @@ import Message from '../components/Message';
 import { IMAGES } from '../constants/images';
 import { ROUTES } from '../constants/routes';
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,6 +34,8 @@ function ChatPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [textareaHeight, setTextareaHeight] = useState(44);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [tariffLabel, setTariffLabel] = useState('Базовый');
 
   const formatTime = (input) => {
     const date = new Date(
@@ -126,6 +130,71 @@ function ChatPage() {
     resize();
   }, [inputValue]);
 
+  // Загрузка тарифа
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchProfile = async () => {
+      try {
+        const { data } = await apiClient.get('/api/profile');
+
+        if (data?.profile) {
+          const profile = data.profile;
+
+          const resolveLastPaymentTimestamp = () => {
+            const ts = profile.last_payment_timestamp ?? profile.lastPaymentTimestamp;
+            if (ts !== undefined && ts !== null) {
+              const tsNumber = Number(ts);
+              if (!Number.isNaN(tsNumber)) {
+                return tsNumber;
+              }
+            }
+
+            const iso = profile.last_payment_datetime ?? profile.lastPaymentDatetime;
+            if (iso) {
+              const parsed = Date.parse(iso);
+              if (!Number.isNaN(parsed)) {
+                return parsed;
+              }
+            }
+
+            return null;
+          };
+
+          const lastPaymentTimestamp = resolveLastPaymentTimestamp();
+          const hasActiveSubscription =
+            typeof lastPaymentTimestamp === 'number' &&
+            Date.now() - lastPaymentTimestamp < THIRTY_DAYS_MS;
+
+          setTariffLabel(hasActiveSubscription ? 'Премиум' : 'Базовый');
+        }
+      } catch (err) {
+        console.error('Не удалось загрузить профиль:', err);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  // Отслеживание скролла для показа кнопки "Вниз"
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
+      const hasEnoughMessages = messages.length > 5;
+
+      setShowScrollButton(hasEnoughMessages && !isNearBottom);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [messages.length]);
+
   const sendMessage = async () => {
     const text = inputValue.trim();
     if (!text || isLoading || !chatId) return;
@@ -189,6 +258,7 @@ function ChatPage() {
       <PageNavbar
         leftIcon="back"
         centerText={agentName}
+        centerSubtext={tariffLabel}
         onLeftClick={() => navigate(ROUTES.AGENTS_LIST)}
         onRightClick={() => navigate(ROUTES.PROFILE)}
       />
@@ -223,41 +293,19 @@ function ChatPage() {
             </div>
           </div>
         )}
+
+        {/* Кнопка прокрутки вниз */}
+        {showScrollButton && (
+          <div
+            onClick={scrollToBottom}
+            className={styles.scrollToBottomButton}
+          >
+            <img src={IMAGES.BACK_ARROW} alt="Прокрутить вниз" />
+          </div>
+        )}
       </main>
 
       <div className={styles.glowBottom} />
-
-      {/* <div
-        onClick={scrollToBottom}
-        style={{
-          position: 'fixed',
-          bottom: `${calculateButtonBottom()}px`,
-          right: '20px',
-          transform: 'rotate(-90deg)',
-          transformOrigin: 'center center',
-          cursor: 'pointer',
-          borderRadius: '50%',
-          backgroundColor: '#2d2d2d',
-          zIndex: 10000,
-          width: '40px',
-          height: '40px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          transition: 'bottom 0.2s ease',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-        }}
-      >
-        <img 
-          style={{ 
-            width: '20px', 
-            height: '20px',
-            filter: 'brightness(0.9)'
-          }} 
-          src={IMAGES.back} 
-          alt="Прокрутить вниз" 
-        />
-      </div> */}
 
       <div className={styles.formBlock}>
         <div className={styles.blockQuestionField}>
@@ -272,13 +320,15 @@ function ChatPage() {
             rows={1}
           />
         </div>
-        <div
-          className={styles.blockButtonSend}
-          onClick={sendMessage}
-          style={{ opacity: isLoading ? 0.5 : 1 }}
-        >
-          <img src={IMAGES.SEND_BUTTON} alt="Отправить" />
-        </div>
+        {inputValue.trim().length > 0 && (
+          <div
+            className={styles.blockButtonSend}
+            onClick={sendMessage}
+            style={{ opacity: isLoading ? 0.5 : 1 }}
+          >
+            <img src={IMAGES.SEND_BUTTON} alt="Отправить" />
+          </div>
+        )}
       </div>
     </div>
   );

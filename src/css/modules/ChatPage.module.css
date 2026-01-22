@@ -546,18 +546,37 @@
   }
 }
 
-/* Анимация появления для плавности */
-.chatPage .markdownContent * {
-  animation: fadeIn 0.3s ease-out;
+/* Кнопка прокрутки вниз */
+.chatPage .scrollToBottomButton {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #25202F;
+  border: 1px solid #483F59;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.chatPage .scrollToBottomButton:hover {
+  background: #2d2738;
+  transform: scale(1.05);
+}
+
+.chatPage .scrollToBottomButton:active {
+  transform: scale(0.95);
+}
+
+.chatPage .scrollToBottomButton img {
+  width: 20px;
+  height: 20px;
+  transform: rotate(-90deg);
+  filter: brightness(0.9);
 }

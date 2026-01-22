@@ -9,6 +9,7 @@ import { ROUTES } from '../constants/routes';
  * @param {Object} props
  * @param {'back'|'logo'|'none'} props.leftIcon - Тип левой иконки
  * @param {string} props.centerText - Текст в центре навбара
+ * @param {string} props.centerSubtext - Подтекст в центре навбара (под centerText)
  * @param {string} props.tariffLabel - Текст тарифа (например, "Базовый")
  * @param {Function} props.onLeftClick - Обработчик клика на левую иконку (опционально)
  * @param {Function} props.onRightClick - Обработчик клика на правую иконку (опционально)
@@ -19,6 +20,7 @@ import { ROUTES } from '../constants/routes';
 function PageNavbar({
   leftIcon = 'back',
   centerText = '',
+  centerSubtext = '',
   tariffLabel = '',
   onLeftClick,
   onRightClick,
@@ -85,7 +87,12 @@ function PageNavbar({
         )}
 
         {/* Центральная часть */}
-        {centerText && <span className={styles.centerText}>{centerText}</span>}
+        {centerText && (
+          <div className={styles.centerContent}>
+            <span className={styles.centerText}>{centerText}</span>
+            {centerSubtext && <span className={styles.centerSubtext}>{centerSubtext}</span>}
+          </div>
+        )}
 
         {/* Правая часть - тариф и профиль */}
         <div className={styles.navbarRight}>
