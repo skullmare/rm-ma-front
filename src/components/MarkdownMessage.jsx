@@ -8,80 +8,47 @@ import styles from '../css/modules/ChatPage.module.css';
 
 const MarkdownMessage = ({ content }) => {
   return (
-    // УБРАТЬ className у ReactMarkdown и обернуть в div
     <div className={styles.markdownContent}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          h1(props) {
-            return <h1 className={styles.markdownH1}>{props.children}</h1>;
-          },
-          h2(props) {
-            return <h2 className={styles.markdownH2}>{props.children}</h2>;
-          },
-          h3(props) {
-            return <h3 className={styles.markdownH3}>{props.children}</h3>;
-          },
-          h4(props) {
-            return <h4 className={styles.markdownH4}>{props.children}</h4>;
-          },
-          p(props) {
-            return <p className={styles.markdownP}>{props.children}</p>;
-          },
-          ul(props) {
-            return <ul className={styles.markdownUl}>{props.children}</ul>;
-          },
-          ol(props) {
-            return <ol className={styles.markdownOl}>{props.children}</ol>;
-          },
-          li(props) {
-            return <li className={styles.markdownLi}>{props.children}</li>;
-          },
-          table(props) {
-            return (
-              <div className={styles.tableWrapper}>
-                <table className={styles.markdownTable}>{props.children}</table>
-              </div>
-            );
-          },
-          th(props) {
-            return <th className={styles.markdownTh}>{props.children}</th>;
-          },
-          td(props) {
-            return <td className={styles.markdownTd}>{props.children}</td>;
-          },
-          blockquote(props) {
-            return (
-              <blockquote className={styles.markdownBlockquote}>{props.children}</blockquote>
-            );
-          },
-          hr(props) {
-            return <hr className={styles.markdownHr} />;
-          },
-          a(props) {
-            return (
-              <a
-                href={props.href}
-                className={styles.markdownLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {props.children}
-              </a>
-            );
-          },
-          strong(props) {
-            return <strong className={styles.markdownStrong}>{props.children}</strong>;
-          },
-          em(props) {
-            return <em className={styles.markdownEm}>{props.children}</em>;
-          },
-          code(props) {
-            const { node, inline, className, children, ...rest } = props;
+          h1: ({ children }) => <h1 className={styles.markdownH1}>{children}</h1>,
+          h2: ({ children }) => <h2 className={styles.markdownH2}>{children}</h2>,
+          h3: ({ children }) => <h3 className={styles.markdownH3}>{children}</h3>,
+          h4: ({ children }) => <h4 className={styles.markdownH4}>{children}</h4>,
+          p: ({ children }) => <p className={styles.markdownP}>{children}</p>,
+          ul: ({ children }) => <ul className={styles.markdownUl}>{children}</ul>,
+          ol: ({ children }) => <ol className={styles.markdownOl}>{children}</ol>,
+          li: ({ children }) => <li className={styles.markdownLi}>{children}</li>,
+          table: ({ children }) => (
+            <div className={styles.tableWrapper}>
+              <table className={styles.markdownTable}>{children}</table>
+            </div>
+          ),
+          th: ({ children }) => <th className={styles.markdownTh}>{children}</th>,
+          td: ({ children }) => <td className={styles.markdownTd}>{children}</td>,
+          blockquote: ({ children }) => (
+            <blockquote className={styles.markdownBlockquote}>{children}</blockquote>
+          ),
+          hr: () => <hr className={styles.markdownHr} />,
+          a: ({ href, children }) => (
+            <a 
+              href={href} 
+              className={styles.markdownLink} 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              {children}
+            </a>
+          ),
+          strong: ({ children }) => <strong className={styles.markdownStrong}>{children}</strong>,
+          em: ({ children }) => <em className={styles.markdownEm}>{children}</em>,
+          // ИСПРАВЛЕННЫЙ КОМПОНЕНТ CODE
+          code: ({ inline, className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || '');
 
             if (inline) {
-              return <code className={styles.inlineCode} {...rest}>{children}</code>;
+              return <code className={styles.inlineCode}>{children}</code>;
             }
 
             return (
@@ -90,7 +57,6 @@ const MarkdownMessage = ({ content }) => {
                   style={oneDark}
                   language={match ? match[1] : 'text'}
                   PreTag="div"
-                  {...rest}
                 >
                   {String(children).replace(/\n$/, '')}
                 </SyntaxHighlighter>
