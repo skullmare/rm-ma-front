@@ -104,7 +104,6 @@
 
 /* Messages */
 .chatPage .message {
-    
     padding: 10px 14px;
     border-radius: 18px;
     line-height: 1.45;
@@ -116,8 +115,6 @@
 .chatPage .message.incoming {
     max-width: 100%;
     align-self: flex-start;
-
-    
 }
 
 .chatPage .message.outgoing {
@@ -175,7 +172,6 @@
     font-size: 14px;
     line-height: 1.45;
     color: #E0E0E0;
-    /* Изменено: разрешена прокрутка */
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #555 transparent;
@@ -220,7 +216,7 @@
 }
 
 .chatPage .typingIndicator {
-    font-size: 15px;
+    font-size: 14px;
     align-self: flex-start;
     display: flex;
     align-items: end;
@@ -280,8 +276,6 @@
     align-self: center;
 }
 
-  
-
 .chatPage .loadMoreButton {
     margin: 0px auto;
     height: 40px;
@@ -301,282 +295,540 @@
     transform: scale(0.97);
 }
 
-/* MARKDOWN STYLES - добавьте эти стили в конец вашего файла */
+/* =========================== */
+/* MARKDOWN СТИЛИ ДЛЯ ЧАТА */
+/* =========================== */
 
-/* Основные стили для markdown контента */
+/* Основной контейнер для markdown */
 .chatPage .markdownContent {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  line-height: 1.6;
-  color: #E0E0E0;
-  width: 100%;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    line-height: 1.6;
+    color: #E0E0E0;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    font-size: 14px;
 }
 
-/* Заголовки */
+/* Заголовки - логичная иерархия размеров */
 .chatPage .markdownH1 {
-  font-size: 1.5em;
-  font-weight: 700;
-  margin: 1em 0 0.5em 0;
-  color: #FFFFFF;
-  border-bottom: 1px solid #3E3E3E;
-  padding-bottom: 0.3em;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 18px 0 10px 0;
+    line-height: 1.3;
+    color: #FFFFFF;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #3E3E3E;
 }
 
 .chatPage .markdownH2 {
-  font-size: 1.3em;
-  font-weight: 600;
-  margin: 0.8em 0 0.4em 0;
-  color: #F0F0F0;
+    font-size: 19px;
+    font-weight: 600;
+    margin: 16px 0 8px 0;
+    line-height: 1.35;
+    color: #F5F5F5;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #3E3E3E;
 }
 
 .chatPage .markdownH3 {
-  font-size: 1.1em;
-  font-weight: 600;
-  margin: 0.6em 0 0.3em 0;
-  color: #E8E8E8;
+    font-size: 17px;
+    font-weight: 600;
+    margin: 14px 0 6px 0;
+    line-height: 1.4;
+    color: #F0F0F0;
 }
 
 .chatPage .markdownH4 {
-  font-size: 1em;
-  font-weight: 600;
-  margin: 0.5em 0 0.25em 0;
-  color: #E0E0E0;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 12px 0 5px 0;
+    line-height: 1.4;
+    color: #E8E8E8;
 }
 
-/* Параграфы */
+.chatPage .markdownH5 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 10px 0 4px 0;
+    line-height: 1.45;
+    color: #E0E0E0;
+}
+
+.chatPage .markdownH6 {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 8px 0 4px 0;
+    line-height: 1.45;
+    color: #D0D0D0;
+}
+
+/* Параграфы и текст */
 .chatPage .markdownP {
-  margin: 0.5em 0;
-  color: #E0E0E0;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #E0E0E0;
+    line-height: 1.6;
+}
+
+.chatPage .markdownP:first-child {
+    margin-top: 0;
+}
+
+.chatPage .markdownP:last-child {
+    margin-bottom: 0;
+}
+
+.chatPage .markdownStrong {
+    font-weight: 600;
+    color: #FFFFFF;
+}
+
+.chatPage .markdownEm {
+    font-style: italic;
+    color: #E0E0E0;
+}
+
+.chatPage .markdownDel {
+    text-decoration: line-through;
+    color: #E0E0E0;
 }
 
 /* Списки */
 .chatPage .markdownUl,
 .chatPage .markdownOl {
-  margin: 0.5em 0;
-  padding-left: 1.5em;
-  color: #E0E0E0;
+    margin: 10px 0;
+    padding-left: 24px;
+    font-size: 14px;
+    color: #E0E0E0;
 }
 
 .chatPage .markdownLi {
-  margin: 0.3em 0;
-  padding-left: 0.2em;
+    margin: 6px 0;
+    padding-left: 4px;
+    line-height: 1.6;
 }
 
-.chatPage .markdownUl li::marker {
-  color: #888;
+.chatPage .markdownLi::marker {
+    color: #E0E0E0;
 }
 
-.chatPage .markdownOl li::marker {
-  color: #888;
+.chatPage .markdownUl .markdownLi::marker {
+    color: #E0E0E0;
+}
+
+.chatPage .markdownOl .markdownLi::marker {
+    color: #E0E0E0;
+    font-weight: 500;
+}
+
+/* Вложенные списки */
+.chatPage .markdownUl .markdownUl,
+.chatPage .markdownOl .markdownOl,
+.chatPage .markdownUl .markdownOl,
+.chatPage .markdownOl .markdownUl {
+    margin: 4px 0;
 }
 
 /* Таблицы */
 .chatPage .tableWrapper {
-  overflow-x: auto;
-  margin: 1em 0;
-  border-radius: 8px;
-  border: 1px solid #3E3E3E;
-  background: #1E1E1E;
+    overflow-x: auto;
+    margin: 12px 0;
+    border-radius: 8px;
+    border: 1px solid #3E3E3E;
+    background: #25202F;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .chatPage .markdownTable {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 300px;
-  font-size: 0.9em;
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 300px;
+    font-size: 13px;
+    background: #25202F;
 }
 
 .chatPage .markdownTh {
-  background-color: #2D2D2D;
-  border: 1px solid #3E3E3E;
-  padding: 8px 12px;
-  font-weight: 600;
-  text-align: left;
-  color: #D0D0D0;
+    background-color: #2A2537;
+    border: 1px solid #3E3E3E;
+    padding: 10px 12px;
+    font-weight: 600;
+    text-align: left;
+    color: #FFFFFF;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
 .chatPage .markdownTd {
-  border: 1px solid #3E3E3E;
-  padding: 8px 12px;
-  color: #E0E0E0;
+    border: 1px solid #3E3E3E;
+    padding: 9px 12px;
+    color: #E0E0E0;
+    font-size: 13px;
+    line-height: 1.5;
 }
 
 .chatPage .markdownTable tr:nth-child(even) {
-  background-color: #252525;
+    background-color: #2D2838;
 }
 
 .chatPage .markdownTable tr:hover {
-  background-color: #2A2A2A;
+    background-color: #322C3F;
 }
 
 /* Код */
 .chatPage .codeBlock {
-  margin: 0.8em 0;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #3E3E3E;
+    margin: 12px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #3E3E3E;
+    background: #1A1A1A;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chatPage .codeBlock pre {
+    margin: 0 !important;
+    padding: 14px 16px !important;
+    background: #1A1A1A !important;
+    overflow-x: auto;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #E0E0E0;
 }
 
 .chatPage .inlineCode {
-  background-color: #2A2A2A;
-  padding: 0.2em 0.4em;
-  border-radius: 4px;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 0.9em;
-  color: #A172F8;
-  border: 1px solid #3E3E3E;
+    background-color: #25202F;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 13px;
+    color: #C0C0C0;
+    border: 1px solid #483F59;
+    white-space: nowrap;
 }
 
 /* Цитаты */
 .chatPage .markdownBlockquote {
-  border-left: 3px solid #A172F8;
-  margin: 0.5em 0;
-  padding-left: 1em;
-  color: #B0B0B0;
-  font-style: italic;
-  background: rgba(161, 114, 248, 0.05);
-  padding: 8px 12px;
-  border-radius: 0 8px 8px 0;
+    border-left: 3px solid #888888;
+    margin: 12px 0;
+    padding: 10px 14px 10px 16px;
+    font-size: 14px;
+    color: #C0C0C0;
+    background: rgba(136, 136, 136, 0.05);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    line-height: 1.6;
+}
+
+.chatPage .markdownBlockquote p {
+    margin: 6px 0;
+}
+
+.chatPage .markdownBlockquote p:first-child {
+    margin-top: 0;
+}
+
+.chatPage .markdownBlockquote p:last-child {
+    margin-bottom: 0;
 }
 
 /* Разделители */
 .chatPage .markdownHr {
-  border: none;
-  border-top: 1px solid #3E3E3E;
-  margin: 1.5em 0;
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #3E3E3E, transparent);
+    margin: 16px 0;
+    opacity: 0.7;
 }
 
 /* Ссылки */
 .chatPage .markdownLink {
-  color: #A172F8;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s;
+    color: #C0C0C0;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(192, 192, 192, 0.3);
+    transition: all 0.2s ease;
+    padding-bottom: 1px;
 }
 
 .chatPage .markdownLink:hover {
-  border-bottom: 1px solid #A172F8;
+    border-bottom: 1px solid #C0C0C0;
+    color: #D0D0D0;
 }
 
-/* Текст */
-.chatPage .markdownStrong {
-  font-weight: 700;
-  color: #FFFFFF;
+.chatPage .markdownLink:active {
+    color: #E0E0E0;
 }
 
-.chatPage .markdownEm {
-  font-style: italic;
-  color: #E0E0E0;
+/* Изображения */
+.chatPage .markdownImage {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 12px 0;
+    border: 1px solid #3E3E3E;
+    background: #25202F;
+    padding: 4px;
+    display: block;
 }
 
-/* Специальные элементы для сообщений */
+.chatPage .markdownFigcaption {
+    font-size: 12px;
+    color: #888888;
+    text-align: center;
+    margin-top: 6px;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* Специфичные стили для входящих сообщений */
 .chatPage .message.incoming .markdownContent {
-  color: #E0E0E0;
+    color: #E0E0E0;
 }
 
+.chatPage .message.incoming .markdownH1,
+.chatPage .message.incoming .markdownH2,
+.chatPage .message.incoming .markdownH3,
+.chatPage .message.incoming .markdownH4,
+.chatPage .message.incoming .markdownH5 {
+    color: #FFFFFF;
+}
+
+.chatPage .message.incoming .markdownLink {
+    color: #C0C0C0;
+    border-bottom-color: rgba(192, 192, 192, 0.3);
+}
+
+.chatPage .message.incoming .markdownLink:hover {
+    color: #D0D0D0;
+    border-bottom-color: #C0C0C0;
+}
+
+/* Специфичные стили для исходящих сообщений */
 .chatPage .message.outgoing .markdownContent {
-  color: #FFFFFF;
+    color: #FFFFFF;
 }
 
-/* Дополнительные стили для улучшенного отображения */
-.chatPage .markdownContent pre {
-  margin: 0;
-  background: #1A1A1A !important;
+.chatPage .message.outgoing .markdownH1,
+.chatPage .message.outgoing .markdownH2,
+.chatPage .message.outgoing .markdownH3,
+.chatPage .message.outgoing .markdownH4,
+.chatPage .message.outgoing .markdownH5 {
+    color: #FFFFFF;
+    border-bottom-color: #564A6B;
 }
 
-.chatPage .markdownContent code {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+.chatPage .message.outgoing .markdownP {
+    color: #FFFFFF;
 }
 
-/* Стили для SyntaxHighlighter (подсветка кода) */
-.chatPage .codeBlock pre {
-  margin: 0 !important;
-  padding: 12px !important;
-  background: #1A1A1A !important;
-  border-radius: 8px !important;
+.chatPage .message.outgoing .markdownLink {
+    color: #E8E8E8;
+    border-bottom-color: rgba(232, 232, 232, 0.3);
 }
 
-.chatPage .codeBlock code {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
-  font-size: 0.85em !important;
-  line-height: 1.4 !important;
+.chatPage .message.outgoing .markdownLink:hover {
+    color: #F0F0F0;
+    border-bottom-color: #E8E8E8;
 }
 
-/* Скроллбар для таблиц */
-.chatPage .tableWrapper::-webkit-scrollbar {
-  height: 6px;
+.chatPage .message.outgoing .inlineCode {
+    background-color: #2D2838;
+    color: #E0E0E0;
+    border-color: #564A6B;
 }
 
-.chatPage .tableWrapper::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 3px;
+.chatPage .message.outgoing .tableWrapper {
+    background: #2D2838;
+    border-color: #564A6B;
 }
 
-.chatPage .tableWrapper::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 3px;
+.chatPage .message.outgoing .markdownTable {
+    background: #2D2838;
 }
 
-.chatPage .tableWrapper::-webkit-scrollbar-thumb:hover {
-  background: #777;
+.chatPage .message.outgoing .markdownTh {
+    background-color: #322C3F;
+    border-color: #564A6B;
 }
 
-/* Адаптивные стили для мобильных */
+.chatPage .message.outgoing .markdownTd {
+    border-color: #564A6B;
+    color: #FFFFFF;
+}
+
+.chatPage .message.outgoing .markdownTable tr:nth-child(even) {
+    background-color: #322C3F;
+}
+
+.chatPage .message.outgoing .markdownTable tr:hover {
+    background-color: #3A3448;
+}
+
+.chatPage .message.outgoing .codeBlock {
+    background: #1F1B26;
+    border-color: #564A6B;
+}
+
+.chatPage .message.outgoing .codeBlock pre {
+    background: #1F1B26 !important;
+}
+
+.chatPage .message.outgoing .markdownBlockquote {
+    border-left-color: #888888;
+    background: rgba(136, 136, 136, 0.08);
+    color: #E8E8E8;
+}
+
+.chatPage .message.outgoing .markdownHr {
+    background: linear-gradient(90deg, transparent, #564A6B, transparent);
+}
+
+/* Скроллбары для таблиц и кода */
+.chatPage .tableWrapper::-webkit-scrollbar,
+.chatPage .codeBlock pre::-webkit-scrollbar {
+    height: 6px;
+}
+
+.chatPage .tableWrapper::-webkit-scrollbar-track,
+.chatPage .codeBlock pre::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.chatPage .tableWrapper::-webkit-scrollbar-thumb,
+.chatPage .codeBlock pre::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+}
+
+.chatPage .tableWrapper::-webkit-scrollbar-thumb:hover,
+.chatPage .codeBlock pre::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+/* Подсветка синтаксиса (базовые цвета для code blocks) */
+.chatPage .codeBlock .keyword { color: #FF79C6; }
+.chatPage .codeBlock .function { color: #50FA7B; }
+.chatPage .codeBlock .string { color: #F1FA8C; }
+.chatPage .codeBlock .number { color: #BD93F9; }
+.chatPage .codeBlock .comment { color: #6272A4; font-style: italic; }
+.chatPage .codeBlock .operator { color: #FF5555; }
+.chatPage .codeBlock .class-name { color: #8BE9FD; }
+
+/* Адаптивность для маленьких экранов */
 @media (max-width: 480px) {
-  .chatPage .markdownTable {
-    font-size: 0.85em;
-  }
-  
-  .chatPage .markdownTh,
-  .chatPage .markdownTd {
-    padding: 6px 8px;
-  }
-  
-  .chatPage .markdownH1 {
-    font-size: 1.3em;
-  }
-  
-  .chatPage .markdownH2 {
-    font-size: 1.2em;
-  }
-  
-  .chatPage .markdownH3 {
-    font-size: 1.1em;
-  }
+    .chatPage .markdownContent {
+        font-size: 14px;
+    }
+    
+    .chatPage .markdownH1 {
+        font-size: 20px;
+        margin: 16px 0 9px 0;
+    }
+    
+    .chatPage .markdownH2 {
+        font-size: 18px;
+        margin: 14px 0 7px 0;
+    }
+    
+    .chatPage .markdownH3 {
+        font-size: 16px;
+        margin: 12px 0 6px 0;
+    }
+    
+    .chatPage .markdownH4 {
+        font-size: 15px;
+        margin: 10px 0 5px 0;
+    }
+    
+    .chatPage .markdownH5 {
+        font-size: 14px;
+        margin: 9px 0 4px 0;
+    }
+    
+    .chatPage .markdownH6 {
+        font-size: 13px;
+        margin: 8px 0 4px 0;
+    }
+    
+    .chatPage .markdownP {
+        font-size: 14px;
+        margin: 8px 0;
+    }
+    
+    .chatPage .markdownTable {
+        font-size: 12px;
+    }
+    
+    .chatPage .markdownTh,
+    .chatPage .markdownTd {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    
+    .chatPage .codeBlock pre {
+        padding: 12px 14px !important;
+        font-size: 12px;
+    }
+    
+    .chatPage .inlineCode {
+        font-size: 12px;
+        padding: 2px 5px;
+    }
+    
+    .chatPage .markdownBlockquote {
+        font-size: 13px;
+        padding: 9px 12px 9px 14px;
+    }
+}
+
+/* Анимации для плавного появления */
+.chatPage .markdownContent * {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Кнопка прокрутки вниз */
 .chatPage .scrollToBottomButton {
-  position: absolute;
-  bottom: 70px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #25202F;
-  border: 1px solid #483F59;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    bottom: 70px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #25202F;
+    border: 1px solid #483F59;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .chatPage .scrollToBottomButton:hover {
-  background: #2d2738;
-  transform: scale(1.05);
+    background: #2d2738;
+    transform: scale(1.05);
 }
 
 .chatPage .scrollToBottomButton:active {
-  transform: scale(0.95);
+    transform: scale(0.95);
 }
 
 .chatPage .scrollToBottomButton img {
-  width: 20px;
-  height: 20px;
-  transform: rotate(-90deg);
-  filter: brightness(0.9);
+    width: 20px;
+    height: 20px;
+    transform: rotate(-90deg);
+    filter: brightness(0.9);
 }

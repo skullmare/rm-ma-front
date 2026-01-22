@@ -4,7 +4,7 @@ import { ROUTES } from './routes';
 // Централизованные данные о всех агентах
 export const AGENTS_DATA = {
   sergey: {
-    id: 'sergey',
+    id: 'sergy',
     name: 'СЕРГЕЙ',
     role: 'АНАЛИТИК ВНЕШНЕГО КОНТЕКСТА',
     roleWithBreaks: 'АНАЛИТИК ВНЕШНЕГО\nКОНТЕКСТА',
@@ -19,7 +19,7 @@ export const AGENTS_DATA = {
 риски и возможности, влияющие
 на стратегию компании.`,
     route: ROUTES.AGENT_SERGY,
-    chatAgent: 'sergey',
+    chatAgent: 'sergy',
   },
   nick: {
     id: 'nick',
