@@ -782,22 +782,6 @@
     }
 }
 
-/* Анимации для плавного появления */
-.chatPage .markdownContent * {
-    animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(4px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* Кнопка прокрутки вниз */
 .chatPage .scrollToBottomButton {
     position: absolute;
