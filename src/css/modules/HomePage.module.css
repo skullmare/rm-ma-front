@@ -4,7 +4,7 @@
     height: 100vh;
     margin: 0 auto;
     overflow: hidden;
-    background: #121212;
+    background: #000000;
     position: relative;
 }
 
@@ -13,7 +13,7 @@
 /* === НАВИГАЦИЯ === */
 .homePage .navbar {
     width: 100%;
-    background: #121212;
+    background: #000000;
     z-index: 1000;
     padding: 0;
     border-bottom: 0.75px solid #3E3E3E;
@@ -70,7 +70,7 @@
     padding: 20px 30px;
     text-align: center;
     z-index: 40;
-    background-color: #121212;
+    background-color: #000000;
     flex-shrink: 0;
 }
 
@@ -103,7 +103,7 @@
     width: 100%;
     padding: 15px 30px;
     text-align: center;
-    background-color: #121212;
+    background-color: #000000;
     z-index: 30;
     flex-shrink: 0;
 }

@@ -14,7 +14,7 @@ const Message = ({ msg }) => {
       ) : (
         <div>{msg.text}</div>
       )}
-      <div className={styles.messageTime}>{msg.time}</div>
+      {/* <div className={styles.messageTime}>{msg.time}</div> */}
     </div>
   );
 };

@@ -7,7 +7,7 @@
     /* Все стили вложены в этот класс для изоляции */
     padding: 0;
     overflow-x: hidden;
-    background: #121212;
+    background: #000000;
     height: 100vh;
     position: relative;
     max-width: 500px;
@@ -16,7 +16,7 @@
 
 /* Navbar */
 .tariffPage .navbar {
-    background: #121212;
+    background: #000000;
     z-index: 1000;
     padding: 0;
     border-bottom: 0.75px solid #3E3E3E;

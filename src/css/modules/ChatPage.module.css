@@ -2,7 +2,7 @@
     /* Все стили вложены в этот класс для изоляции */
     height: 100vh;
     padding: 0;
-    background: #121212;
+    background: #000000;
     overflow-x: hidden;
     position: relative;
     display: flex;
@@ -47,7 +47,7 @@
 /* Navbar */
 .chatPage .navbar {
     width: 100%;
-    background: #121212;
+    background: #000000;
     z-index: 1000;
     padding: 0;
     border-bottom: 0.75px solid #3E3E3E;
@@ -104,26 +104,28 @@
 
 /* Messages */
 .chatPage .message {
-    max-width: 85%;
+    
     padding: 10px 14px;
     border-radius: 18px;
     line-height: 1.45;
-    font-size: 15.5px;
+    font-size: 14px;
     position: relative;
     word-wrap: break-word;
 }
 
 .chatPage .message.incoming {
+    max-width: 100%;
     align-self: flex-start;
-    background: #2D2D2D;
-    border-bottom-left-radius: 4px;
+
+    
 }
 
 .chatPage .message.outgoing {
     align-self: flex-end;
-    background: #A172F8;
+    background: #25202F;
     color: #FFFFFF;
     border-bottom-right-radius: 4px;
+    max-width: 85%;
 }
 
 .chatPage .messageTime {
@@ -141,8 +143,7 @@
 .chatPage .formBlock {
     width: 100%;
     padding: 11px 15px;
-    border-top: 0.75px solid #3E3E3E;
-    background-color: #121212;
+    background: linear-gradient(0deg, #100C14 57.53%, rgba(18, 18, 18, 0.575345) 89.24%, rgba(18, 18, 18, 0.08) 100%);
     display: flex;
     align-items: flex-end;
     gap: 12px;
@@ -153,6 +154,9 @@
 }
 
 .chatPage .blockQuestionField {
+    background-color: #25202FB2;
+    border: 1px solid #483F59;
+    border-radius: 8px;
     flex: 1;
     min-width: 0;
     display: flex;
@@ -161,14 +165,14 @@
 
 .chatPage .questionField {
     width: 100%;
-    min-height: 44px;
-    max-height: 140px;
-    padding: 11px 4px 11px 0;
+    min-height: 40px;
+    max-height: 100%;
+    padding: 11px 50px 11px 8px;
     background: transparent;
     border: none;
     outline: none;
     resize: none;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.45;
     color: #E0E0E0;
     /* Изменено: разрешена прокрутка */
@@ -199,18 +203,15 @@
 }
 
 .chatPage .blockButtonSend {
-    flex: 0 0 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
+    right: 25px;
+    margin-bottom: 10px;
     cursor: pointer;
-    margin-bottom: 2px;
 }
 
 .chatPage .blockButtonSend img {
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     transition: transform 0.2s;
 }
 
@@ -282,21 +283,18 @@
   
 
 .chatPage .loadMoreButton {
-    margin: 10px auto 16px auto;
+    margin: 0px auto;
+    height: 40px;
     padding: 10px 18px;
-    background: #1E1E1E;
-    color: #E0E0E0;
-    border: 1px solid #3E3E3E;
-    border-radius: 14px;
+    background: transparent;
+    color: #e0e0e0df;
+    border: 1px solid rgba(72, 63, 89, 1);
+    border-radius: 8px;
     font-size: 14px;
     cursor: pointer;
     display: block;
     text-align: center;
     transition: transform 0.15s;
-}
-
-.chatPage .loadMoreButton:hover {
-    background: #2A2A2A;
 }
 
 .chatPage .loadMoreButton:active {

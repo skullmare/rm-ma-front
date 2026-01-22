@@ -227,7 +227,7 @@ function ChatPage() {
 
       <div className={styles.glowBottom} />
 
-      <div
+      {/* <div
         onClick={scrollToBottom}
         style={{
           position: 'fixed',
@@ -257,14 +257,14 @@ function ChatPage() {
           src={IMAGES.back} 
           alt="Прокрутить вниз" 
         />
-      </div>
+      </div> */}
 
       <div className={styles.formBlock}>
         <div className={styles.blockQuestionField}>
           <textarea
             ref={textareaRef}
             className={styles.questionField}
-            placeholder="Задайте свой вопрос..."
+            placeholder="Задайте вопрос..."
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}

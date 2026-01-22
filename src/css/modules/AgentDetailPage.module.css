@@ -2,13 +2,13 @@
 
 .body {
   min-height: 100vh;
-  background: #121212;
+  background: #000000;
 }
 
 .agentDetailPage {
   height: 100%;
   padding: 0;
-  background: #121212;
+  background: #000000;
   overflow-x: hidden;
   position: relative;
   display: flex;
@@ -40,7 +40,7 @@
   width: 100%;
   padding: 20px;
   position: relative;
-  background-color: #121212;
+  background-color: #000000;
 }
 
 .agentDetailPage .contentBlockLast {
@@ -97,7 +97,7 @@
   padding: 20px 30px;
   margin-bottom: 30px;
   text-align: center;
-  background-color: #121212;
+  background-color: #000000;
   flex-shrink: 0;
   z-index: 40;
 }

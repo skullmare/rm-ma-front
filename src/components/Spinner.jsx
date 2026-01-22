@@ -9,7 +9,7 @@ function Spinner() {
     width: '100%',
     maxWidth: '500px',
     height: '100%',
-    background: '#121212',
+    background: '#000000',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
