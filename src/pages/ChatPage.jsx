@@ -71,7 +71,7 @@ function ChatPage() {
       if (beforeTimestamp) setIsLoadingMore(true);
       else setIsHistoryLoading(true);
 
-      const params = {};
+      const params = { agent };
       if (beforeTimestamp) params.timestamp = String(beforeTimestamp);
 
       const { data } = await apiClient.get('/api/chats/history', {
