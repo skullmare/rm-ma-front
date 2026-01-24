@@ -50,6 +50,7 @@ function ChatPage() {
     type: msg.autor === 'human' ? 'outgoing' : 'incoming',
     time: formatTime(msg.create_at || msg.timestamp),
     timestamp: msg.timestamp ? Number(msg.timestamp) : new Date(msg.create_at || Date.now()).getTime(),
+    flag: msg.flag || null,
   }), []);
 
   const scrollToBottom = useCallback(() => {
@@ -241,11 +242,8 @@ function ChatPage() {
     }
   };
 
-  const calculateButtonBottom = () => {
-    const minTextareaHeight = 44;
-    const baseBottom = 80;
-    const heightDifference = Math.max(0, textareaHeight - minTextareaHeight);
-    return baseBottom + heightDifference;
+  const handleGoToTariff = () => {
+    navigate(ROUTES.TARIFF || '/tariff');
   };
 
   if (isPageLoading || (isHistoryLoading && messages.length === 0)) {
@@ -279,7 +277,19 @@ function ChatPage() {
         
         {/* Используем компонент Message для рендеринга всех сообщений */}
         {messages.map(msg => (
-          <Message key={msg.id} msg={msg} />
+          <React.Fragment key={msg.id}>
+            <Message msg={msg} />
+            {msg.flag === 'payment' && (
+              <div className={styles.paymentButtonContainer}>
+                <button 
+                  className={styles.paymentButton}
+                  onClick={handleGoToTariff}
+                >
+                  ПЕРЕЙТИ
+                </button>
+              </div>
+            )}
+          </React.Fragment>
         ))}
 
         {isLoading && (
