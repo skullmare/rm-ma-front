@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/index.css';
 import Spinner from '../components/Spinner';
+import PageNavbar from '../components/PageNavbar';
 
 const logoImg = '/img/Logo container.svg';
 const slide1BoyImg = '/img/1_slide_boy.png';
@@ -159,7 +160,16 @@ function HomePage() {
   };
 
   const handleGoToAgents = () => {
-    navigate('/agents_list');
+    // Проверяем, был ли пройден опрос
+    const onboardingCompleted = localStorage.getItem('onboarding_completed');
+
+    if (onboardingCompleted === 'true') {
+      // Опрос уже пройден, переходим к списку агентов
+      navigate('/agents_list');
+    } else {
+      // Опрос не пройден, переходим на страницу onboarding
+      navigate('/onboarding');
+    }
   };
 
   if (isLoading) {
@@ -184,13 +194,7 @@ function HomePage() {
           {/* Slide 1 */}
           <div className="carousel-item active">
             <div className="slide-content">
-              <nav className="navbar">
-                <div className="container-fluid">
-                  <a className="navbar-brand" href="#">
-                    <img src={logoImg} alt="Logo" />
-                  </a>
-                </div>
-              </nav>
+              <PageNavbar leftIcon="logo" showProfileIcon={false} />
 
               <div className="main-content">
                 <div className="glow"></div>
@@ -227,13 +231,7 @@ function HomePage() {
           {/* Slide 2 */}
           <div className="carousel-item">
             <div className="slide-content">
-              <nav className="navbar">
-                <div className="container-fluid">
-                  <a className="navbar-brand" href="#">
-                    <img src={logoImg} alt="Logo" />
-                  </a>
-                </div>
-              </nav>
+              <PageNavbar leftIcon="logo" showProfileIcon={false} />
 
               <div className="main-content">
                 <div className="content-block">
@@ -301,13 +299,7 @@ function HomePage() {
           {/* Slide 3 */}
           <div className="carousel-item">
             <div className="slide-content">
-              <nav className="navbar">
-                <div className="container-fluid">
-                  <a className="navbar-brand" href="#">
-                    <img src={logoImg} alt="Logo" />
-                  </a>
-                </div>
-              </nav>
+              <PageNavbar leftIcon="logo" showProfileIcon={false} />
 
               <div className="main-content">
                 <div className="glow"></div>
@@ -364,13 +356,7 @@ function HomePage() {
           {/* Slide 4 */}
           <div className="carousel-item">
             <div className="slide-content">
-              <nav className="navbar">
-                <div className="container-fluid">
-                  <a className="navbar-brand" href="#">
-                    <img src={logoImg} alt="Logo" />
-                  </a>
-                </div>
-              </nav>
+              <PageNavbar leftIcon="logo" showProfileIcon={false} />
 
               <div className="main-content">
                 <div className="glow"></div>

@@ -1,0 +1,174 @@
+/* OnboardingPage Styles - Based on ProfilePage */
+.body {
+
+}
+
+.onboardingPage {
+    padding: 0;
+    overflow-x: hidden;
+    background: #000000;
+    height: 100vh;
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.onboardingPage .glow {
+    position: absolute;
+    top: -70px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: #A172F880;
+    filter: blur(60px);
+    z-index: 1001;
+    pointer-events: none;
+}
+
+.onboardingPage .scrollableContent {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 20px;
+}
+
+.onboardingPage .contentBlock {
+    width: 100%;
+    padding: 10px 15px;
+}
+
+.onboardingPage .contentBlock:last-of-type {
+    border-bottom: none;
+}
+
+.onboardingPage .pageTitle {
+    margin: 10px 0;
+    font-size: 24px;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.onboardingPage .pageSubtitle {
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 150%;
+    color: #A9A9A9;
+    margin: 10px 0 0 0;
+}
+
+.onboardingPage .fieldLabel {
+    font-size: 14px;
+    font-weight: 400;
+    color: #A09BA8;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.onboardingPage .fieldInput {
+    background-color: #25202F;
+    border: none;
+    border-radius: 4px;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 400;
+    color: #E0E0E0;
+    line-height: 1.4;
+    padding: 11px 15px;
+    transition: border-color 0.2s ease;
+}
+
+.onboardingPage .fieldInput::placeholder {
+    color: #777183;
+}
+
+.onboardingPage .fieldHint {
+    font-size: 11px;
+    color: #777183;
+    margin-top: 6px;
+    line-height: 1.3;
+}
+
+.onboardingPage .error {
+    background: rgba(229, 57, 53, 0.1);
+    border: 1px solid #e53935;
+    border-radius: 4px;
+    padding: 10px 15px;
+    color: #ff6b6b;
+    font-size: 13px;
+}
+
+.onboardingPage .fixedButtonsContainer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #000000;
+    padding: 15px;
+    z-index: 100;
+}
+
+.onboardingPage .submitButton {
+    width: 100%;
+    height: 44px;
+    background: #FFCC00;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #121212;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    margin-bottom: 12px;
+}
+
+.onboardingPage .submitButton:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.onboardingPage .submitButton:active:not(:disabled) {
+    opacity: 0.8;
+}
+
+.onboardingPage .submitButtonDisabled {
+    background: #25222B !important;
+    color: #121212 !important;
+    cursor: not-allowed !important;
+}
+
+.onboardingPage .skipButton {
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    border: none;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #FFCC00;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    letter-spacing: 0%;
+    line-height: 100%;
+}
+
+.onboardingPage .skipButton:hover:not(:disabled) {
+    opacity: 0.8;
+}
+
+.onboardingPage .skipButton:active:not(:disabled) {
+    opacity: 0.6;
+}
+
+.onboardingPage .skipButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
