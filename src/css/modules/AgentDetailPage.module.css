@@ -38,7 +38,7 @@
 /* Content blocks */
 .agentDetailPage .contentBlock {
   width: 100%;
-  padding: 20px;
+  padding: 20px 10px;
   position: relative;
   background-color: #000000;
 }

@@ -48,71 +48,74 @@ function OnboardingPage() {
 
   return (
     <div className={`${styles.body} ${styles.onboardingPage}`}>
-      <PageNavbar leftIcon="none" showProfileIcon={false} />
+      <PageNavbar leftIcon="logo" showProfileIcon={false} />
 
       <div className={styles.glow} aria-hidden="true" />
 
-      {/* Заголовок */}
-      <div className={styles.contentBlock}>
-        <h2 className={styles.pageTitle}>РАССКАЖИ О СЕБЕ</h2>
-        <p className={styles.pageSubtitle}>
-          Это поможет ИИ-агентам говорить<br />
-          с тобой на одном языке и учитывать<br />
-          контекст твоего бизнеса.
-        </p>
-      </div>
-
-      {/* Роль в бизнесе */}
-      <div className={styles.contentBlock}>
-        <div className={styles.fieldLabel}>Роль в бизнесе</div>
-        <input
-          type="text"
-          className={styles.fieldInput}
-          placeholder="Генеральный директор"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          disabled={isSubmitting}
-        />
-        <div className={styles.fieldHint}>Например: генеральный директор</div>
-      </div>
-
-      {/* Сфера деятельности */}
-      <div className={styles.contentBlock}>
-        <div className={styles.fieldLabel}>Сфера деятельности</div>
-        <input
-          type="text"
-          className={styles.fieldInput}
-          placeholder="Образование"
-          value={profession}
-          onChange={(e) => setProfession(e.target.value)}
-          disabled={isSubmitting}
-        />
-        <div className={styles.fieldHint}>Например: производство, образование</div>
-      </div>
-
-      {/* Регион */}
-      <div className={styles.contentBlock}>
-        <div className={styles.fieldLabel}>Регион</div>
-        <input
-          type="text"
-          className={styles.fieldInput}
-          placeholder="Магаданская область"
-          value={region}
-          onChange={(e) => setRegion(e.target.value)}
-          disabled={isSubmitting}
-        />
-        <div className={styles.fieldHint}>Например: Московская область</div>
-      </div>
-
-      {/* Ошибка */}
-      {error && (
+      {/* Scrollable content */}
+      <div className={styles.scrollableContent}>
+        {/* Заголовок */}
         <div className={styles.contentBlock}>
-          <div className={styles.error}>{error}</div>
+          <h2 className={styles.pageTitle}>РАССКАЖИ О СЕБЕ</h2>
+          <p className={styles.pageSubtitle}>
+            Это поможет ИИ-агентам говорить<br />
+            с тобой на одном языке и учитывать<br />
+            контекст твоего бизнеса.
+          </p>
         </div>
-      )}
+        {/* Ошибка */}
+        {error && (
+          <div className={styles.contentBlock}>
+            <div className={styles.error}>{error}</div>
+          </div>
+        )}
+        {/* Роль в бизнесе */}
+        <div className={styles.contentBlock}>
+          <div className={styles.fieldLabel}>Роль в бизнесе</div>
+          <input
+            type="text"
+            className={styles.fieldInput}
+            placeholder="Генеральный директор"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            disabled={isSubmitting}
+          />
+          <div className={styles.fieldHint}>Например: генеральный директор</div>
+        </div>
 
-      {/* Кнопки */}
-      <div className={styles.contentBlock}>
+        {/* Сфера деятельности */}
+        <div className={styles.contentBlock}>
+          <div className={styles.fieldLabel}>Сфера деятельности</div>
+          <input
+            type="text"
+            className={styles.fieldInput}
+            placeholder="Образование"
+            value={profession}
+            onChange={(e) => setProfession(e.target.value)}
+            disabled={isSubmitting}
+          />
+          <div className={styles.fieldHint}>Например: производство, образование</div>
+        </div>
+
+        {/* Регион */}
+        <div className={styles.contentBlock}>
+          <div className={styles.fieldLabel}>Регион</div>
+          <input
+            type="text"
+            className={styles.fieldInput}
+            placeholder="Магаданская область"
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            disabled={isSubmitting}
+          />
+          <div className={styles.fieldHint}>Например: Московская область</div>
+        </div>
+
+
+      </div>
+
+      {/* Fixed buttons at bottom */}
+      <div className={styles.fixedButtonsContainer}>
         <button
           className={`${styles.submitButton} ${!isFormValid ? styles.submitButtonDisabled : ''}`}
           onClick={handleSubmit}
