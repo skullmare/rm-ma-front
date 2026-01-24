@@ -1,6 +1,7 @@
 // Централизованное хранилище всех маршрутов приложения
 export const ROUTES = {
   HOME: '/',
+  ONBOARDING: '/onboarding',
   AGENTS_LIST: '/agents_list',
   AGENT_SERGY: '/agent_sergy',
   AGENT_NICK: '/agent_nick',

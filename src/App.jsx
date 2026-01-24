@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage.jsx';
+import OnboardingPage from './pages/OnboardingPage.jsx';
 import AgentsListPage from './pages/AgentsListPage.jsx';
 import AgentDetailPage from './pages/AgentDetailPage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
@@ -36,6 +37,7 @@ function App() {
             isFirstVisit ? <HomePage /> : <Navigate to="/agents_list" replace />
           }
         />
+        <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/agents_list" element={<AgentsListPage />} />
         <Route path="/agent_sergy" element={<AgentDetailPage />} />
         <Route path="/agent_nick" element={<AgentDetailPage />} />

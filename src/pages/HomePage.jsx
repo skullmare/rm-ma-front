@@ -159,7 +159,16 @@ function HomePage() {
   };
 
   const handleGoToAgents = () => {
-    navigate('/agents_list');
+    // Проверяем, был ли пройден опрос
+    const onboardingCompleted = localStorage.getItem('onboarding_completed');
+
+    if (onboardingCompleted === 'true') {
+      // Опрос уже пройден, переходим к списку агентов
+      navigate('/agents_list');
+    } else {
+      // Опрос не пройден, переходим на страницу onboarding
+      navigate('/onboarding');
+    }
   };
 
   if (isLoading) {
