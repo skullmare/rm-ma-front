@@ -104,7 +104,6 @@
 
 /* Messages */
 .chatPage .message {
-    padding: 10px 14px;
     border-radius: 18px;
     line-height: 1.45;
     font-size: 14px;
@@ -119,6 +118,7 @@
 
 .chatPage .message.outgoing {
     align-self: flex-end;
+    padding: 10px 14px;
     background: #25202F;
     color: #FFFFFF;
     border-bottom-right-radius: 4px;
@@ -823,7 +823,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0 14px;
 }
 
 .chatPage .paymentButton {
@@ -857,15 +856,15 @@
 .chatPage .quickReplies {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
     width: 100%;
+    gap: 7px;
 }
 
 .chatPage .quickReplyButton {
     background: transparent;
     border: 1px solid #483F59;
     border-radius: 20px;
-    padding: 10px 16px;
+    padding: 5px 10px;
     color: #E0E0E0;
     font-size: 14px;
     cursor: pointer;
