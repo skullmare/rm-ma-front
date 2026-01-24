@@ -853,32 +853,6 @@
     opacity: 0.8;
 }
 
-/* Welcome message container */
-.chatPage .welcomeContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 20px 0;
-    max-width: 100%;
-}
-
-.chatPage .welcomeMessage {
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1.5;
-    color: #FFFFFF;
-}
-
-.chatPage .welcomeMessage p {
-    margin: 0;
-    padding: 2px 0;
-}
-
-.chatPage .welcomeMessage p:first-child {
-    font-size: 20px;
-}
-
 /* Quick replies */
 .chatPage .quickReplies {
     display: flex;
