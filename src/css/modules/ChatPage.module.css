@@ -852,3 +852,65 @@
 .chatPage .paymentButton:active {
     opacity: 0.8;
 }
+
+/* Welcome message container */
+.chatPage .welcomeContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 0;
+    max-width: 100%;
+}
+
+.chatPage .welcomeMessage {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: #FFFFFF;
+}
+
+.chatPage .welcomeMessage p {
+    margin: 0;
+    padding: 2px 0;
+}
+
+.chatPage .welcomeMessage p:first-child {
+    font-size: 20px;
+}
+
+/* Quick replies */
+.chatPage .quickReplies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.chatPage .quickReplyButton {
+    background: transparent;
+    border: 1px solid #483F59;
+    border-radius: 20px;
+    padding: 10px 16px;
+    color: #E0E0E0;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    line-height: 1.3;
+}
+
+.chatPage .quickReplyButton:hover {
+    background: #25202F;
+    border-color: #6B5B8C;
+    color: #FFFFFF;
+}
+
+.chatPage .quickReplyButton:active {
+    transform: scale(0.98);
+}
+
+.chatPage .quickReplyButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

@@ -17,6 +17,18 @@ import { ROUTES } from '../constants/routes';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
+const WELCOME_MESSAGES = {
+  sergey: {
+    greeting: 'Привет! 👋\nЯ Сергей, аналитик внешнего контекста.\nС чего начнём?',
+    quickReplies: [
+      'Проанализировать рынок',
+      'Оценить конкурентов',
+      'Показать тенденции',
+      'Рассказать про тренды ближайших лет',
+    ],
+  },
+};
+
 function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -246,6 +258,47 @@ function ChatPage() {
     navigate(ROUTES.TARIFF || '/tariff');
   };
 
+  const handleQuickReply = async (text) => {
+    if (!text || isLoading || !chatId) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const newMsg = {
+      id: tempId,
+      text,
+      type: 'outgoing',
+      time: formatTime(),
+      timestamp: Date.now(),
+    };
+
+    setMessages(prev => [...prev, newMsg]);
+    setIsLoading(true);
+    setTimeout(scrollToBottom, 100);
+
+    try {
+      const { data } = await apiClient.post('/api/chats/send', { message: text, agent });
+
+      setMessages(prev => {
+        let list = prev.map(m =>
+          m.id === tempId && data?.userMessageId ? { ...m, id: data.userMessageId } : m
+        );
+
+        if (data?.message && data.autor === 'ai_agent') {
+          const aiMsg = transformMessage(data);
+          if (!list.some(m => m.id === aiMsg.id)) list.push(aiMsg);
+        }
+        return list;
+      });
+    } catch (err) {
+      console.error('Ошибка отправки сообщения:', err);
+      setMessages(prev => prev.filter(m => m.id !== tempId));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Get welcome message config for current agent
+  const welcomeConfig = WELCOME_MESSAGES[agent] || WELCOME_MESSAGES.sergey;
+
   if (isPageLoading || (isHistoryLoading && messages.length === 0)) {
     return <Spinner />;
   }
@@ -263,7 +316,7 @@ function ChatPage() {
       <div className={styles.glow} />
 
       <main ref={chatContainerRef} className={styles.chatContainer}>
-        {hasMore && !isHistoryLoading && (
+        {hasMore && !isHistoryLoading && messages.length > 0 && (
           <button
             onClick={() => {
               const oldest = messages[0]?.timestamp;
@@ -274,7 +327,30 @@ function ChatPage() {
             {isLoadingMore ? 'Загрузка...' : 'Загрузить предыдущие сообщения'}
           </button>
         )}
-        
+
+        {/* Приветственное сообщение когда история пуста */}
+        {messages.length === 0 && !isHistoryLoading && (
+          <div className={styles.welcomeContainer}>
+            <div className={styles.welcomeMessage}>
+              {welcomeConfig.greeting.split('\n').map((line, i) => (
+                <p key={i}>{line}</p>
+              ))}
+            </div>
+            <div className={styles.quickReplies}>
+              {welcomeConfig.quickReplies.map((reply, index) => (
+                <button
+                  key={index}
+                  className={styles.quickReplyButton}
+                  onClick={() => handleQuickReply(reply)}
+                  disabled={isLoading}
+                >
+                  {reply}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Используем компонент Message для рендеринга всех сообщений */}
         {messages.map(msg => (
           <React.Fragment key={msg.id}>
