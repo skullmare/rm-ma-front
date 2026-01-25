@@ -66,6 +66,8 @@ function ChatPage() {
   const isPageLoading = usePageLoader(500);
   const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
+  const loadMoreTriggerRef = useRef(null);
+  const isLoadingMoreRef = useRef(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -107,12 +109,23 @@ function ChatPage() {
   const loadHistory = useCallback(async (beforeTimestamp = null) => {
     if (!chatId) return;
 
+    // Prevent multiple simultaneous loadMore requests
+    if (beforeTimestamp && isLoadingMoreRef.current) return;
+
     try {
-      if (beforeTimestamp) setIsLoadingMore(true);
-      else setIsHistoryLoading(true);
+      if (beforeTimestamp) {
+        isLoadingMoreRef.current = true;
+        setIsLoadingMore(true);
+      } else {
+        setIsHistoryLoading(true);
+      }
 
       const params = { agent };
       if (beforeTimestamp) params.timestamp = String(beforeTimestamp);
+
+      // Save scroll position before loading more
+      const container = chatContainerRef.current;
+      const prevScrollHeight = container?.scrollHeight || 0;
 
       const { data } = await apiClient.get('/api/chats/history', {
         params,
@@ -130,7 +143,17 @@ function ChatPage() {
 
         setHasMore(!!data.hasMore);
 
-        if (!beforeTimestamp) setTimeout(scrollToBottom, 100);
+        if (!beforeTimestamp) {
+          setTimeout(scrollToBottom, 100);
+        } else {
+          // Preserve scroll position after loading more messages
+          requestAnimationFrame(() => {
+            if (container) {
+              const newScrollHeight = container.scrollHeight;
+              container.scrollTop = newScrollHeight - prevScrollHeight;
+            }
+          });
+        }
       } else {
         setHasMore(false);
       }
@@ -139,10 +162,14 @@ function ChatPage() {
       setHasMore(false);
       if (!beforeTimestamp) setTimeout(scrollToBottom, 100);
     } finally {
-      if (beforeTimestamp) setIsLoadingMore(false);
-      else setIsHistoryLoading(false);
+      if (beforeTimestamp) {
+        setIsLoadingMore(false);
+        isLoadingMoreRef.current = false;
+      } else {
+        setIsHistoryLoading(false);
+      }
     }
-  }, [chatId, transformMessage, scrollToBottom]);
+  }, [chatId, agent, transformMessage, scrollToBottom]);
 
   useEffect(() => {
     if (!chatId) {
@@ -233,6 +260,35 @@ function ChatPage() {
 
     return () => container.removeEventListener('scroll', handleScroll);
   }, [messages.length]);
+
+  // Infinite scroll - загрузка предыдущих сообщений при скролле вверх
+  useEffect(() => {
+    const trigger = loadMoreTriggerRef.current;
+    if (!trigger) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && hasMore && !isLoadingMore && !isHistoryLoading && messages.length > 0) {
+          const oldest = messages[0]?.timestamp;
+          if (oldest) {
+            loadHistory(oldest);
+          }
+        }
+      },
+      {
+        root: chatContainerRef.current,
+        rootMargin: '100px 0px 0px 0px',
+        threshold: 0,
+      }
+    );
+
+    observer.observe(trigger);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, isLoadingMore, isHistoryLoading, messages, loadHistory]);
 
   const sendMessage = async () => {
     const text = inputValue.trim();
@@ -343,16 +399,17 @@ function ChatPage() {
       <div className={styles.glow} />
 
       <main ref={chatContainerRef} className={styles.chatContainer}>
-        {hasMore && !isHistoryLoading && messages.length > 0 && (
-          <button
-            onClick={() => {
-              const oldest = messages[0]?.timestamp;
-              if (oldest) loadHistory(oldest);
-            }}
-            className={styles.loadMoreButton}
-          >
-            {isLoadingMore ? 'Загрузка...' : 'Загрузить предыдущие сообщения'}
-          </button>
+        {/* Элемент-триггер для infinite scroll */}
+        {hasMore && messages.length > 0 && (
+          <div ref={loadMoreTriggerRef} className={styles.loadMoreTrigger}>
+            {isLoadingMore && (
+              <div className={styles.loadMoreSpinner}>
+                <span className={styles.dots}>
+                  <span></span><span></span><span></span>
+                </span>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Приветственное сообщение когда история пуста */}
