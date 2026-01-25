@@ -11,6 +11,146 @@
     margin: 0 auto;
 }
 
+/* ================================ */
+/* ChatScope overrides */
+/* ================================ */
+
+.chatPage .mainContainer {
+    flex: 1;
+    background: transparent !important;
+    border: none !important;
+    min-height: 0;
+}
+
+.chatPage .chatContainer {
+    background: transparent !important;
+    border: none !important;
+}
+
+.chatPage .messageList {
+    background: transparent !important;
+    padding: 12px 16px !important;
+}
+
+/* Override ChatScope message list scrollbar */
+.chatPage .messageList :global(.cs-message-list__scroll-wrapper) {
+    scrollbar-width: thin;
+    scrollbar-color: #555 transparent;
+}
+
+.chatPage .messageList :global(.cs-message-list__scroll-wrapper)::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chatPage .messageList :global(.cs-message-list__scroll-wrapper)::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chatPage .messageList :global(.cs-message-list__scroll-wrapper)::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+}
+
+/* ChatScope Message styling */
+.chatPage .chatMessage :global(.cs-message__content-wrapper) {
+    background: transparent !important;
+}
+
+.chatPage .chatMessage :global(.cs-message__content) {
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+.chatPage .chatMessage.incoming :global(.cs-message__content) {
+    color: #E0E0E0;
+}
+
+.chatPage .chatMessage.outgoing :global(.cs-message__content-wrapper) {
+    background: #25202F !important;
+    border-radius: 18px !important;
+    border-bottom-right-radius: 4px !important;
+    padding: 10px 14px !important;
+}
+
+.chatPage .chatMessage.outgoing :global(.cs-message__content) {
+    color: #FFFFFF;
+    background: transparent !important;
+}
+
+/* Welcome message styling */
+.chatPage .welcomeMessage :global(.cs-message__content-wrapper) {
+    background: transparent !important;
+}
+
+.chatPage .welcomeMessage :global(.cs-message__content) {
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+/* Loading message styling */
+.chatPage .loadingMessage :global(.cs-message__content) {
+    color: #888 !important;
+    font-size: 14px !important;
+}
+
+/* ChatScope MessageInput styling */
+.chatPage .messageInput {
+    background: linear-gradient(0deg, #100C14 57.53%, rgba(18, 18, 18, 0.575345) 89.24%, rgba(18, 18, 18, 0.08) 100%) !important;
+    border: none !important;
+    padding: 11px 15px !important;
+    z-index: 1003;
+}
+
+.chatPage .messageInput :global(.cs-message-input__content-editor-wrapper) {
+    background-color: #25202FB2 !important;
+    border: 1px solid #483F59 !important;
+    border-radius: 8px !important;
+}
+
+.chatPage .messageInput :global(.cs-message-input__content-editor) {
+    background: transparent !important;
+    color: #E0E0E0 !important;
+    font-size: 14px !important;
+    padding: 11px 8px !important;
+}
+
+.chatPage .messageInput :global(.cs-message-input__content-editor-container) {
+    background: transparent !important;
+}
+
+.chatPage .messageInput :global(.cs-message-input__content-editor)::before {
+    color: #888888 !important;
+}
+
+.chatPage .messageInput :global(.cs-button--send) {
+    background: transparent !important;
+    color: #A172F8 !important;
+}
+
+.chatPage .messageInput :global(.cs-button--send):hover {
+    color: #C4A1FF !important;
+}
+
+.chatPage .messageInput :global(.cs-button--send) svg {
+    fill: currentColor !important;
+}
+
+/* TypingIndicator styling */
+.chatPage :global(.cs-typing-indicator) {
+    background: transparent !important;
+    color: #E0E0E0 !important;
+    font-size: 14px !important;
+}
+
+.chatPage :global(.cs-typing-indicator__dot) {
+    background-color: #E0E0E0 !important;
+}
+
+/* Hide default ChatScope loading */
+.chatPage :global(.cs-message-list__loading-more) {
+    display: none !important;
+}
+
 .chatPage main {
     flex: 1;
     padding: 12px 16px;
