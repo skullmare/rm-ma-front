@@ -864,9 +864,9 @@
     background: transparent;
     border: 1px solid #483F59;
     border-radius: 20px;
-    padding: 5px 10px;
-    color: #E0E0E0;
-    font-size: 14px;
+    padding: 5px 8px;
+    color: #BBB4C8;
+    font-size: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: left;
