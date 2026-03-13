@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom'; // Добавили useSearchParams
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+// Импорты страниц
 import HomePage from './pages/HomePage.jsx';
 import OnboardingPage from './pages/OnboardingPage.jsx';
 import AgentsListPage from './pages/AgentsListPage.jsx';
@@ -7,43 +9,64 @@ import AgentDetailPage from './pages/AgentDetailPage.jsx';
 import ChatPage from './pages/ChatPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import TariffPage from './pages/TariffPage.jsx';
-import AuthGuard from './components/AuthGuard.jsx';
 import PaymentSuccess from './pages/PaymentSuccess.jsx';
+
+// Компоненты
+import AuthGuard from './components/AuthGuard.jsx';
 
 function App() {
   const [firstVisitChecked, setFirstVisitChecked] = useState(false);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
-  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // 1. Логика первого визита
+    // 1. Логика первого визита (Onboarding)
     const visited = localStorage.getItem('visited');
     if (!visited) {
       setIsFirstVisit(true);
       localStorage.setItem('visited', 'true');
     }
 
-    // 2. Логика "Вход из курса" (Накопительная)
-    const fromCourse = searchParams.get('fromCourse');
-    const selectedAgent = searchParams.get('selectedAgent');
+    // 2. Логика Telegram Mini App (Start Parameters)
+    // Ожидаем формат ссылки: https://t.me/bot/app?startapp=fromCourse-true_selectedAgent-nick
+    const tg = window.Telegram?.WebApp;
+    const startParam = tg?.initDataUnsafe?.start_param;
 
-    if (fromCourse === 'true' && selectedAgent) {
-      localStorage.setItem('fromCourse', 'true');
+    if (startParam) {
+      try {
+        // Парсим строку: "fromCourse-true_selectedAgent-nick" -> {fromCourse: "true", selectedAgent: "nick"}
+        const params = Object.fromEntries(
+          startParam.split('_').map(pair => {
+            const [key, value] = pair.split('-');
+            return [key, value];
+          })
+        );
 
-      // Получаем текущий список из localStorage или создаем пустой массив
-      const storedAgents = localStorage.getItem('selectedAgents');
-      let agentsArray = storedAgents ? JSON.parse(storedAgents) : [];
+        const { fromCourse, selectedAgent } = params;
 
-      // Добавляем агента, только если его еще нет в списке
-      if (!agentsArray.includes(selectedAgent)) {
-        agentsArray.push(selectedAgent);
-        localStorage.setItem('selectedAgents', JSON.stringify(agentsArray));
+        if (fromCourse === 'true' && selectedAgent) {
+          // Сохраняем флаг входа из курса
+          localStorage.setItem('fromCourse', 'true');
+
+          // Обновляем список выбранных агентов (накопительно)
+          const storedAgents = localStorage.getItem('selectedAgents');
+          let agentsArray = storedAgents ? JSON.parse(storedAgents) : [];
+
+          if (!agentsArray.includes(selectedAgent)) {
+            agentsArray.push(selectedAgent);
+            localStorage.setItem('selectedAgents', JSON.stringify(agentsArray));
+          }
+          
+          console.log(`Агент ${selectedAgent} добавлен из курса`);
+        }
+      } catch (error) {
+        console.error("Ошибка парсинга start_param:", error);
       }
     }
 
     setFirstVisitChecked(true);
-  }, [searchParams]);
+  }, []);
 
+  // Пока проверяем первый визит и параметры, ничего не рендерим
   if (!firstVisitChecked) {
     return null; 
   }
@@ -51,25 +74,30 @@ function App() {
   return (
     <AuthGuard>
       <Routes>
+        {/* Главная: если первый раз — лендинг, если нет — сразу к списку */}
         <Route
           path="/"
           element={
             isFirstVisit ? <HomePage /> : <Navigate to="/agents_list" replace />
           }
         />
-        <Route path="/onboarding" element={<OnboardingPage />} />
         
-        {/* В AgentsListPage нужно будет прокинуть логику фильтрации */}
+        <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/agents_list" element={<AgentsListPage />} />
         
+        {/* Динамические или статические роуты агентов */}
         <Route path="/agent_sergy" element={<AgentDetailPage />} />
         <Route path="/agent_nick" element={<AgentDetailPage />} />
         <Route path="/agent_lida" element={<AgentDetailPage />} />
         <Route path="/agent_mark" element={<AgentDetailPage />} />
-        <Route path="/payment-success" element={<PaymentSuccess />} />
+        
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/tariff" element={<TariffPage />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+
+        {/* Редирект для несуществующих страниц */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthGuard>
   );
