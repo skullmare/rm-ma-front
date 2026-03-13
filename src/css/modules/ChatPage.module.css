@@ -268,7 +268,8 @@
     }
 }
 
-.chatPage .loadingMore {
+.chatPage .loadingMore,
+.chatPage .loadingMoreIndicator {
     text-align: center;
     padding: 10px;
     color: #888;
