@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'; // Добавили useMemo для оптимизации
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../css/modules/AgentsListPage.module.css';
 import Spinner from '../components/Spinner';
@@ -17,48 +17,39 @@ function AgentsListPage() {
   const { user } = useAuth();
   const [tariffLabel, setTariffLabel] = useState('Базовый');
 
-  // --- ЛОГИКА ФИЛЬТРАЦИИ АГЕНТОВ ---
-  const displayedAgents = useMemo(() => {
-    const fromCourse = localStorage.getItem('fromCourse');
-    const storedAgents = localStorage.getItem('selectedAgents');
-
-    // Парсим массив выбранных агентов
-    const selectedAgentsArray = storedAgents ? JSON.parse(storedAgents) : [];
-
-    if (fromCourse === 'true' && selectedAgentsArray.length > 0) {
-      // Фильтруем список: оставляем тех, кто содержится в массиве из localStorage
-      const filtered = AGENTS_LIST.filter((agent) => {
-        return selectedAgentsArray.some(selectedId =>
-          agent.id === selectedId || agent.route.includes(selectedId)
-        );
-      });
-
-      return filtered.length > 0 ? filtered : AGENTS_LIST;
-    }
-
-    return AGENTS_LIST;
-  }, []);
-  // --------------------------------
-
+  // Загрузка профиля для определения тарифа (только для авторизованных пользователей)
   useEffect(() => {
-    if (!user) return;
+    // Проверяем, авторизован ли пользователь
+    if (!user) {
+      // Если не авторизован, оставляем "Базовый" и не делаем запрос
+      return;
+    }
 
     const fetchProfile = async () => {
       try {
         const { data } = await apiClient.get('/api/profile');
+
         if (data?.profile) {
           const profile = data.profile;
+
+          // Логика определения тарифа (идентична TariffPage.jsx и ProfilePage.jsx)
           const resolveLastPaymentTimestamp = () => {
             const ts = profile.last_payment_timestamp ?? profile.lastPaymentTimestamp;
             if (ts !== undefined && ts !== null) {
               const tsNumber = Number(ts);
-              if (!Number.isNaN(tsNumber)) return tsNumber;
+              if (!Number.isNaN(tsNumber)) {
+                return tsNumber;
+              }
             }
+
             const iso = profile.last_payment_datetime ?? profile.lastPaymentDatetime;
             if (iso) {
               const parsed = Date.parse(iso);
-              if (!Number.isNaN(parsed)) return parsed;
+              if (!Number.isNaN(parsed)) {
+                return parsed;
+              }
             }
+
             return null;
           };
 
@@ -70,6 +61,7 @@ function AgentsListPage() {
           setTariffLabel(hasActiveSubscription ? 'Премиум' : 'Базовый');
         }
       } catch (err) {
+        // В случае ошибки оставляем дефолтный тариф
         console.error('Не удалось загрузить профиль:', err);
       }
     };
@@ -89,17 +81,18 @@ function AgentsListPage() {
   return (
     <div className={`${styles.body} ${styles.agentsListPage}`}>
       <PageNavbar leftIcon="logo" tariffLabel={tariffLabel} />
+
       <div className={styles.glow}></div>
+
       <div className={styles.contentBlock}>
         <h2 className={styles.headingSection}>ВЫБЕРИ АГЕНТА</h2>
       </div>
 
-      {/* Теперь используем displayedAgents вместо AGENTS_LIST */}
-      {displayedAgents.map((agent, index) => (
+      {/* Динамический список агентов */}
+      {AGENTS_LIST.map((agent, index) => (
         <div
           key={agent.id}
-          className={`${styles.contentBlock} ${index < displayedAgents.length - 1 ? styles.contentBlockBorderBottom : ''
-            }`}
+          className={`${styles.contentBlock} ${index < AGENTS_LIST.length - 1 ? styles.contentBlockBorderBottom : ''}`}
         >
           <a href="#" className={styles.agentLink} onClick={(e) => handleAgentClick(e, agent.route)}>
             <div className="d-flex align-items-center justify-content-between gap-3">
@@ -110,10 +103,10 @@ function AgentsListPage() {
                 <div className={styles.agentContent}>
                   <span className={styles.agentName}>{agent.name}</span>
                   <span className={styles.agentRole}>
-                    {agent.roleWithBreaks.split('\n').map((line, i, array) => (
-                      <React.Fragment key={i}>
+                    {agent.roleWithBreaks.split('\n').map((line, index, array) => (
+                      <React.Fragment key={index}>
                         {line}
-                        {i < array.length - 1 && <br />}
+                        {index < array.length - 1 && <br />}
                       </React.Fragment>
                     ))}
                   </span>
@@ -131,3 +124,4 @@ function AgentsListPage() {
 }
 
 export default AgentsListPage;
+
