@@ -1,0 +1,39 @@
+/* ========================= */
+/*      SCROLLBAR STYLES     */
+/* ========================= */
+
+/* --- Глобальный скроллбар (Firefox) --- */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #555 transparent;
+}
+
+/* --- Глобальный скроллбар (WebKit: Chrome, Safari, Edge) --- */
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px; /* для горизонтального */
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+/* --- Тонкий вариант (для небольших полей ввода, textarea и т.п.) --- */
+textarea::-webkit-scrollbar,
+input::-webkit-scrollbar {
+    width: 4px;
+}
+
+textarea::-webkit-scrollbar-thumb,
+input::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+}

@@ -1,7 +1,5 @@
 /* AgentsListPage Styles */
-.body {
-    
-}
+.body {}
 
 .agentsListPage {
     /* Все стили вложены в этот класс для изоляции */
@@ -128,5 +126,65 @@
 }
 
 .agentsListPage .agentArrow {
+    flex-shrink: 0;
+}
+
+/* Skeleton loader */
+.skeletonBlock {
+    animation: skeletonPulse 1.4s ease-in-out infinite;
+    background: linear-gradient(90deg, #1a1a1a 25%, #262626 50%, #1a1a1a 75%);
+    background-size: 200% 100%;
+    border-radius: 6px;
+}
+
+@keyframes skeletonPulse {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeletonAvatarWrapper {
+    width: 75px;
+    height: 75px;
+    flex-shrink: 0;
+}
+
+.skeletonAvatarInner {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+}
+
+.skeletonName {
+    height: 15px;
+    width: 90px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #2d1f45 25%, #3a2558 50%, #2d1f45 75%) !important;
+    background-size: 200% 100% !important;
+    animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.skeletonRole {
+    height: 15px;
+    width: 150px;
+    border-radius: 4px;
+}
+
+.skeletonRole2 {
+    height: 15px;
+    width: 105px;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+.skeletonArrow {
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
     flex-shrink: 0;
 }

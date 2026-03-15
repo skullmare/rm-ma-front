@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import '../src/css/scrollbar.css';
 
 // Импорты страниц
 import HomePage from './pages/HomePage.jsx';
@@ -24,43 +25,6 @@ function App() {
     if (!visited) {
       setIsFirstVisit(true);
       localStorage.setItem('visited', 'true');
-    }
-
-    // 2. Логика Telegram Mini App (Start Parameters)
-    // Ожидаем формат ссылки: https://t.me/bot/app?startapp=fromCourse-true_selectedAgent-nick
-    const tg = window.Telegram?.WebApp;
-    const startParam = tg?.initDataUnsafe?.start_param;
-
-    if (startParam) {
-      try {
-        // Парсим строку: "fromCourse-true_selectedAgent-nick" -> {fromCourse: "true", selectedAgent: "nick"}
-        const params = Object.fromEntries(
-          startParam.split('_').map(pair => {
-            const [key, value] = pair.split('-');
-            return [key, value];
-          })
-        );
-
-        const { fromCourse, selectedAgent } = params;
-
-        if (fromCourse === 'true' && selectedAgent) {
-          // Сохраняем флаг входа из курса
-          localStorage.setItem('fromCourse', 'true');
-
-          // Обновляем список выбранных агентов (накопительно)
-          const storedAgents = localStorage.getItem('selectedAgents');
-          let agentsArray = storedAgents ? JSON.parse(storedAgents) : [];
-
-          if (!agentsArray.includes(selectedAgent)) {
-            agentsArray.push(selectedAgent);
-            localStorage.setItem('selectedAgents', JSON.stringify(agentsArray));
-          }
-          
-          console.log(`Агент ${selectedAgent} добавлен из курса`);
-        }
-      } catch (error) {
-        console.error("Ошибка парсинга start_param:", error);
-      }
     }
 
     setFirstVisitChecked(true);
